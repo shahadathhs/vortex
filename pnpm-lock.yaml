@@ -93,6 +93,9 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../packages/common
+      '@vortex/config':
+        specifier: workspace:*
+        version: link:../packages/config
       '@vortex/constants':
         specifier: workspace:*
         version: link:../packages/constants
@@ -162,6 +165,19 @@ importers:
         specifier: ^20.0.0
         version: 20.19.29
 
+  packages/config:
+    dependencies:
+      dotenv:
+        specifier: ^16.0.0
+        version: 16.6.1
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.29
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
   packages/constants:
     devDependencies:
       typescript:
@@ -173,6 +189,9 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@vortex/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@vortex/constants':
         specifier: workspace:*
         version: link:../../packages/constants
@@ -240,6 +259,9 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@vortex/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@vortex/constants':
         specifier: workspace:*
         version: link:../../packages/constants
@@ -274,6 +296,9 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@vortex/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@vortex/constants':
         specifier: workspace:*
         version: link:../../packages/constants
@@ -311,6 +336,9 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@vortex/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@vortex/constants':
         specifier: workspace:*
         version: link:../../packages/constants

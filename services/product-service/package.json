@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vortex/common": "workspace:*",
+    "@vortex/config": "workspace:*",
     "@vortex/constants": "workspace:*",
     "cors": "^2.8.5",
     "express": "^5.0.0-beta.3",
