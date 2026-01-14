@@ -1,31 +1,23 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
+import { IOrder } from '../types/order.interface';
 
-export interface OrderDoc extends mongoose.Document {
-  userId: string;
-  productId: string;
-  quantity: number;
-  totalPrice: number;
-  status: string;
-}
-
-const orderSchema = new mongoose.Schema(
+const orderSchema = new Schema<IOrder>(
   {
     userId: { type: String, required: true },
     productId: { type: String, required: true },
     quantity: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
-    status: { type: String, required: true, default: 'pending' },
   },
   {
+    timestamps: true,
     toJSON: {
       transform(doc, ret) {
-        (ret as any).id = (ret as any)._id;
+        ret.id = ret._id;
         delete (ret as any)._id;
         delete (ret as any).__v;
       },
     },
-    timestamps: true,
   },
 );
 
-export const Order = mongoose.model<OrderDoc>('Order', orderSchema);
+export const Order = model<IOrder>('Order', orderSchema);

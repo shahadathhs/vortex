@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { orderController } from '../controllers/order.controller';
+import { validateRequest } from '@vortex/common';
+import { createOrderSchema } from '../schemas/order.schema';
 
 const router: Router = Router();
 
-router.post('/', orderController.createOrder);
+router.post('/', validateRequest(createOrderSchema), orderController.createOrder);
 
 export default router;

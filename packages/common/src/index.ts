@@ -1,3 +1,4 @@
 export * from './error-handler';
-export * from './jwt-util';
 export * from './rabbitmq';
+export * from './jwt-util';
+export * from './validate-request';

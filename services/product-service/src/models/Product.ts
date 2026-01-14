@@ -1,13 +1,7 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
+import { IProduct } from '../types/product.interface';
 
-export interface ProductDoc extends mongoose.Document {
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-}
-
-const productSchema = new mongoose.Schema(
+const productSchema = new Schema<IProduct>(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
@@ -17,7 +11,7 @@ const productSchema = new mongoose.Schema(
   {
     toJSON: {
       transform(doc, ret) {
-        (ret as any).id = (ret as any)._id;
+        ret.id = ret._id;
         delete (ret as any)._id;
         delete (ret as any).__v;
       },
@@ -25,7 +19,7 @@ const productSchema = new mongoose.Schema(
   },
 );
 
-// For text search logic requested by user earlier
+// For text search logic
 productSchema.index({ name: 'text', description: 'text' });
 
-export const Product = mongoose.model<ProductDoc>('Product', productSchema);
+export const Product = model<IProduct>('Product', productSchema);
