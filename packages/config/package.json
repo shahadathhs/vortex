@@ -8,7 +8,6 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@vortex/constants": "workspace:*",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {

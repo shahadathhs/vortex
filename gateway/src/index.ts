@@ -1,10 +1,6 @@
 import app from './app';
-import { createConfig, GatewayEnv } from '@vortex/config';
-import { ServicePort } from '@vortex/constants';
+import { config } from './config';
 
-const config = createConfig(GatewayEnv, ServicePort.GATEWAY);
-const PORT = config.PORT;
-
-app.listen(PORT, () => {
-  console.info(`API Gateway listening on port ${PORT}`);
+app.listen(config.PORT, () => {
+  console.info(`API Gateway listening on port ${config.PORT}`);
 });

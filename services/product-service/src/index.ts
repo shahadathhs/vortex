@@ -1,28 +1,7 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import mongoose from 'mongoose';
-import { RabbitMQManager, errorHandler } from '@vortex/common';
-import { createConfig, ProductEnv } from '@vortex/config';
-import { ServicePort } from '@vortex/constants';
-
-import productRoutes from './routes/product.routes';
-
-const config = createConfig(ProductEnv, ServicePort.PRODUCT);
-const app = express();
-const PORT = config.PORT;
-
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-
-app.get('/health', (req, res) => {
-  res.json({ service: 'product-service', status: 'healthy', timestamp: new Date() });
-});
-
-app.use('/api/products', productRoutes);
-
-app.use(errorHandler);
+import { RabbitMQManager } from '@vortex/common';
+import app from './app';
+import { config } from './config';
 
 const start = async () => {
   try {
@@ -32,8 +11,8 @@ const start = async () => {
     // Initialize RabbitMQ connection
     RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
-    app.listen(PORT, () => {
-      console.info(`Product Service listening on port ${PORT}`);
+    app.listen(config.PORT, () => {
+      console.info(`Product Service listening on port ${config.PORT}`);
     });
   } catch (error) {
     console.error('Failed to start Product Service', error);
