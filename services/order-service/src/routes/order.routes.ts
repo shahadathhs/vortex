@@ -2,7 +2,10 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Order } from '../models/Order';
 import { RabbitMQManager } from '@vortex/common';
 import { EventName, QueueName } from '@vortex/constants';
-import { config } from '../config';
+import { createConfig, OrderEnv } from '@vortex/config';
+import { ServicePort } from '@vortex/constants';
+
+const config = createConfig(OrderEnv, ServicePort.ORDER);
 
 const router: Router = Router();
 

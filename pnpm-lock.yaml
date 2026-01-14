@@ -167,6 +167,9 @@ importers:
 
   packages/config:
     dependencies:
+      '@vortex/constants':
+        specifier: workspace:*
+        version: link:../constants
       dotenv:
         specifier: ^16.0.0
         version: 16.6.1

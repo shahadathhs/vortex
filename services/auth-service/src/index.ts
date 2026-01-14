@@ -3,9 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { connectDB } from './config/db';
 import { RabbitMQManager, errorHandler } from '@vortex/common';
-import { config } from './config';
+import { createConfig, AuthEnv } from '@vortex/config';
+import { ServicePort } from '@vortex/constants';
 import authRoutes from './routes/auth.routes';
 
+const config = createConfig(AuthEnv, ServicePort.AUTH);
 const app = express();
 const PORT = config.PORT;
 

@@ -1,6 +1,8 @@
 import app from './app';
-import { config } from './config';
+import { createConfig, GatewayEnv } from '@vortex/config';
+import { ServicePort } from '@vortex/constants';
 
+const config = createConfig(GatewayEnv, ServicePort.GATEWAY);
 const PORT = config.PORT;
 
 app.listen(PORT, () => {

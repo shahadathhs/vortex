@@ -2,9 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { RabbitMQManager, errorHandler } from '@vortex/common';
-import { QueueName } from '@vortex/constants';
-import { config } from './config';
+import { QueueName, ServicePort } from '@vortex/constants';
+import { createConfig, NotificationEnv } from '@vortex/config';
 
+const config = createConfig(NotificationEnv, ServicePort.NOTIFICATION);
 const app = express();
 const PORT = config.PORT;
 

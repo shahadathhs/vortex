@@ -1,8 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { User } from '../models/User';
 import { generateToken, AppError } from '@vortex/common';
-import { config } from '../config';
+import { createConfig, AuthEnv } from '@vortex/config';
+import { ServicePort } from '@vortex/constants';
 
+const config = createConfig(AuthEnv, ServicePort.AUTH);
 const router: Router = Router();
 
 router.post('/register', async (req: Request, res: Response, next: NextFunction) => {

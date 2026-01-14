@@ -3,10 +3,12 @@ import cors from 'cors';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
 import { RabbitMQManager, errorHandler } from '@vortex/common';
-import { config } from './config';
+import { createConfig, OrderEnv } from '@vortex/config';
+import { ServicePort } from '@vortex/constants';
 
 import orderRoutes from './routes/order.routes';
 
+const config = createConfig(OrderEnv, ServicePort.ORDER);
 const app = express();
 const PORT = config.PORT;
 
