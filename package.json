@@ -15,7 +15,9 @@
     "commit": "cz"
   },
   "workspaces": [
-    "services/*"
+    "packages/*",
+    "services/*",
+    "gateway"
   ],
   "config": {
     "commitizen": {

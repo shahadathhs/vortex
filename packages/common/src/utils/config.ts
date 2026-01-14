@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
-import path from 'path';
 
-// Load .env from the root of the service that calls this
-dotenv.config({ path: path.join(process.cwd(), '.env') });
+dotenv.config();
 
 const envSchema = z.object({
   PORT: z.string().default('3000'),
