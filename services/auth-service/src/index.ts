@@ -1,16 +1,13 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import { connectDB } from './config/db';
-import { RabbitMQManager } from '../../common/rabbitmq';
-import { errorHandler } from '../../common/error-handler';
+import { RabbitMQManager, errorHandler, getConfig } from '@vortex/common';
 import authRoutes from './routes/auth.routes';
 
-dotenv.config();
-
+const config = getConfig();
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = config.PORT;
 
 // Middlewares
 app.use(helmet());
@@ -21,7 +18,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 
 app.get('/health', (req, res) => {
-    res.json({ service: 'auth-service', status: 'healthy', timestamp: new Date() });
+  res.json({ service: 'auth-service', status: 'healthy', timestamp: new Date() });
 });
 
 // Error handling
@@ -29,14 +26,14 @@ app.use(errorHandler);
 
 // Start server
 const start = async () => {
-    await connectDB(process.env.MONGODB_URI!);
+  await connectDB(config.MONGODB_URI);
 
-    // Initialize RabbitMQ connection
-    RabbitMQManager.getConnection(process.env.RABBITMQ_URL!);
+  // Initialize RabbitMQ connection
+  RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
-    app.listen(PORT, () => {
-        console.log(`Auth Service listening on port ${PORT}`);
-    });
+  app.listen(PORT, () => {
+    console.info(`Auth Service listening on port ${PORT}`);
+  });
 };
 
 start();
