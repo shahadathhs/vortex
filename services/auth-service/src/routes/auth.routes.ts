@@ -38,7 +38,7 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
 
     const token = generateToken(
       { id: (user._id as any).toString(), email: user.email },
-      config.JWT_SECRET as any,
+      config.JWT_SECRET,
     );
     res.json({ token, user: { id: user._id, email: user.email } });
   } catch (error) {

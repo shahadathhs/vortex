@@ -15,25 +15,29 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/auth', authRoutes);
-
 app.get('/health', (req, res) => {
   res.json({ service: 'auth-service', status: 'healthy', timestamp: new Date() });
 });
 
-// Error handling
+app.use('/api/auth', authRoutes);
+
+// Error Handler
 app.use(errorHandler);
 
 // Start server
 const start = async () => {
-  await connectDB(config.MONGODB_URI);
+  try {
+    await connectDB(config.MONGODB_URI);
 
-  // Initialize RabbitMQ connection
-  RabbitMQManager.getConnection(config.RABBITMQ_URL);
+    // Initialize RabbitMQ connection
+    RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
-  app.listen(PORT, () => {
-    console.info(`Auth Service listening on port ${PORT}`);
-  });
+    app.listen(PORT, () => {
+      console.info(`Auth Service listening on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start Auth Service', error);
+  }
 };
 
 start();

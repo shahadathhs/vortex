@@ -22,7 +22,7 @@ const start = async () => {
   try {
     const connection = RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
-    // Create a channel for consuming events later
+    // Create a channel for consuming events
     connection.createChannel({
       setup: (channel: any) => {
         return Promise.all([

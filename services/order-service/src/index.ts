@@ -14,11 +14,11 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-app.use('/orders', orderRoutes);
-
 app.get('/health', (req, res) => {
   res.json({ service: 'order-service', status: 'healthy', timestamp: new Date() });
 });
+
+app.use('/api/orders', orderRoutes);
 
 app.use(errorHandler);
 
@@ -27,6 +27,7 @@ const start = async () => {
     await mongoose.connect(config.MONGODB_URI);
     console.info('Order DB connected');
 
+    // Initialize RabbitMQ connection
     RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
     app.listen(PORT, () => {
