@@ -10,15 +10,16 @@
   },
   "dependencies": {
     "@vortex/common": "workspace:*",
-    "express": "^5.0.0-beta.3",
+    "@vortex/constants": "workspace:*",
     "cors": "^2.8.5",
+    "express": "^5.0.0-beta.3",
     "helmet": "^7.1.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
     "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "rimraf": "^5.0.10",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.3",
-    "rimraf": "^5.0.10"
+    "typescript": "^5.9.3"
   }
 }

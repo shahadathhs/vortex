@@ -2,15 +2,19 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
-import { RabbitMQManager, errorHandler, getConfig } from '@vortex/common';
+import { RabbitMQManager, errorHandler } from '@vortex/common';
+import { config } from './config';
 
-const config = getConfig();
+import orderRoutes from './routes/order.routes';
+
 const app = express();
 const PORT = config.PORT;
 
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+app.use('/orders', orderRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ service: 'order-service', status: 'healthy', timestamp: new Date() });

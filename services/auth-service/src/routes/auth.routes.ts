@@ -1,8 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { User } from '../models/User';
 import { generateToken, AppError } from '@vortex/common';
+import { config } from '../config';
 
-const router = Router();
+const router: Router = Router();
 
 router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -35,7 +36,10 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
       throw new AppError('Invalid credentials', 401);
     }
 
-    const token = generateToken({ id: (user._id as any).toString(), email: user.email });
+    const token = generateToken(
+      { id: (user._id as any).toString(), email: user.email },
+      config.JWT_SECRET as any,
+    );
     res.json({ token, user: { id: user._id, email: user.email } });
   } catch (error) {
     next(error);

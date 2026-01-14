@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vortex/common": "workspace:*",
+    "@vortex/constants": "workspace:*",
     "amqp-connection-manager": "^4.1.0",
     "amqplib": "^0.10.0",
     "axios": "^1.6.0",

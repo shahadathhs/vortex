@@ -2,10 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { connectDB } from './config/db';
-import { RabbitMQManager, errorHandler, getConfig } from '@vortex/common';
+import { RabbitMQManager, errorHandler } from '@vortex/common';
+import { config } from './config';
 import authRoutes from './routes/auth.routes';
 
-const config = getConfig();
 const app = express();
 const PORT = config.PORT;
 

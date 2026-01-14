@@ -1,9 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { RabbitMQManager, errorHandler, getConfig } from '@vortex/common';
+import { RabbitMQManager, errorHandler } from '@vortex/common';
+import { QueueName } from '@vortex/constants';
+import { config } from './config';
 
-const config = getConfig();
 const app = express();
 const PORT = config.PORT;
 
@@ -25,8 +26,8 @@ const start = async () => {
     connection.createChannel({
       setup: (channel: any) => {
         return Promise.all([
-          channel.assertQueue('order_events', { durable: true }),
-          channel.consume('order_events', (msg: any) => {
+          channel.assertQueue(QueueName.NOTIFICATION_QUEUE, { durable: true }),
+          channel.consume(QueueName.NOTIFICATION_QUEUE, (msg: any) => {
             if (msg) {
               console.info('Received event:', msg.content.toString());
               channel.ack(msg);
