@@ -1,7 +1,7 @@
 {
-    "name": "nodejs-microservice",
+    "name": "vortex",
     "version": "1.0.0",
-    "description": "Event-Driven E-Commerce Ecosystem",
+    "description": "Vortex - A Event-Driven E-Commerce Ecosystem",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
