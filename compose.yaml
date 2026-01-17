@@ -4,7 +4,13 @@ services:
     image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-gateway:${VERSION:-latest}
     container_name: ${PACKAGE_NAME}_gateway
     restart: unless-stopped
+    ports:
+      - '3000:3000'
+    profiles:
+      - common
+      - gateway
     environment:
+      - PORT=3000
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
@@ -13,14 +19,20 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - ${PACKAGE_NAME}-network
+      - network
 
   # Auth Service
   auth-service:
     image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-auth-service:${VERSION:-latest}
     container_name: ${PACKAGE_NAME}_auth_service
     restart: unless-stopped
+    ports:
+      - '3001:3001'
+    profiles:
+      - common
+      - auth
     environment:
+      - PORT=3001
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_auth
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
@@ -29,14 +41,20 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - ${PACKAGE_NAME}-network
+      - network
 
   # Product Service
   product-service:
     image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-product-service:${VERSION:-latest}
     container_name: ${PACKAGE_NAME}_product_service
     restart: unless-stopped
+    ports:
+      - '3002:3002'
+    profiles:
+      - common
+      - product
     environment:
+      - PORT=3002
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_product
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
@@ -45,14 +63,20 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - ${PACKAGE_NAME}-network
+      - network
 
   # Order Service
   order-service:
     image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-order-service:${VERSION:-latest}
     container_name: ${PACKAGE_NAME}_order_service
     restart: unless-stopped
+    ports:
+      - '3003:3003'
+    profiles:
+      - common
+      - order
     environment:
+      - PORT=3003
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_order
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
@@ -61,14 +85,20 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - ${PACKAGE_NAME}-network
+      - network
 
   # Notification Service
   notification-service:
     image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-notification-service:${VERSION:-latest}
     container_name: ${PACKAGE_NAME}_notification_service
     restart: unless-stopped
+    ports:
+      - '3004:3004'
+    profiles:
+      - common
+      - notification
     environment:
+      - PORT=3004
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_notification
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
@@ -77,8 +107,9 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - ${PACKAGE_NAME}-network
+      - network
 
 networks:
-  ${PACKAGE_NAME}-network:
+  network:
+    name: ${PACKAGE_NAME}-network
     driver: bridge

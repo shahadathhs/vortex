@@ -12,6 +12,7 @@ COMPOSE_FILE_APP := compose.yaml
 
 .PHONY: help \
 	infra dev prod tools \
+	up-all up-common up-gateway up-auth up-product up-order up-notification down \
 	build-all push-all pull-all \
 	build-gateway build-auth build-product build-order build-notification \
 	push-gateway push-auth push-product push-order push-notification \
@@ -26,6 +27,14 @@ help:
 	@echo "  make infra         Start infrastructure (MongoDB, RabbitMQ, Redis)"
 	@echo "  make dev           Start development environment"
 	@echo "  make prod          Start production environment"
+	@echo "  make up-all        Start infra + all app services"
+	@echo "  make up-common     Start infra + app services in 'common' profile"
+	@echo "  make up-gateway    Start infra + gateway only"
+	@echo "  make up-auth       Start infra + auth-service only"
+	@echo "  make up-product    Start infra + product-service only"
+	@echo "  make up-order      Start infra + order-service only"
+	@echo "  make up-notification Start infra + notification-service only"
+	@echo "  make down          Stop infra + app"
 	@echo ""
 	@echo "Image Management:"
 	@echo "  make build-all     Build all service images"
@@ -59,6 +68,11 @@ help:
 	@echo "Cleanup:"
 	@echo "  make clean         Stop and remove all containers"
 	@echo "  make clean-all     Remove containers, images, volumes"
+	@echo ""
+	@echo "Logs:"
+	@echo "  make logs-infra    Show infra logs"
+	@echo "  make logs-dev      Show dev logs"
+	@echo "  make logs-prod     Show prod logs"
 
 # Environment Commands
 infra:
@@ -72,6 +86,31 @@ prod:
 
 tools:
 	docker compose -f $(COMPOSE_FILE_INFRA) --env-file $(ENV_FILE) --profile tools up -d
+
+# App profile commands (infra + app)
+up-all:
+	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) up -d
+
+up-common:
+	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile common up -d
+
+up-gateway:
+	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile gateway up -d
+
+up-auth:
+	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile auth up -d
+
+up-product:
+	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile product up -d
+
+up-order:
+	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile order up -d
+
+up-notification:
+	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile notification up -d
+
+down:
+	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) down --remove-orphans
 
 # Image Management
 build-all: build-gateway build-auth build-product build-order build-notification
