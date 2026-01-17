@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   # API Gateway
   gateway:
-    image: softvence/vortex-gateway:${VERSION:-latest}
-    container_name: vortex_gateway
+    image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-gateway:${VERSION:-latest}
+    container_name: ${PACKAGE_NAME}_gateway
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -15,15 +13,12 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - vortex-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.gateway.rule=Host(`api.vortex.com`)"
+      - ${PACKAGE_NAME}-network
 
   # Auth Service
   auth-service:
-    image: softvence/vortex-auth-service:${VERSION:-latest}
-    container_name: vortex_auth_service
+    image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-auth-service:${VERSION:-latest}
+    container_name: ${PACKAGE_NAME}_auth_service
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -34,12 +29,12 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - vortex-network
+      - ${PACKAGE_NAME}-network
 
   # Product Service
   product-service:
-    image: softvence/vortex-product-service:${VERSION:-latest}
-    container_name: vortex_product_service
+    image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-product-service:${VERSION:-latest}
+    container_name: ${PACKAGE_NAME}_product_service
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -50,12 +45,12 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - vortex-network
+      - ${PACKAGE_NAME}-network
 
   # Order Service
   order-service:
-    image: softvence/vortex-order-service:${VERSION:-latest}
-    container_name: vortex_order_service
+    image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-order-service:${VERSION:-latest}
+    container_name: ${PACKAGE_NAME}_order_service
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -66,12 +61,12 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - vortex-network
+      - ${PACKAGE_NAME}-network
 
   # Notification Service
   notification-service:
-    image: softvence/vortex-notification-service:${VERSION:-latest}
-    container_name: vortex_notification_service
+    image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-notification-service:${VERSION:-latest}
+    container_name: ${PACKAGE_NAME}_notification_service
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -82,8 +77,8 @@ services:
       - mongodb
       - rabbitmq
     networks:
-      - vortex-network
+      - ${PACKAGE_NAME}-network
 
 networks:
-  vortex-network:
+  ${PACKAGE_NAME}-network:
     driver: bridge

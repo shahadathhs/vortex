@@ -1,48 +1,48 @@
 services:
   mongodb:
     image: mongo:8.2.3
-    container_name: vortex_mongodb
+    container_name: ${PACKAGE_NAME}_mongodb
     restart: unless-stopped
     ports:
-      - '27017:27017'
+      - '127.0.0.1:27017:27017'
     volumes:
       - mongodb_data:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     networks:
-      - vortex-network
+      - ${PACKAGE_NAME}-network
 
   rabbitmq:
     image: rabbitmq:4.2.2-management
-    container_name: vortex_rabbitmq
+    container_name: ${PACKAGE_NAME}_rabbitmq
     restart: unless-stopped
     ports:
-      - '5672:5672'
-      - '15672:15672'
+      - '127.0.0.1:5672:5672'
+      - '127.0.0.1:15672:15672'
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - vortex-network
+      - ${PACKAGE_NAME}-network
 
   redis:
     image: redis:7.2-alpine
-    container_name: vortex_redis
+    container_name: ${PACKAGE_NAME}_redis
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - '127.0.0.1:6379:6379'
     volumes:
       - redis_data:/data
     networks:
-      - vortex-network
+      - ${PACKAGE_NAME}-network
 
   # Development Tools
   mongo-express:
-    image: mongo-express:latest
-    container_name: vortex_mongo_express
+    image: mongo-express:1.0.0
+    container_name: ${PACKAGE_NAME}_mongo_express
     restart: unless-stopped
     ports:
       - '8081:8081'
@@ -53,7 +53,7 @@ services:
     depends_on:
       - mongodb
     networks:
-      - vortex-network
+      - ${PACKAGE_NAME}-network
     profiles:
       - tools
 
@@ -63,5 +63,5 @@ volumes:
   redis_data:
 
 networks:
-  vortex-network:
+  ${PACKAGE_NAME}-network:
     driver: bridge

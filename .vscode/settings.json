@@ -35,6 +35,7 @@
     "amqp",
     "ecommerce",
     "INITDB",
-    "RABBITMQ"
+    "RABBITMQ",
+    "shahadathhs"
   ]
 }

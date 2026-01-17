@@ -22,7 +22,8 @@
     "order:dev": "pnpm --filter=order-service dev",
     "product:dev": "pnpm --filter=product-service dev",
     "notification:dev": "pnpm --filter=notification-service dev",
-    "gateway:dev": "pnpm --filter=gateway dev"
+    "gateway:dev": "pnpm --filter=gateway dev",
+    "gateway:build": "pnpm --filter=gateway build"
   },
   "workspaces": [
     "packages/*",
