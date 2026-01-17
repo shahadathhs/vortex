@@ -1,4 +1,4 @@
-# Dependency directories (root only)
+# Dependency directories root only
 node_modules/
 jspm_packages/
 
@@ -20,6 +20,12 @@ out/
 /yarn-error.log*
 /logs/
 /*.log
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
 
 # OS files
 .DS_Store

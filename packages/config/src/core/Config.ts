@@ -36,7 +36,9 @@ export class Config<T extends Record<string, string>> {
   getOrThrow(key: keyof T): string {
     const value = this.config[key as string];
     if (!value) {
-      throw new Error(`Environment variable ${String(key)} is required but missing`);
+      throw new Error(
+        `Environment variable ${String(key)} is required but missing`,
+      );
     }
     return value;
   }

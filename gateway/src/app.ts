@@ -1,7 +1,8 @@
+import { errorHandler } from '@vortex/common';
+import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import cors from 'cors';
-import { errorHandler } from '@vortex/common';
+
 import proxyRouter from './proxy';
 
 const app: express.Application = express();

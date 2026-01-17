@@ -11,3 +11,8 @@ pnpm-lock.yaml
 .cache
 dist/
 **/dist/
+.turbo
+packages
+services
+gateway
+apps

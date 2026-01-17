@@ -1,13 +1,16 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@vortex/typescript-config/express.json",
   "compilerOptions": {
+    "rootDir": "./src",
     "outDir": "./dist",
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@vortex/common": ["../../packages/common/src"],
-      "@vortex/constants": ["../../packages/constants/src"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
-  "include": ["src/**/*", "../../packages/common/src/**/*", "../../packages/constants/src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

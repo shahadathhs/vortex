@@ -5,7 +5,10 @@ export interface TokenPayload {
   email: string;
 }
 
-export const generateToken = (payload: TokenPayload, secret: string): string => {
+export const generateToken = (
+  payload: TokenPayload,
+  secret: string,
+): string => {
   return jwt.sign(payload, secret, { expiresIn: '1d' });
 };
 

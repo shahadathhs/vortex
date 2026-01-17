@@ -1,5 +1,6 @@
 import { RabbitMQManager } from '@vortex/common';
 import { QueueName } from '@vortex/config';
+
 import { config } from '../config';
 
 export class NotificationService {

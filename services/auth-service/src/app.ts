@@ -1,7 +1,8 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import { errorHandler } from '@vortex/common';
+import cors from 'cors';
+import express from 'express';
+import helmet from 'helmet';
+
 import authRoutes from './routes/auth.routes';
 
 const app: express.Application = express();
@@ -13,7 +14,11 @@ app.use(express.json());
 
 // Routes
 app.get('/health', (req, res) => {
-  res.json({ service: 'auth-service', status: 'healthy', timestamp: new Date() });
+  res.json({
+    service: 'auth-service',
+    status: 'healthy',
+    timestamp: new Date(),
+  });
 });
 
 app.use('/api/auth', authRoutes);

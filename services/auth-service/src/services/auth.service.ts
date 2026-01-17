@@ -1,6 +1,7 @@
-import { User } from '../models/User';
 import { generateToken, AppError } from '@vortex/common';
+
 import { config } from '../config';
+import { User } from '../models/User';
 
 export class AuthService {
   async register(data: any) {

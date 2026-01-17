@@ -1,5 +1,6 @@
-import mongoose from 'mongoose';
 import { RabbitMQManager } from '@vortex/common';
+import mongoose from 'mongoose';
+
 import app from './app';
 import { config } from './config';
 

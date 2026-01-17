@@ -1,5 +1,6 @@
-import { Product } from '../models/Product';
 import { AppError } from '@vortex/common';
+
+import { Product } from '../models/Product';
 
 export class ProductService {
   async createProduct(data: any) {

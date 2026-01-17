@@ -1,0 +1,14 @@
+{
+  "name": "@vortex/typescript-config",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    "./base.json": "./base.json",
+    "./express.json": "./express.json"
+  },
+  "scripts": {
+    "clean": "rimraf node_modules",
+    "clean:turbo": "rimraf .turbo node_modules"
+  },
+  "license": "ISC"
+}
