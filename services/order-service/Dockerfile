@@ -1,30 +1,45 @@
-FROM node:22-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# --------------------
+# Build stage
+# --------------------
+FROM node:24-slim AS build
 
-FROM base AS dependencies
+# Enable Corepack and Install PNPM
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Setup Apt Packages
+RUN apt update && apt install -y
+
+# Setup Working Directory
 WORKDIR /app
-COPY . .
+
+# Copy Required Files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY services/order-service ./services/order-service
+COPY packages ./packages
+
+# Install Dependencies
 RUN pnpm install --frozen-lockfile
 
-FROM base AS builder
-WORKDIR /app
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY . .
+# Build Application
 RUN pnpm --filter order-service build
 
-FROM base AS runner
-WORKDIR /app
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 vortex
-USER vortex
+# --------------------
+# Runner stage
+# --------------------
+FROM node:24-slim AS runner
 
-COPY --from=builder --chown=vortex:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=vortex:nodejs /app/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=builder --chown=vortex:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=vortex:nodejs /app/packages ./packages
-COPY --from=builder --chown=vortex:nodejs /app/services/order-service ./services/order-service
+# Setup Apt Packages
+RUN apt update && apt install -y
+
+# Setup Working Directory
+WORKDIR /app
+
+# Copy Built Files from Build Stage
+COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/packages ./packages
+COPY --from=build /app/services/order-service ./services/order-service
 
 ENV NODE_ENV=production
+
 CMD ["node", "services/order-service/dist/index.js"]
