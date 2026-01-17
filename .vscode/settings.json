@@ -29,5 +29,12 @@
   // 🔧 Prettier Config Sync
   "prettier.useEditorConfig": true,
   "prettier.resolveGlobalModules": false,
-  "cSpell.words": ["amqp", "ecommerce", "RABBITMQ"]
+  "cSpell.words": [
+    "ADMINPASSWORD",
+    "ADMINUSERNAME",
+    "amqp",
+    "ecommerce",
+    "INITDB",
+    "RABBITMQ"
+  ]
 }

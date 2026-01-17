@@ -1,21 +1,89 @@
+version: '3.8'
+
 services:
-  mongodb:
-    image: mongo:8.2.3
-    container_name: ecommerce_mongodb
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongodb_data:/data/db
-
-  rabbitmq:
-    image: rabbitmq:4.2.2-management
-    container_name: ecommerce_rabbitmq
-    ports:
-      - '5672:5672' # RabbitMQ port
-      - '15672:15672' # Management UI port
+  # API Gateway
+  gateway:
+    image: softvence/vortex-gateway:${VERSION:-latest}
+    container_name: vortex_gateway
+    restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}
+      - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - vortex-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway.rule=Host(`api.vortex.com`)"
 
-volumes:
-  mongodb_data:
+  # Auth Service
+  auth-service:
+    image: softvence/vortex-auth-service:${VERSION:-latest}
+    container_name: vortex_auth_service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_auth
+      - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - vortex-network
+
+  # Product Service
+  product-service:
+    image: softvence/vortex-product-service:${VERSION:-latest}
+    container_name: vortex_product_service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_product
+      - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - vortex-network
+
+  # Order Service
+  order-service:
+    image: softvence/vortex-order-service:${VERSION:-latest}
+    container_name: vortex_order_service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_order
+      - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - vortex-network
+
+  # Notification Service
+  notification-service:
+    image: softvence/vortex-notification-service:${VERSION:-latest}
+    container_name: vortex_notification_service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_notification
+      - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongodb
+      - rabbitmq
+    networks:
+      - vortex-network
+
+networks:
+  vortex-network:
+    driver: bridge
