@@ -1,10 +1,4 @@
-export enum ServicePort {
-  GATEWAY = 3000,
-  AUTH = 3001,
-  PRODUCT = 3002,
-  ORDER = 3003,
-  NOTIFICATION = 3004,
-}
+
 
 export enum EventName {
   ORDER_CREATED = 'order.created',

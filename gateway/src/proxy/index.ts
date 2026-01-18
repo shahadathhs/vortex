@@ -1,20 +1,21 @@
-import { ServicePort } from '@vortex/config';
 import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+
+import { config } from '../config';
 
 const router: Router = Router();
 
 const services = [
-  { path: '/auth', port: ServicePort.AUTH },
-  { path: '/products', port: ServicePort.PRODUCT },
-  { path: '/orders', port: ServicePort.ORDER },
+  { path: '/auth', url: config.getOrThrow('AUTH_SERVICE_URL') },
+  { path: '/products', url: config.getOrThrow('PRODUCT_SERVICE_URL') },
+  { path: '/orders', url: config.getOrThrow('ORDER_SERVICE_URL') },
 ];
 
-services.forEach(({ path, port }) => {
+services.forEach(({ path, url }) => {
   router.use(
     path,
     createProxyMiddleware({
-      target: `http://127.0.0.1:${port}`,
+      target: url,
       changeOrigin: true,
     }),
   );

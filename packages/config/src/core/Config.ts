@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import { ServicePort } from '../constants';
 
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
@@ -10,11 +9,9 @@ dotenv.config({ path: path.join(process.cwd(), '.env') });
  */
 export class Config<T extends Record<string, string>> {
   private config: Record<string, string>;
-  private servicePort: number;
 
-  constructor(configEnum: T, servicePort: ServicePort) {
+  constructor(configEnum: T) {
     this.config = {};
-    this.servicePort = servicePort;
 
     // Auto-populate config from enum
     for (const key in configEnum) {
@@ -48,7 +45,7 @@ export class Config<T extends Record<string, string>> {
    */
   get PORT(): number {
     const envPort = this.config['PORT'];
-    return envPort ? parseInt(envPort, 10) : this.servicePort;
+    return envPort ? parseInt(envPort, 10) : 3000;
   }
 
   /**
@@ -78,7 +75,6 @@ export class Config<T extends Record<string, string>> {
  */
 export function createConfig<T extends Record<string, string>>(
   configEnum: T,
-  servicePort: ServicePort,
 ): Config<T> {
-  return new Config(configEnum, servicePort);
+  return new Config(configEnum);
 }

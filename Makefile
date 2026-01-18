@@ -1,184 +1,101 @@
-# Environment file
+# Config
 ENV_FILE := .env.production
-
-# Docker registry and package info
 DOCKER_REGISTRY := shahadathhs
 PACKAGE_NAME := vortex
 VERSION := latest
 
-# Compose files
-COMPOSE_FILE_INFRA := compose.infra.yaml
-COMPOSE_FILE_APP := compose.yaml
+# Docker Compose Commands
+COMPOSE_FILE_ARGS := -f compose.infra.yaml -f compose.yaml
+COMPOSE_ENV_ARGS := --env-file $(ENV_FILE)
+COMPOSE_CMD := docker compose $(COMPOSE_FILE_ARGS) $(COMPOSE_ENV_ARGS)
+COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 
-.PHONY: help \
-	infra dev prod tools \
-	up-all up-common up-gateway up-auth up-product up-order up-notification down \
-	build-all push-all pull-all \
-	build-gateway build-auth build-product build-order build-notification \
-	push-gateway push-auth push-product push-order push-notification \
-	pull-gateway pull-auth pull-product pull-order pull-notification \
-	clean clean-all logs-infra logs-dev logs-prod
+# Services List
+SERVICES := gateway auth product order notification
+
+.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-%
 
 help:
 	@echo "Vortex Docker Commands"
-	@echo "=========================================="
+	@echo "======================"
+	@echo "Environment:"
+	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
+	@echo "  make up  Start all services"
+	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, notification)"
+	@echo "  make up-common        Start common profile services"
+	@echo "  make tools            Start dev tools (Mongo Express)"
+	@echo "  make down             Stop all containers"
 	@echo ""
-	@echo "Environment Management:"
-	@echo "  make infra         Start infrastructure (MongoDB, RabbitMQ, Redis)"
-	@echo "  make dev           Start development environment"
-	@echo "  make prod          Start production environment"
-	@echo "  make up-all        Start infra + all app services"
-	@echo "  make up-common     Start infra + app services in 'common' profile"
-	@echo "  make up-gateway    Start infra + gateway only"
-	@echo "  make up-auth       Start infra + auth-service only"
-	@echo "  make up-product    Start infra + product-service only"
-	@echo "  make up-order      Start infra + order-service only"
-	@echo "  make up-notification Start infra + notification-service only"
-	@echo "  make down          Stop infra + app"
+	@echo "Images (build/push/pull):"
+	@echo "  make build        Build all images"
+	@echo "  make build-<service>  Build specific service"
+	@echo "  make push         Push all images"
+	@echo "  make pull         Pull all images"
 	@echo ""
-	@echo "Image Management:"
-	@echo "  make build-all     Build all service images"
-	@echo "  make push-all      Push all service images"
-	@echo "  make pull-all      Pull all service images"
-	@echo ""
-	@echo "Build per service:"
-	@echo "  make build-gateway"
-	@echo "  make build-auth"
-	@echo "  make build-product"
-	@echo "  make build-order"
-	@echo "  make build-notification"
-	@echo ""
-	@echo "Push per service:"
-	@echo "  make push-gateway"
-	@echo "  make push-auth"
-	@echo "  make push-product"
-	@echo "  make push-order"
-	@echo "  make push-notification"
-	@echo ""
-	@echo "Pull per service:"
-	@echo "  make pull-gateway"
-	@echo "  make pull-auth"
-	@echo "  make pull-product"
-	@echo "  make pull-order"
-	@echo "  make pull-notification"
-	@echo ""
-	@echo "Development Tools:"
-	@echo "  make tools         Start dev tools (Mongo Express, etc.)"
-	@echo ""
-	@echo "Cleanup:"
-	@echo "  make clean         Stop and remove all containers"
-	@echo "  make clean-all     Remove containers, images, volumes"
-	@echo ""
-	@echo "Logs:"
-	@echo "  make logs-infra    Show infra logs"
-	@echo "  make logs-dev      Show dev logs"
-	@echo "  make logs-prod     Show prod logs"
+	@echo "Cleanup & Logs:"
+	@echo "  make clean[-all]      Stop and remove containers [volumes]"
+	@echo "  make logs-infra       Show infra logs"
+	@echo "  make logs-dev         Show app logs"
 
-# Environment Commands
+# --- Environment ---
+
 infra:
-	docker compose -f $(COMPOSE_FILE_INFRA) --env-file $(ENV_FILE) up -d
+	$(COMPOSE_INFRA_CMD) up -d
 
-dev:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) up -d
-
-prod:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) up -d
+up:
+	$(COMPOSE_CMD) up -d
 
 tools:
-	docker compose -f $(COMPOSE_FILE_INFRA) --env-file $(ENV_FILE) --profile tools up -d
+	$(COMPOSE_INFRA_CMD) --profile tools up -d
 
-# App profile commands (infra + app)
-up-all:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) up -d
-
-up-common:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile common up -d
-
-up-gateway:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile gateway up -d
-
-up-auth:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile auth up -d
-
-up-product:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile product up -d
-
-up-order:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile order up -d
-
-up-notification:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) --profile notification up -d
+# Pattern: make up-auth, make up-gateway, make up-common
+up-%:
+	$(COMPOSE_CMD) --profile $* up -d
 
 down:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) --env-file $(ENV_FILE) down --remove-orphans
+	$(COMPOSE_CMD) down --remove-orphans
 
-# Image Management
-build-all: build-gateway build-auth build-product build-order build-notification
+# --- Build / Push / Pull patterns ---
 
-push-all: push-gateway push-auth push-product push-order push-notification
-
-pull-all: pull-gateway pull-auth pull-product pull-order pull-notification
-
+# Build
 build-gateway:
 	docker build -f gateway/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-gateway:$(VERSION) .
 
-build-auth:
-	docker build -f services/auth-service/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-auth-service:$(VERSION) .
+build-%:
+	docker build -f services/$*-service/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-$*-service:$(VERSION) .
 
-build-product:
-	docker build -f services/product-service/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-product-service:$(VERSION) .
+build: $(addprefix build-, $(SERVICES))
 
-build-order:
-	docker build -f services/order-service/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-order-service:$(VERSION) .
-
-build-notification:
-	docker build -f services/notification-service/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-notification-service:$(VERSION) .
-
+# Push
 push-gateway:
 	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-gateway:$(VERSION)
 
-push-auth:
-	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-auth-service:$(VERSION)
+push-%:
+	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-$*-service:$(VERSION)
 
-push-product:
-	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-product-service:$(VERSION)
+push: $(addprefix push-, $(SERVICES))
 
-push-order:
-	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-order-service:$(VERSION)
-
-push-notification:
-	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-notification-service:$(VERSION)
-
+# Pull
 pull-gateway:
 	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-gateway:$(VERSION)
 
-pull-auth:
-	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-auth-service:$(VERSION)
+pull-%:
+	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-$*-service:$(VERSION)
 
-pull-product:
-	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-product-service:$(VERSION)
+pull: $(addprefix pull-, $(SERVICES))
 
-pull-order:
-	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-order-service:$(VERSION)
+# --- Maintenance ---
 
-pull-notification:
-	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-notification-service:$(VERSION)
-
-# Cleanup Commands
 clean:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) down --remove-orphans
+	$(COMPOSE_CMD) down --remove-orphans
 
 clean-all:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) down -v --remove-orphans
+	$(COMPOSE_CMD) down -v --remove-orphans
 	docker system prune -f
 	docker volume prune -f
 
-# Logs
 logs-infra:
-	docker compose -f $(COMPOSE_FILE_INFRA) logs -f
+	$(COMPOSE_INFRA_CMD) logs -f
 
-logs-dev:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) logs -f
-
-logs-prod:
-	docker compose -f $(COMPOSE_FILE_INFRA) -f $(COMPOSE_FILE_APP) logs -f
+logs-dev logs-prod:
+	$(COMPOSE_CMD) logs -f

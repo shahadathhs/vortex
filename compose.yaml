@@ -15,6 +15,10 @@ services:
       - MONGODB_URI=mongodb://mongo:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
       - JWT_SECRET=${JWT_SECRET}
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - ORDER_SERVICE_URL=http://order-service:3003
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3004
     depends_on:
       - mongodb
       - rabbitmq
