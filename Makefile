@@ -40,20 +40,23 @@ help:
 # --- Environment ---
 
 infra:
-	$(COMPOSE_INFRA_CMD) up -d
+	$(COMPOSE_INFRA_CMD) --profile infra up -d
 
 up:
-	$(COMPOSE_CMD) up -d
+	$(COMPOSE_CMD) --profile dev up -d
+
+prod:
+	$(COMPOSE_CMD) --profile prod up -d
 
 tools:
 	$(COMPOSE_INFRA_CMD) --profile tools up -d
 
-# Pattern: make up-auth, make up-gateway, make up-common
+# Pattern: make up-auth, make up-gateway
 up-%:
 	$(COMPOSE_CMD) --profile $* up -d
 
 down:
-	$(COMPOSE_CMD) down --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools down --remove-orphans
 
 # --- Build / Push / Pull patterns ---
 
@@ -87,10 +90,10 @@ pull: $(addprefix pull-, $(SERVICES))
 # --- Maintenance ---
 
 clean:
-	$(COMPOSE_CMD) down --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools down --remove-orphans
 
 clean-all:
-	$(COMPOSE_CMD) down -v --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools down -v --remove-orphans
 	docker system prune -f
 	docker volume prune -f
 

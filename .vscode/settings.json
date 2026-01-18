@@ -33,9 +33,13 @@
     "ADMINPASSWORD",
     "ADMINUSERNAME",
     "amqp",
+    "appendonly",
+    "BASICAUTH",
     "ecommerce",
+    "healthcheck",
     "INITDB",
     "RABBITMQ",
+    "replicaof",
     "shahadathhs"
   ]
 }
