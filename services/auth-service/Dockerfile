@@ -21,7 +21,7 @@ COPY packages ./packages
 RUN pnpm install --frozen-lockfile
 
 # Build Application
-RUN pnpm --filter auth-service build
+RUN pnpm --filter auth-service... build
 
 # --------------------
 # Runner stage

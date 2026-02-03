@@ -21,7 +21,8 @@ COPY packages ./packages
 RUN pnpm install --frozen-lockfile
 
 # Build Application
-RUN pnpm gateway:build
+# Build Application
+RUN pnpm --filter gateway... build
 
 # --------------------
 # Runner stage

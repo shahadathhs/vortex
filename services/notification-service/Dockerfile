@@ -21,7 +21,7 @@ COPY packages ./packages
 RUN pnpm install --frozen-lockfile
 
 # Build Application
-RUN pnpm --filter notification-service build
+RUN pnpm --filter notification-service... build
 
 # --------------------
 # Runner stage
