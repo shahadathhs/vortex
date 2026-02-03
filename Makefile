@@ -20,7 +20,7 @@ help:
 	@echo "======================"
 	@echo "Environment:"
 	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
-	@echo "  make up  Start all services"
+	@echo "  make up               Start all services"
 	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, notification)"
 	@echo "  make up-common        Start common profile services"
 	@echo "  make tools            Start dev tools (Mongo Express)"

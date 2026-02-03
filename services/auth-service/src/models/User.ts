@@ -5,11 +5,21 @@ import { IUser } from '../types/user.interface';
 
 const userSchema = new Schema<IUser>(
   {
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     password: { type: String, required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    role: { type: String, enum: ['customer', 'admin', 'vendor'], default: 'customer' },
+    role: {
+      type: String,
+      enum: ['customer', 'admin', 'vendor'],
+      default: 'customer',
+    },
     isEmailVerified: { type: Boolean, default: false },
     emailVerificationToken: { type: String },
     emailVerificationExpires: { type: Date },

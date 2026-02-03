@@ -1,5 +1,3 @@
-
-
 export enum EventName {
   ORDER_CREATED = 'order.created',
   PRODUCT_CREATED = 'product.created',

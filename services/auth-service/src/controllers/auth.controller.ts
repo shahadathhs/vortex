@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { authService } from '../services/auth.service';
 
 interface AuthRequest extends Request {
-  user?:AuthUser;
+  user?: AuthUser;
 }
 
 export class AuthController {

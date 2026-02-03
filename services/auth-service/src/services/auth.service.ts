@@ -12,18 +12,18 @@ export class AuthService {
 
   async register(data: RegisterInput) {
     const { email, password, firstName, lastName } = data;
-    
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw new AppError('User already exists', 400);
     }
 
-    const user = await User.create({ 
-      email, 
-      password, 
-      firstName, 
+    const user = await User.create({
+      email,
+      password,
+      firstName,
       lastName,
-      role: 'customer' 
+      role: 'customer',
     });
 
     // Publish user.created event
@@ -37,15 +37,15 @@ export class AuthService {
 
     return {
       message: 'User registered successfully',
-      user: { 
-        id: user._id, 
+      user: {
+        id: user._id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role
+        role: user.role,
       },
       token,
-      refreshToken
+      refreshToken,
     };
   }
 
@@ -63,22 +63,22 @@ export class AuthService {
     user.refreshToken = refreshToken;
     await user.save();
 
-    return { 
-      token, 
+    return {
+      token,
       refreshToken,
-      user: { 
-        id: user._id, 
+      user: {
+        id: user._id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role
-      } 
+        role: user.role,
+      },
     };
   }
 
   async refreshToken(oldRefreshToken: string) {
     const user = await User.findOne({ refreshToken: oldRefreshToken });
-    
+
     if (!user) {
       throw new AppError('Invalid refresh token', 401);
     }
@@ -94,14 +94,17 @@ export class AuthService {
 
   async forgotPassword(email: string) {
     const user = await User.findOne({ email });
-    
+
     if (!user) {
       // Don't reveal if user exists
       return { message: 'If email exists, password reset link has been sent' };
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
-    user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.passwordResetToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
     user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
     await user.save();
 
@@ -113,10 +116,10 @@ export class AuthService {
 
   async resetPassword(token: string, newPassword: string) {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-    
+
     const user = await User.findOne({
       passwordResetToken: hashedToken,
-      passwordResetExpires: { $gt: new Date() }
+      passwordResetExpires: { $gt: new Date() },
     });
 
     if (!user) {
@@ -133,7 +136,7 @@ export class AuthService {
 
   async getProfile(userId: string) {
     const user = await User.findById(userId).select('-password -refreshToken');
-    
+
     if (!user) {
       throw new AppError('User not found', 404);
     }
@@ -148,10 +151,10 @@ export class AuthService {
 
   private generateAccessToken(user: IUser) {
     return generateToken(
-      { 
-        id: user._id.toString(), 
+      {
+        id: user._id.toString(),
         email: user.email,
-        role: user.role 
+        role: user.role,
       },
       config.JWT_SECRET,
     );

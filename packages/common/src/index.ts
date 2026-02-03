@@ -1,6 +1,6 @@
 /**
  * @vortex/common
- * 
+ *
  * Shared utilities and types for the Vortex microservices platform
  */
 

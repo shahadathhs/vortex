@@ -1,6 +1,7 @@
 {
   "name": "vortex",
   "version": "1.0.0",
+  "private": true,
   "description": "Vortex - A Event-Driven E-Commerce Ecosystem",
   "packageManager": "pnpm@10.26.0",
   "scripts": {
@@ -20,10 +21,14 @@
     "auth:dev": "pnpm --filter=auth-service dev",
     "auth:build": "pnpm --filter=auth-service build",
     "order:dev": "pnpm --filter=order-service dev",
+    "order:build": "pnpm --filter=order-service build",
     "product:dev": "pnpm --filter=product-service dev",
+    "product:build": "pnpm --filter=product-service build",
     "notification:dev": "pnpm --filter=notification-service dev",
+    "notification:build": "pnpm --filter=notification-service build",
     "gateway:dev": "pnpm --filter=gateway dev",
-    "gateway:build": "pnpm --filter=gateway build"
+    "gateway:build": "pnpm --filter=gateway build",
+    "release": "semantic-release"
   },
   "workspaces": [
     "packages/*",
@@ -36,9 +41,15 @@
     }
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "https://github.com/shahadathhs",
+  "license": "UNLICENSED",
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.3",
+    "@semantic-release/npm": "^13.1.3",
+    "@semantic-release/release-notes-generator": "^14.1.0",
     "@vortex/config": "workspace:*",
     "@vortex/eslint-config": "workspace:*",
     "@vortex/typescript-config": "workspace:*",
@@ -49,6 +60,7 @@
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "rimraf": "^5.0.0",
+    "semantic-release": "^25.0.3",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "turbo": "^2.4.2",

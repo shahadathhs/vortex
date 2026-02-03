@@ -35,6 +35,7 @@
     "amqp",
     "appendonly",
     "BASICAUTH",
+    "Buildx",
     "ecommerce",
     "healthcheck",
     "INITDB",
