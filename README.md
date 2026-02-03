@@ -1,6 +1,13 @@
 # Vortex - Event-Driven E-Commerce Ecosystem
 
+[![CI](https://github.com/shahadathhs/vortex/actions/workflows/ci.yml/badge.svg)](https://github.com/shahadathhs/vortex/actions/workflows/ci.yml)
+[![Release](https://github.com/shahadathhs/vortex/actions/workflows/release.yml/badge.svg)](https://github.com/shahadathhs/vortex/actions/workflows/release.yml)
+[![Version](https://img.shields.io/github/v/release/shahadathhs/vortex)](https://github.com/shahadathhs/vortex/releases)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+
 A **portfolio project** showcasing production-grade microservices architecture for e-commerce platforms. Built with Node.js, TypeScript, and designed to demonstrate scalable, cloud-native system design patterns.
+
+> 🛠️ **Interested in contributing?** Read our [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🎯 Project Overview
 
