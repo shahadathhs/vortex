@@ -2,7 +2,7 @@ name: Release
 
 on:
   workflow_run:
-    workflows: ["CI"]
+    workflows: ['CI']
     types:
       - completed
     branches: [main]
@@ -93,13 +93,13 @@ jobs:
         run: |
           # Use local package.json version
           VERSION=$(node -p "require('./package.json').version")
-          
+
           echo "Processing service: ${{ matrix.service }} with version: $VERSION"
-          
+
           # Build and push Versioned image
           make build-${{ matrix.service }} DOCKER_REGISTRY=$DOCKER_REGISTRY VERSION=$VERSION
           make push-${{ matrix.service }} DOCKER_REGISTRY=$DOCKER_REGISTRY VERSION=$VERSION
-          
+
           # Build and push Latest image
           make build-${{ matrix.service }} DOCKER_REGISTRY=$DOCKER_REGISTRY VERSION=latest
           make push-${{ matrix.service }} DOCKER_REGISTRY=$DOCKER_REGISTRY VERSION=latest
