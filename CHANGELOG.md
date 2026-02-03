@@ -1,3 +1,13 @@
+# [1.1.0](https://github.com/shahadathhs/vortex/compare/v1.0.0...v1.1.0) (2026-02-03)
+
+### Bug Fixes
+
+- format error fix ([5d44ab5](https://github.com/shahadathhs/vortex/commit/5d44ab57cf596769694ae9f0a21d2ac9cc7a965e))
+
+### Features
+
+- add CI/CD workflows and update dockerfiles for all services, and update package.json build scripts. ([ff5d6fe](https://github.com/shahadathhs/vortex/commit/ff5d6fe43eef9c80215cbe41d974c73029b7eb95))
+
 # 1.0.0 (2026-02-03)
 
 ### Features
