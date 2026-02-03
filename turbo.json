@@ -15,7 +15,7 @@
     },
     "lint": {
       "dependsOn": ["^lint"],
-      "cache": true
+      "cache": false
     },
     "lint:fix": {
       "dependsOn": ["^lint:fix"],
@@ -23,7 +23,7 @@
     },
     "format": {
       "dependsOn": ["^format"],
-      "cache": true
+      "cache": false
     },
     "format:fix": {
       "dependsOn": ["^format:fix"],
