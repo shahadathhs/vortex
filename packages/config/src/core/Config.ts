@@ -16,7 +16,7 @@ export class Config<T extends Record<string, string>> {
     // Auto-populate config from enum
     for (const key in configEnum) {
       const envKey = configEnum[key];
-      this.config[key] = process.env[envKey] || '';
+      this.config[key] = process.env[envKey] ?? '';
     }
   }
 
@@ -24,7 +24,7 @@ export class Config<T extends Record<string, string>> {
    * Get a config value as string
    */
   get(key: keyof T): string {
-    return this.config[key as string] || '';
+    return this.config[key as string] ?? '';
   }
 
   /**
@@ -44,7 +44,7 @@ export class Config<T extends Record<string, string>> {
    * Get PORT with proper fallback to ServicePort
    */
   get PORT(): number {
-    const envPort = this.config['PORT'];
+    const envPort = this.config.PORT;
     return envPort ? parseInt(envPort, 10) : 3000;
   }
 
@@ -52,7 +52,7 @@ export class Config<T extends Record<string, string>> {
    * Get RABBITMQ_URL with default fallback
    */
   get RABBITMQ_URL(): string {
-    return this.config['RABBITMQ_URL'] || 'amqp://127.0.0.1';
+    return this.config.RABBITMQ_URL ?? 'amqp://127.0.0.1';
   }
 
   /**

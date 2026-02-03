@@ -1,34 +1,53 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 import { productService } from '../services/product.service';
+import { IProduct } from '../types/product.interface';
 
 export class ProductController {
-  async createProduct(req: Request, res: Response, next: NextFunction) {
+  public createProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-      const product = await productService.createProduct(req.body);
+      const product = await productService.createProduct(
+        req.body as Partial<IProduct>,
+      );
       res.status(201).json(product);
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async getProducts(req: Request, res: Response, next: NextFunction) {
+  public getProducts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-      const products = await productService.getProducts(req.query);
+      const products = await productService.getProducts(
+        req.query as Record<string, unknown>,
+      );
       res.json(products);
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async getProductById(req: Request, res: Response, next: NextFunction) {
+  public getProductById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-      const product = await productService.getProductById(req.params.id);
+      const product = await productService.getProductById(
+        req.params.id as string,
+      );
       res.json(product);
     } catch (error) {
       next(error);
     }
-  }
+  };
 }
 
 export const productController = new ProductController();

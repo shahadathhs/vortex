@@ -1,23 +1,27 @@
 import { RabbitMQManager } from '@vortex/common';
 import { QueueName } from '@vortex/config';
+import { Channel, ConsumeMessage } from 'amqplib';
 
 import { config } from '../config';
 
 export class NotificationService {
-  async startConsumer() {
+  startConsumer() {
     const connection = RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
     // Create a channel for consuming events
     connection.createChannel({
-      setup: (channel: any) => {
+      setup: (channel: Channel) => {
         return Promise.all([
           channel.assertQueue(QueueName.NOTIFICATION_QUEUE, { durable: true }),
-          channel.consume(QueueName.NOTIFICATION_QUEUE, (msg: any) => {
-            if (msg) {
-              this.handleMessage(msg.content.toString());
-              channel.ack(msg);
-            }
-          }),
+          channel.consume(
+            QueueName.NOTIFICATION_QUEUE,
+            (msg: ConsumeMessage | null) => {
+              if (msg) {
+                this.handleMessage(msg.content.toString());
+                channel.ack(msg);
+              }
+            },
+          ),
         ]);
       },
     });
