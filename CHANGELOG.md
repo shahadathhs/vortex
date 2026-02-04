@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/shahadathhs/vortex/compare/v1.1.0...v1.2.0) (2026-02-04)
+
+### Bug Fixes
+
+- lint & format error ([beff4bb](https://github.com/shahadathhs/vortex/commit/beff4bb24c950990aebadde5b98f5abd1e030cfb))
+
+### Features
+
+- Add CI workflow, Prettier ignore, and initial package configurations for notification, order, and product microservices. ([975ff19](https://github.com/shahadathhs/vortex/commit/975ff191352b9e522b987a9077e6d61daa50c4b7))
+- add GitHub Actions CI workflow for linting, formatting, typechecking, and building. ([2e26858](https://github.com/shahadathhs/vortex/commit/2e268588921aea2b3bc78d0b28e4c9ea339485d0))
+- Implement initial microservices architecture with auth, order, product, and notification services, alongside common config, eslint, and messaging utilities. ([c2bbbe8](https://github.com/shahadathhs/vortex/commit/c2bbbe8cb9ee7b9a2349efb93652b61bcb730213))
+
 # [1.1.0](https://github.com/shahadathhs/vortex/compare/v1.0.0...v1.1.0) (2026-02-03)
 
 ### Bug Fixes
