@@ -109,7 +109,7 @@ export class AuthService {
     await user.save();
 
     // TODO: Send email with resetToken
-    console.log(`Password reset token for ${email}: ${resetToken}`);
+    console.info(`Password reset token for ${email}: ${resetToken}`);
 
     return { message: 'If email exists, password reset link has been sent' };
   }
@@ -160,7 +160,7 @@ export class AuthService {
     );
   }
 
-  private generateRefreshToken(user: IUser) {
+  private generateRefreshToken(_user: IUser) {
     return crypto.randomBytes(40).toString('hex');
   }
 
@@ -184,7 +184,7 @@ export class AuthService {
         },
       });
 
-      console.log('📤 Published user.created event');
+      console.info('📤 Published user.created event');
     } catch (error) {
       console.error('Failed to publish user.created event:', error);
     }

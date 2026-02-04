@@ -20,4 +20,7 @@ const start = async () => {
   }
 };
 
-start();
+start().catch((error: unknown) => {
+  console.error('Fatal error during startup:', error);
+  process.exit(1);
+});

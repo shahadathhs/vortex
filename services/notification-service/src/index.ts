@@ -2,10 +2,10 @@ import app from './app';
 import { config } from './config';
 import { notificationService } from './services/notification.service';
 
-const start = async () => {
+const start = () => {
   try {
     // Start RabbitMQ Consumer
-    await notificationService.startConsumer();
+    notificationService.startConsumer();
 
     app.listen(config.PORT, () => {
       console.info(`Notification Service listening on port ${config.PORT}`);

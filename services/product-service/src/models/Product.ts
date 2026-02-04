@@ -11,10 +11,10 @@ const productSchema = new Schema<IProduct>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
+      transform(_doc, ret: Record<string, unknown>) {
         ret.id = ret._id;
-        delete (ret as any)._id;
-        delete (ret as any).__v;
+        delete ret._id;
+        delete ret.__v;
       },
     },
   },
