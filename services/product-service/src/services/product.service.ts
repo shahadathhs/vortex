@@ -1,15 +1,16 @@
 import { AppError } from '@vortex/common';
 
 import { Product } from '../models/Product';
+import { IProduct } from '../types/product.interface';
 
 export class ProductService {
-  async createProduct(data: any) {
+  async createProduct(data: Partial<IProduct>) {
     const { name, description, price, stock } = data;
     const product = await Product.create({ name, description, price, stock });
     return product;
   }
 
-  async getProducts(query: any) {
+  async getProducts(query: Record<string, unknown>) {
     const { q } = query;
     let dbQuery = {};
 

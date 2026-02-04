@@ -8,9 +8,10 @@ export class RabbitMQManager {
       this.instance = amqp.connect([url]);
 
       this.instance.on('connect', () => console.info('Connected to RabbitMQ'));
-      this.instance.on('disconnect', (err: any) =>
-        console.error('RabbitMQ disconnected', err.err),
-      );
+      this.instance.on('disconnect', (err: unknown) => {
+        const error = err as { err?: unknown };
+        console.error('RabbitMQ disconnected', error.err ?? err);
+      });
     }
     return this.instance;
   }

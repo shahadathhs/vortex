@@ -1,16 +1,21 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 import { orderService } from '../services/order.service';
+import { IOrder } from '../types/order.interface';
 
 export class OrderController {
-  async createOrder(req: Request, res: Response, next: NextFunction) {
+  public createOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-      const order = await orderService.createOrder(req.body);
+      const order = await orderService.createOrder(req.body as Partial<IOrder>);
       res.status(201).json(order);
     } catch (error) {
       next(error);
     }
-  }
+  };
 }
 
 export const orderController = new OrderController();
