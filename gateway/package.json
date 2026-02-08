@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
     "build": "rimraf dist && tsc",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@vortex/common": "workspace:*",
-    "@vortex/config": "workspace:*",
     "@vortex/eslint-config": "workspace:*",
     "@vortex/typescript-config": "workspace:*",
     "cors": "^2.8.6",

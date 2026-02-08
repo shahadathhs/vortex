@@ -1,5 +1,5 @@
 import app from './app';
-import { config } from './config';
+import { config } from './config/config';
 import { notificationService } from './services/notification.service';
 
 const start = () => {

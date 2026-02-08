@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
-import { config } from '../config';
+import { config } from '../config/config';
 
 const router: Router = Router();
 

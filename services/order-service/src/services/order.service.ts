@@ -1,8 +1,7 @@
-import { RabbitMQManager } from '@vortex/common';
-import { EventName, QueueName } from '@vortex/config';
+import { EventName, QueueName, RabbitMQManager } from '@vortex/common';
 import { ConfirmChannel } from 'amqplib';
 
-import { config } from '../config';
+import { config } from '../config/config';
 import { Order } from '../models/Order';
 import { IOrder } from '../types/order.interface';
 
