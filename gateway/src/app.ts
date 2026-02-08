@@ -3,7 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 
-import proxyRouter from './proxy';
+import proxyRouter from './proxy/proxy';
 
 const app: express.Application = express();
 

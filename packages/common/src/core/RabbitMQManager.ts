@@ -1,6 +1,6 @@
 import amqp, { AmqpConnectionManager } from 'amqp-connection-manager';
 
-import { logger } from '../utils';
+import { logger } from '../utils/logger';
 
 export class RabbitMQManager {
   private static instance: AmqpConnectionManager;

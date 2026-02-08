@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { z, ZodError } from 'zod';
-import { AppError } from '../errors/errorHandler';
+
+import { BadRequestError } from '../errors/ApiErrors';
 
 export const validateRequest = (schema: z.ZodTypeAny) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -16,7 +17,7 @@ export const validateRequest = (schema: z.ZodTypeAny) => {
         const errorMessage = error.issues
           .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
           .join(', ');
-        next(new AppError(errorMessage, 400));
+        next(new BadRequestError(errorMessage));
       } else {
         next(error);
       }

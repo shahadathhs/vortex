@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-import { logger } from '../utils';
+import { logger } from '../utils/logger';
 
 export interface TokenPayload {
   id: string;

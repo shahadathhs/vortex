@@ -2,21 +2,21 @@ import { logger, RabbitMQManager } from '@vortex/common';
 import mongoose from 'mongoose';
 
 import app from './app';
-import { config } from './config';
+import { config } from './config/config';
 
 const start = async () => {
   try {
     await mongoose.connect(config.MONGODB_URI);
-    logger.info('Order DB connected');
+    logger.info('Product DB connected');
 
     // Initialize RabbitMQ connection
     RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
     app.listen(config.PORT, () => {
-      logger.info(`Order Service listening on port ${config.PORT}`);
+      logger.info(`Product Service listening on port ${config.PORT}`);
     });
   } catch (error) {
-    logger.error('Failed to start Order Service', error);
+    logger.error('Failed to start Product Service', error);
   }
 };
 

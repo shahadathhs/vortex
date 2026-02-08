@@ -33,9 +33,6 @@ importers:
       '@semantic-release/release-notes-generator':
         specifier: ^14.1.0
         version: 14.1.0(semantic-release@25.0.3(typescript@5.9.3))
-      '@vortex/config':
-        specifier: workspace:*
-        version: link:packages/config
       '@vortex/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config
@@ -84,9 +81,6 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../packages/common
-      '@vortex/config':
-        specifier: workspace:*
-        version: link:../packages/config
       '@vortex/eslint-config':
         specifier: workspace:*
         version: link:../packages/eslint-config
@@ -170,22 +164,6 @@ importers:
       '@types/node':
         specifier: ^25.2.2
         version: 25.2.2
-      '@vortex/config':
-        specifier: workspace:*
-        version: link:../config
-
-  packages/config:
-    dependencies:
-      dotenv:
-        specifier: ^17.2.4
-        version: 17.2.4
-    devDependencies:
-      '@types/node':
-        specifier: ^25.2.2
-        version: 25.2.2
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
   packages/eslint-config:
     dependencies:
@@ -221,9 +199,6 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../../packages/common
-      '@vortex/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@vortex/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -340,9 +315,6 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../../packages/common
-      '@vortex/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@vortex/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -389,9 +361,6 @@ importers:
       '@vortex/common':
         specifier: workspace:*
         version: link:../../packages/common
-      '@vortex/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@vortex/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config

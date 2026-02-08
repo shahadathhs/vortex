@@ -1,4 +1,4 @@
-import { AppError } from '@vortex/common';
+import { NotFoundError } from '@vortex/common';
 
 import { Product } from '../models/Product';
 import { IProduct } from '../types/product.interface';
@@ -25,7 +25,7 @@ export class ProductService {
   async getProductById(id: string) {
     const product = await Product.findById(id);
     if (!product) {
-      throw new AppError('Product not found', 404);
+      throw new NotFoundError('Product not found');
     }
     return product;
   }

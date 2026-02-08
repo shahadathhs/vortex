@@ -1,6 +1,0 @@
-export enum AuthEnv {
-  MONGODB_URI = 'MONGODB_URI',
-  JWT_SECRET = 'JWT_SECRET',
-  PORT = 'PORT',
-  RABBITMQ_URL = 'RABBITMQ_URL',
-}

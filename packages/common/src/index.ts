@@ -1,23 +1,30 @@
 /**
  * @vortex/common
  *
- * Shared utilities and types for the Vortex microservices platform
+ * Shared utilities, core logic, and middlewares for the Vortex microservices platform
  */
 
-// Authentication & JWT
-export * from './auth';
+// Constants & Enums
+export * from './constants/constants';
 
-// Error handling
-export * from './errors';
+// Core Logic (Config, Messaging, JWT)
+export * from './core/Config';
+export * from './core/jwt';
+export * from './core/RabbitMQManager';
 
-// Messaging (RabbitMQ)
-export * from './messaging';
+// Error Handling
+export * from './errors/ApiErrors';
+export * from './errors/errorHandler';
+export * from './errors/MongooseErrorParser';
 
-// Validation
-export * from './validation';
+// Middleware
+export * from './middleware/auth.middleware';
+export * from './middleware/rbac.middleware';
+export * from './middleware/validateRequest';
 
-// Utility functions
-export * from './utils';
+// Utilities
+export * from './utils/asyncHandler';
+export * from './utils/logger';
 
 // Type definitions
-export * from './types';
+export * from './types/auth';

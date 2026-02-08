@@ -1,8 +1,7 @@
-import { RabbitMQManager } from '@vortex/common';
-import { QueueName } from '@vortex/config';
+import { QueueName, RabbitMQManager } from '@vortex/common';
 import { Channel, ConsumeMessage } from 'amqplib';
 
-import { config } from '../config';
+import { config } from '../config/config';
 
 export class NotificationService {
   startConsumer() {

@@ -1,7 +1,7 @@
 import { logger, RabbitMQManager } from '@vortex/common';
 
 import app from './app';
-import { config } from './config';
+import { config } from './config/config';
 import { connectDB } from './config/db';
 
 const start = async () => {
