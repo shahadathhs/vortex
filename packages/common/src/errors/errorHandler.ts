@@ -1,4 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+
+import { logger } from '../utils';
 
 export class AppError extends Error {
   constructor(
@@ -19,9 +21,13 @@ export const errorHandler = (
   next: NextFunction,
 ) => {
   const statusCode = err instanceof AppError ? err.statusCode : 500;
-  const message = err.message || 'Internal Server Error';
+  const message = err.message ?? 'Internal Server Error';
 
-  console.error(`[Error] ${statusCode} - ${message}`);
+  logger.error(`${statusCode} - ${message}`, {
+    url: req.originalUrl,
+    method: req.method,
+    stack: err.stack,
+  });
 
   res.status(statusCode).json({
     status: 'error',
