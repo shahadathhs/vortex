@@ -1,5 +1,7 @@
 import amqp, { AmqpConnectionManager } from 'amqp-connection-manager';
 
+import { logger } from '../utils';
+
 export class RabbitMQManager {
   private static instance: AmqpConnectionManager;
 
@@ -7,10 +9,10 @@ export class RabbitMQManager {
     if (!this.instance) {
       this.instance = amqp.connect([url]);
 
-      this.instance.on('connect', () => console.info('Connected to RabbitMQ'));
+      this.instance.on('connect', () => logger.info('Connected to RabbitMQ'));
       this.instance.on('disconnect', (err: unknown) => {
         const error = err as { err?: unknown };
-        console.error('RabbitMQ disconnected', error.err ?? err);
+        logger.error('RabbitMQ disconnected', error.err ?? err);
       });
     }
     return this.instance;

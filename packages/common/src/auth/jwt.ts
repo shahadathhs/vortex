@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 
+import { logger } from '../utils';
+
 export interface TokenPayload {
   id: string;
   email: string;
@@ -17,7 +19,8 @@ export const verifyToken = (token: string, secret: string): TokenPayload => {
   try {
     return jwt.verify(token, secret) as TokenPayload;
   } catch (error) {
-    console.error('Error verifying token:', error);
-    throw new Error('Invalid or expired token');
+    logger.error('Error verifying token:', error);
+    // Preserving the cause is required by the preserve-caught-error rule
+    throw new Error('Invalid or expired token', { cause: error });
   }
 };
