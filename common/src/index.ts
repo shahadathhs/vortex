@@ -28,3 +28,4 @@ export * from './utils/logger';
 
 // Type definitions
 export * from './types/auth';
+export * from './types/amqplib';

@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import {
   BadRequestError,
   ConflictError,
+  ConfirmChannel,
   generateToken,
   logger,
   NotFoundError,
@@ -176,7 +177,7 @@ export class AuthService {
     try {
       const channelWrapper = this.rabbitMQ.createChannel({
         json: true,
-        setup: async (channel: import('amqplib').ConfirmChannel) => {
+        setup: async (channel: ConfirmChannel) => {
           await channel.assertExchange('vortex', 'topic', { durable: true });
         },
       });
