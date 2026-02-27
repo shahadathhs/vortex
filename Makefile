@@ -13,31 +13,108 @@ COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 # Services List
 SERVICES := gateway auth product order notification
 
-.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-%
+.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-fix clean-pkg dev-%
 
 help:
-	@echo "Vortex Docker Commands"
-	@echo "======================"
-	@echo "Environment:"
+	@echo "Vortex - Makefile Commands"
+	@echo "=========================="
+	@echo ""
+	@echo "pnpm / Development:"
+	@echo "  make install          Install dependencies"
+	@echo "  make dev              Run all services in dev (turbo)"
+	@echo "  make dev-<service>    Run specific service (gateway, auth, order, product, notification)"
+	@echo "  make build-js         Build all packages (pnpm)"
+	@echo "  make typecheck        Type-check all packages"
+	@echo "  make lint             Lint all packages"
+	@echo "  make lint-fix         Lint and fix all packages"
+	@echo "  make format           Check formatting"
+	@echo "  make format-fix       Format all packages"
+	@echo "  make ci-fix          Lint + format fix (CI)"
+	@echo "  make clean-pkg       Clean build artifacts and node_modules"
+	@echo "  make deploy-<svc>   Deploy package to ./dist/deploy/<svc> (gateway, auth, order, product, notification)"
+	@echo ""
+	@echo "Docker / Environment:"
 	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
 	@echo "  make up               Start all services"
 	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, notification)"
-	@echo "  make up-common        Start common profile services"
-	@echo "  make tools            Start dev tools (Mongo Express)"
-	@echo "  make down             Stop all containers"
+	@echo "  make tools           Start dev tools (Mongo Express)"
+	@echo "  make down            Stop all containers"
 	@echo ""
-	@echo "Images (build/push/pull):"
-	@echo "  make build        Build all images"
-	@echo "  make build-<service>  Build specific service"
-	@echo "  make push         Push all images"
-	@echo "  make pull         Pull all images"
+	@echo "Docker Images (build/push/pull):"
+	@echo "  make build           Build all Docker images"
+	@echo "  make build-<service>  Build specific service image"
+	@echo "  make push            Push all images"
+	@echo "  make pull            Pull all images"
 	@echo ""
 	@echo "Cleanup & Logs:"
 	@echo "  make clean[-all]      Stop and remove containers [volumes]"
 	@echo "  make logs-infra       Show infra logs"
 	@echo "  make logs-dev         Show app logs"
 
-# --- Environment ---
+# --- pnpm / Development ---
+
+install:
+	pnpm install
+
+dev:
+	pnpm dev
+
+dev-gateway:
+	pnpm --filter=gateway dev
+
+dev-auth:
+	pnpm --filter=auth-service dev
+
+dev-order:
+	pnpm --filter=order-service dev
+
+dev-product:
+	pnpm --filter=product-service dev
+
+dev-notification:
+	pnpm --filter=notification-service dev
+
+build-js:
+	pnpm build
+
+typecheck:
+	pnpm typecheck
+
+lint:
+	pnpm lint
+
+lint-fix:
+	pnpm lint:fix
+
+format:
+	pnpm format
+
+format-fix:
+	pnpm format:fix
+
+ci-fix:
+	pnpm ci:fix
+
+clean-pkg:
+	pnpm clean
+
+# Deploy: copy built package + deps to dist/deploy/<service>
+deploy-gateway:
+	pnpm deploy --filter=gateway dist/deploy/gateway
+
+deploy-auth:
+	pnpm deploy --filter=auth-service dist/deploy/auth-service
+
+deploy-order:
+	pnpm deploy --filter=order-service dist/deploy/order-service
+
+deploy-product:
+	pnpm deploy --filter=product-service dist/deploy/product-service
+
+deploy-notification:
+	pnpm deploy --filter=notification-service dist/deploy/notification-service
+
+# --- Docker / Environment ---
 
 infra:
 	$(COMPOSE_INFRA_CMD) --profile infra up -d
