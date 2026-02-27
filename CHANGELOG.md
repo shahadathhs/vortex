@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/shahadathhs/vortex/compare/v1.2.0...v1.2.1) (2026-02-27)
+
+### Bug Fixes
+
+- rename Config.ts to config.ts for Linux case-sensitivity ([1f59e6c](https://github.com/shahadathhs/vortex/commit/1f59e6cccc61641630d2691ec48f7df799f1c1a2))
+
 # [1.2.0](https://github.com/shahadathhs/vortex/compare/v1.1.0...v1.2.0) (2026-02-04)
 
 ### Bug Fixes
