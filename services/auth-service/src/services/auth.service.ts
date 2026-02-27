@@ -1,8 +1,17 @@
 import crypto from 'crypto';
 
-import { AppError, generateToken, RabbitMQManager } from '@vortex/common';
+import {
+  BadRequestError,
+  ConflictError,
+  ConfirmChannel,
+  generateToken,
+  logger,
+  NotFoundError,
+  RabbitMQManager,
+  UnauthorizedError,
+} from '@vortex/common';
 
-import { config } from '../config';
+import { config } from '../config/config';
 import { User } from '../models/User';
 import { LoginInput, RegisterInput } from '../schemas/auth.schema';
 import { IUser } from '../types/user.interface';
@@ -15,7 +24,7 @@ export class AuthService {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      throw new AppError('User already exists', 400);
+      throw new ConflictError('User already exists');
     }
 
     const user = await User.create({
@@ -38,7 +47,7 @@ export class AuthService {
     return {
       message: 'User registered successfully',
       user: {
-        id: user._id,
+        id: String(user._id),
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -54,7 +63,7 @@ export class AuthService {
     const user = await User.findOne({ email });
 
     if (!user || !(await user.comparePassword(password))) {
-      throw new AppError('Invalid credentials', 401);
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     const token = this.generateAccessToken(user);
@@ -67,7 +76,7 @@ export class AuthService {
       token,
       refreshToken,
       user: {
-        id: user._id,
+        id: String(user._id),
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -80,7 +89,7 @@ export class AuthService {
     const user = await User.findOne({ refreshToken: oldRefreshToken });
 
     if (!user) {
-      throw new AppError('Invalid refresh token', 401);
+      throw new UnauthorizedError('Invalid refresh token');
     }
 
     const token = this.generateAccessToken(user);
@@ -109,7 +118,7 @@ export class AuthService {
     await user.save();
 
     // TODO: Send email with resetToken
-    console.info(`Password reset token for ${email}: ${resetToken}`);
+    logger.info(`Password reset token for ${email}: ${resetToken}`);
 
     return { message: 'If email exists, password reset link has been sent' };
   }
@@ -123,7 +132,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new AppError('Invalid or expired reset token', 400);
+      throw new BadRequestError('Invalid or expired reset token');
     }
 
     user.password = newPassword;
@@ -138,7 +147,7 @@ export class AuthService {
     const user = await User.findById(userId).select('-password -refreshToken');
 
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new NotFoundError('User not found');
     }
 
     return { user };
@@ -152,7 +161,7 @@ export class AuthService {
   private generateAccessToken(user: IUser) {
     return generateToken(
       {
-        id: user._id.toString(),
+        id: String(user._id),
         email: user.email,
         role: user.role,
       },
@@ -168,7 +177,7 @@ export class AuthService {
     try {
       const channelWrapper = this.rabbitMQ.createChannel({
         json: true,
-        setup: async (channel: import('amqplib').ConfirmChannel) => {
+        setup: async (channel: ConfirmChannel) => {
           await channel.assertExchange('vortex', 'topic', { durable: true });
         },
       });
@@ -177,16 +186,16 @@ export class AuthService {
         eventName: 'user.created',
         timestamp: new Date(),
         data: {
-          userId: user._id.toString(),
+          userId: String(user._id),
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
         },
       });
 
-      console.info('📤 Published user.created event');
+      logger.info('📤 Published user.created event');
     } catch (error) {
-      console.error('Failed to publish user.created event:', error);
+      logger.error('Failed to publish user.created event:', error);
     }
   }
 }

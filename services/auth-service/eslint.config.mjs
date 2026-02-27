@@ -1,3 +1,4 @@
-import baseConfig from '@vortex/eslint-config/express';
+import expressConfig from '@systemix/eslint/express.js';
 
-export default baseConfig;
+/** @type {import('eslint').Linter.Config[]} */
+export default expressConfig;

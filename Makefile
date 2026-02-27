@@ -13,31 +13,152 @@ COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 # Services List
 SERVICES := gateway auth product order notification
 
-.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-%
+.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
 
 help:
-	@echo "Vortex Docker Commands"
-	@echo "======================"
-	@echo "Environment:"
+	@echo "Vortex - Makefile Commands"
+	@echo "=========================="
+	@echo ""
+	@echo "pnpm / Development:"
+	@echo "  make install          Install dependencies"
+	@echo "  make dev              Run all services in dev (turbo)"
+	@echo "  make dev-<service>    Run specific service (gateway, auth, order, product, notification)"
+	@echo "  make build-js         Build all packages (pnpm)"
+	@echo "  make typecheck        Type-check all packages"
+	@echo "  make lint             Lint all packages"
+	@echo "  make lint-fix         Lint and fix all packages"
+	@echo "  make format           Check formatting"
+	@echo "  make format-fix       Format all packages"
+	@echo "  make ci-fix          Lint + format fix (CI)"
+	@echo "  make clean-pkg       Clean build artifacts and node_modules"
+	@echo "  make deploy-<svc>   Deploy package to ./dist/deploy/<svc> (gateway, auth, order, product, notification)"
+	@echo ""
+	@echo "PM2 (production):"
+	@echo "  make pm2-start      Build and start all services via PM2"
+	@echo "  make pm2-stop       Stop all PM2 processes"
+	@echo "  make pm2-restart    Restart all PM2 processes"
+	@echo "  make pm2-delete     Delete all PM2 processes"
+	@echo "  make pm2-status     Show PM2 process list"
+	@echo "  make pm2-logs       Tail PM2 logs (all apps)"
+	@echo "  make pm2-logs-<svc> Tail logs for specific app (gateway, auth, order, product, notification)"
+	@echo ""
+	@echo "Docker / Environment:"
 	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
 	@echo "  make up               Start all services"
 	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, notification)"
-	@echo "  make up-common        Start common profile services"
-	@echo "  make tools            Start dev tools (Mongo Express)"
-	@echo "  make down             Stop all containers"
+	@echo "  make tools           Start dev tools (Mongo Express)"
+	@echo "  make down            Stop all containers"
 	@echo ""
-	@echo "Images (build/push/pull):"
-	@echo "  make build        Build all images"
-	@echo "  make build-<service>  Build specific service"
-	@echo "  make push         Push all images"
-	@echo "  make pull         Pull all images"
+	@echo "Docker Images (build/push/pull):"
+	@echo "  make build           Build all Docker images"
+	@echo "  make build-<service>  Build specific service image"
+	@echo "  make push            Push all images"
+	@echo "  make pull            Pull all images"
 	@echo ""
 	@echo "Cleanup & Logs:"
 	@echo "  make clean[-all]      Stop and remove containers [volumes]"
 	@echo "  make logs-infra       Show infra logs"
 	@echo "  make logs-dev         Show app logs"
 
-# --- Environment ---
+# --- pnpm / Development ---
+
+install:
+	pnpm install
+
+dev:
+	pnpm dev
+
+dev-gateway:
+	pnpm --filter=gateway dev
+
+dev-auth:
+	pnpm --filter=auth-service dev
+
+dev-order:
+	pnpm --filter=order-service dev
+
+dev-product:
+	pnpm --filter=product-service dev
+
+dev-notification:
+	pnpm --filter=notification-service dev
+
+build-js:
+	pnpm build
+
+typecheck:
+	pnpm typecheck
+
+lint:
+	pnpm lint
+
+lint-fix:
+	pnpm lint:fix
+
+format:
+	pnpm format
+
+format-fix:
+	pnpm format:fix
+
+ci-fix:
+	pnpm ci:fix
+
+clean-pkg:
+	pnpm clean
+
+# Deploy: copy built package + deps to dist/deploy/<service>
+deploy-gateway:
+	pnpm deploy --filter=gateway dist/deploy/gateway
+
+deploy-auth:
+	pnpm deploy --filter=auth-service dist/deploy/auth-service
+
+deploy-order:
+	pnpm deploy --filter=order-service dist/deploy/order-service
+
+deploy-product:
+	pnpm deploy --filter=product-service dist/deploy/product-service
+
+deploy-notification:
+	pnpm deploy --filter=notification-service dist/deploy/notification-service
+
+# --- PM2 (production) ---
+
+pm2-start: build-js
+	pm2 start ecosystem.config.mjs
+
+pm2-stop:
+	pm2 stop ecosystem.config.mjs 2>/dev/null || pm2 stop all
+
+pm2-restart: build-js
+	pm2 restart ecosystem.config.mjs 2>/dev/null || (pm2 delete all 2>/dev/null; pm2 start ecosystem.config.mjs)
+
+pm2-delete:
+	pm2 delete ecosystem.config.mjs 2>/dev/null || pm2 delete all 2>/dev/null || true
+
+pm2-status:
+	pm2 list
+
+pm2-logs:
+	pm2 logs
+
+pm2-logs-gateway:
+	pm2 logs vortex-gateway
+
+pm2-logs-auth:
+	pm2 logs vortex-auth-service
+
+pm2-logs-order:
+	pm2 logs vortex-order-service
+
+pm2-logs-product:
+	pm2 logs vortex-product-service
+
+pm2-logs-notification:
+	pm2 logs vortex-notification-service
+
+# --- Docker / Environment ---
 
 infra:
 	$(COMPOSE_INFRA_CMD) --profile infra up -d

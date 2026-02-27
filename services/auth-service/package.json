@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
     "build": "rimraf dist && tsc",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -17,29 +17,19 @@
   },
   "dependencies": {
     "@vortex/common": "workspace:*",
-    "@vortex/config": "workspace:*",
-    "@vortex/eslint-config": "workspace:*",
-    "@vortex/typescript-config": "workspace:*",
-    "amqp-connection-manager": "^5.0.0",
-    "amqplib": "^0.10.0",
-    "axios": "^1.6.0",
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.0.0-beta.3",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.1.5",
-    "zod": "^4.3.5"
+    "cors": "catalog:",
+    "express": "catalog:",
+    "helmet": "catalog:",
+    "mongoose": "catalog:",
+    "zod": "catalog:",
+    "bcryptjs": "catalog:"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.10.0",
-    "@types/cors": "^2.8.13",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.2.0",
-    "rimraf": "^6.1.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.0.0"
+    "@types/cors": "catalog:",
+    "@types/express": "catalog:",
+    "@types/node": "catalog:",
+    "rimraf": "catalog:",
+    "ts-node-dev": "catalog:",
+    "typescript": "catalog:"
   }
 }

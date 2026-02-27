@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
     "build": "rimraf dist && tsc",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -16,23 +16,18 @@
     "clean:turbo": "rimraf .turbo dist node_modules"
   },
   "dependencies": {
-    "@types/amqplib": "^0.10.8",
     "@vortex/common": "workspace:*",
-    "@vortex/config": "workspace:*",
-    "@vortex/eslint-config": "workspace:*",
-    "@vortex/typescript-config": "workspace:*",
-    "amqplib": "^0.10.9",
-    "cors": "^2.8.5",
-    "express": "^5.0.0-beta.3",
-    "helmet": "^8.1.0",
-    "mongoose": "^9.1.5",
-    "zod": "^4.3.5"
+    "cors": "catalog:",
+    "express": "catalog:",
+    "helmet": "catalog:",
+    "mongoose": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.6",
-    "rimraf": "^6.1.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.3"
+    "@types/cors": "catalog:",
+    "@types/express": "catalog:",
+    "rimraf": "catalog:",
+    "ts-node-dev": "catalog:",
+    "typescript": "catalog:"
   }
 }

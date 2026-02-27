@@ -2,7 +2,7 @@ export default {
   apps: [
     {
       name: 'vortex-gateway',
-      script: './gateway/dist/index.js',
+      script: './gateway/dist/server.js',
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
@@ -10,7 +10,7 @@ export default {
     },
     {
       name: 'vortex-auth-service',
-      script: './services/auth-service/dist/index.js',
+      script: './services/auth-service/dist/server.js',
       env: {
         NODE_ENV: 'production',
         PORT: 3001,
@@ -18,7 +18,7 @@ export default {
     },
     {
       name: 'vortex-product-service',
-      script: './services/product-service/dist/index.js',
+      script: './services/product-service/dist/server.js',
       env: {
         NODE_ENV: 'production',
         PORT: 3002,
@@ -26,7 +26,7 @@ export default {
     },
     {
       name: 'vortex-order-service',
-      script: './services/order-service/dist/index.js',
+      script: './services/order-service/dist/server.js',
       env: {
         NODE_ENV: 'production',
         PORT: 3003,
@@ -34,7 +34,7 @@ export default {
     },
     {
       name: 'vortex-notification-service',
-      script: './services/notification-service/dist/index.js',
+      script: './services/notification-service/dist/server.js',
       env: {
         NODE_ENV: 'production',
         PORT: 3004,
