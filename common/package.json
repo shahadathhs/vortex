@@ -4,7 +4,9 @@
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
@@ -32,6 +34,8 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.0",
-    "@types/node": "^25.2.3"
+    "@types/node": "^25.2.3",
+    "@systemix/eslint": "^0.4.0",
+    "@systemix/typescript": "^0.4.0"
   }
 }
