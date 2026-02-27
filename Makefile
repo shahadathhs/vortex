@@ -13,7 +13,7 @@ COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 # Services List
 SERVICES := gateway auth product order notification
 
-.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-fix clean-pkg dev-%
+.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
 
 help:
 	@echo "Vortex - Makefile Commands"
@@ -32,6 +32,15 @@ help:
 	@echo "  make ci-fix          Lint + format fix (CI)"
 	@echo "  make clean-pkg       Clean build artifacts and node_modules"
 	@echo "  make deploy-<svc>   Deploy package to ./dist/deploy/<svc> (gateway, auth, order, product, notification)"
+	@echo ""
+	@echo "PM2 (production):"
+	@echo "  make pm2-start      Build and start all services via PM2"
+	@echo "  make pm2-stop       Stop all PM2 processes"
+	@echo "  make pm2-restart    Restart all PM2 processes"
+	@echo "  make pm2-delete     Delete all PM2 processes"
+	@echo "  make pm2-status     Show PM2 process list"
+	@echo "  make pm2-logs       Tail PM2 logs (all apps)"
+	@echo "  make pm2-logs-<svc> Tail logs for specific app (gateway, auth, order, product, notification)"
 	@echo ""
 	@echo "Docker / Environment:"
 	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
@@ -113,6 +122,41 @@ deploy-product:
 
 deploy-notification:
 	pnpm deploy --filter=notification-service dist/deploy/notification-service
+
+# --- PM2 (production) ---
+
+pm2-start: build-js
+	pm2 start ecosystem.config.mjs
+
+pm2-stop:
+	pm2 stop ecosystem.config.mjs 2>/dev/null || pm2 stop all
+
+pm2-restart: build-js
+	pm2 restart ecosystem.config.mjs 2>/dev/null || (pm2 delete all 2>/dev/null; pm2 start ecosystem.config.mjs)
+
+pm2-delete:
+	pm2 delete ecosystem.config.mjs 2>/dev/null || pm2 delete all 2>/dev/null || true
+
+pm2-status:
+	pm2 list
+
+pm2-logs:
+	pm2 logs
+
+pm2-logs-gateway:
+	pm2 logs vortex-gateway
+
+pm2-logs-auth:
+	pm2 logs vortex-auth-service
+
+pm2-logs-order:
+	pm2 logs vortex-order-service
+
+pm2-logs-product:
+	pm2 logs vortex-product-service
+
+pm2-logs-notification:
+	pm2 logs vortex-notification-service
 
 # --- Docker / Environment ---
 
