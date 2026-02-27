@@ -3,6 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 
+import cartRoutes from './routes/cart.routes';
 import orderRoutes from './routes/order.routes';
 
 const app: express.Application = express();
@@ -20,6 +21,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/orders', orderRoutes);
+app.use('/api/cart', cartRoutes);
 
 app.use(errorHandler);
 

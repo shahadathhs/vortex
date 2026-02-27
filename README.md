@@ -25,13 +25,13 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
 
 ### Microservices
 
-| Service                  | Purpose                                            | Database                        | Events                               |
-| ------------------------ | -------------------------------------------------- | ------------------------------- | ------------------------------------ |
-| **Gateway**              | API Gateway for routing and load balancing         | N/A                             | N/A                                  |
-| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)         | `user.created`, `user.updated`       |
-| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`)      | `product.created`, `product.updated` |
-| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)        | `order.created`, `order.updated`     |
-| **Notification Service** | Event-driven notifications (email, SMS, push)      | MongoDB (`vortex_notification`) | Consumes all events                  |
+| Service                  | Purpose                                            | Database                   | Events                               |
+| ------------------------ | -------------------------------------------------- | -------------------------- | ------------------------------------ |
+| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                  |
+| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`       |
+| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated` |
+| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`     |
+| **Notification Service** | Event-driven notifications (order confirmations)   | N/A (event consumer)       | Consumes `user.created`, `order.*`   |
 
 ### Infrastructure Components
 
@@ -59,7 +59,7 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
             └─────────────┘ └──────────┘ └─────────────┘
 ```
 
-## � Business Requirements
+## 📋 Business Requirements
 
 ### Platform Goal
 
@@ -188,7 +188,7 @@ Vortex will be a **B2C e-commerce platform** for digital and physical product sa
 - `order.created` → Triggers inventory deduction, payment processing
 - `order.confirmed` → Triggers shipping preparation
 - `order.shipped` → Sends tracking notification
-- `order.delivered` → Requestsproduct review
+- `order.delivered` → Requests product review
 - `order.cancelled` → Restores inventory, processes refund
 
 **Business Rules:**
@@ -315,20 +315,20 @@ Vortex will be a **B2C e-commerce platform** for digital and physical product sa
 
 ### Planned Features (Roadmap)
 
-#### Phase 1: Core E-Commerce Functionality
+#### Phase 1: Core E-Commerce Functionality ✅
 
-- [ ] User registration and authentication (JWT-based)
-- [ ] Product CRUD operations with search/filtering
-- [ ] Shopping cart management
-- [ ] Order placement and tracking
-- [ ] Basic notification system (order confirmations)
+- [x] User registration and authentication (JWT-based)
+- [x] Product CRUD operations with search/filtering
+- [x] Shopping cart management
+- [x] Order placement and tracking
+- [x] Basic notification system (order confirmations)
 
 #### Phase 2: Advanced Features
 
 - [ ] Payment gateway integration
-- [ ] Inventory management with stock tracking
-- [ ] Order status workflows (pending → processing → shipped → delivered)
-- [ ] User profile management
+- [ ] Inventory management with stock tracking (decrement on order)
+- [x] Order status workflows (pending → confirmed → processing → shipped → delivered → completed)
+- [x] User profile management (`GET /api/auth/profile`)
 - [ ] Product reviews and ratings
 
 #### Phase 3: Enterprise Features
@@ -367,29 +367,27 @@ Vortex will be a **B2C e-commerce platform** for digital and physical product sa
 
 ### Development Tools
 
-- **Monorepo**: Turborepo + pnpm workspaces
+- **Monorepo**: Turborepo + pnpm workspaces (catalog for shared versions)
 - **Code Quality**: ESLint, Prettier, Husky, Lint-staged
 - **Containerization**: Docker, Docker Compose
 - **Package Manager**: pnpm 10.x
+- **Process Manager**: PM2 (production deployment)
 
 ## 📁 Project Structure
 
 ```
 vortex/
-├── gateway/                    # API Gateway service
+├── gateway/                    # API Gateway (port 3000)
+├── common/                     # Shared utilities, middleware, JWT, RabbitMQ, config
 ├── services/
-│   ├── auth-service/          # Authentication & Authorization
-│   ├── product-service/       # Product Catalog Management
-│   ├── order-service/         # Order Processing
-│   └── notification-service/  # Event-driven Notifications
-├── packages/
-│   ├── common/                # Shared utilities, middleware
-│   ├── config/                # Configuration management
-│   ├── eslint-config/         # Shared ESLint config
-│   └── typescript-config/     # Shared TypeScript config
-├── compose.infra.yaml         # Infrastructure services
+│   ├── auth-service/          # Authentication & Authorization (port 3001)
+│   ├── product-service/       # Product Catalog Management (port 3002)
+│   ├── order-service/         # Order Processing + Cart (port 3003)
+│   └── notification-service/  # Event-driven Notifications (port 3004)
+├── compose.infra.yaml         # MongoDB, RabbitMQ, Redis, Mongo Express
 ├── compose.yaml               # Application services
-├── Makefile                   # Simplified Docker commands
+├── ecosystem.config.mjs       # PM2 process definitions
+├── Makefile                   # Docker, pnpm, PM2 commands
 └── turbo.json                 # Turborepo configuration
 ```
 
@@ -421,6 +419,8 @@ vortex/
 3. **Install dependencies (for local development)**
    ```bash
    pnpm install
+   # or
+   make install
    ```
 
 ### Running with Docker
@@ -465,40 +465,67 @@ make down
 #### Clean Up (remove containers and volumes)
 
 ```bash
-make clean-all
+make clean        # Stop and remove containers
+make clean-all    # Also remove volumes and prune Docker
+```
+
+#### View All Make Commands
+
+```bash
+make help
 ```
 
 ### Local Development (without Docker)
 
+Start infrastructure first (`make infra`), then run services:
+
 ```bash
-# Terminal 1 - Auth Service
+# Or use make shortcuts (each in separate terminal)
+make dev-gateway
+make dev-auth
+make dev-order
+make dev-product
+make dev-notification
+
+# Or use pnpm directly
 pnpm auth:dev
-
-# Terminal 2 - Product Service
 pnpm product:dev
-
-# Terminal 3 - Order Service
 pnpm order:dev
-
-# Terminal 4 - Notification Service
 pnpm notification:dev
-
-# Terminal 5 - Gateway
 pnpm gateway:dev
 ```
 
+### Running with PM2 (Production)
+
+Build and run all services via PM2:
+
+```bash
+make infra          # Start MongoDB, RabbitMQ first
+make pm2-start      # Build + start all services
+make pm2-status     # View process list
+make pm2-logs       # Tail logs
+make pm2-stop       # Stop all
+```
+
 ## 🔧 Development Workflow
+
+### pnpm / Make Commands
+
+| Command                           | Description             |
+| --------------------------------- | ----------------------- |
+| `make install`                    | Install dependencies    |
+| `make build-js`                   | Build all packages      |
+| `make typecheck`                  | Type-check all packages |
+| `make lint` / `make lint-fix`     | Lint and fix            |
+| `make format` / `make format-fix` | Format code             |
+| `make ci-fix`                     | Lint + format fix       |
 
 ### Build All Services
 
 ```bash
 pnpm build
-```
-
-### Run Tests
-
-```bash
-pnpm test
+# or
+make build-js
 ```
 
 ### Lint & Format
@@ -514,16 +541,29 @@ pnpm format:fix    # Auto-format code
 
 ```bash
 pnpm typecheck
+# or
+make typecheck
 ```
 
 ### Docker Image Management
 
 ```bash
-make build         # Build all images
-make build-auth    # Build specific service
+make build         # Build all Docker images
+make build-auth    # Build specific service image
 make push          # Push all images to registry
 make pull          # Pull all images from registry
 ```
+
+## 📊 API Endpoints
+
+All routes go through the Gateway at `http://localhost:3000`.
+
+| Service      | Base Path       | Endpoints                                                                                                                               |
+| ------------ | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Auth**     | `/api/auth`     | `POST /register`, `POST /login`, `POST /refresh-token`, `POST /forgot-password`, `POST /reset-password`, `GET /profile`, `POST /logout` |
+| **Products** | `/api/products` | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                       |
+| **Orders**   | `/api/orders`   | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                   |
+| **Cart**     | `/api/cart`     | `GET /?userId=`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                       |
 
 ## 📊 Service Health Checks
 
@@ -545,10 +585,10 @@ make pull          # Pull all images from registry
 
 ## 📝 Configuration
 
-All services use environment-based configuration via the `@vortex/config` package:
+All services use environment-based configuration via the `@vortex/common` package:
 
 ```typescript
-import { createConfig, AuthEnv } from '@vortex/config';
+import { createConfig, AuthEnv } from '@vortex/common';
 
 export const config = createConfig(AuthEnv);
 
@@ -605,6 +645,6 @@ ISC
 
 ---
 
-**Status**: 🚧 Foundation Complete - Feature Development In Progress
+**Status**: ✅ Phase 1 Complete - Core E-Commerce Features Implemented
 
 **Purpose**: Portfolio & Learning Demonstration of Modern Microservices Architecture

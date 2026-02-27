@@ -7,6 +7,7 @@ import {
   generateToken,
   logger,
   NotFoundError,
+  QueueName,
   RabbitMQManager,
   UnauthorizedError,
 } from '@vortex/common';
@@ -179,10 +180,14 @@ export class AuthService {
         json: true,
         setup: async (channel: ConfirmChannel) => {
           await channel.assertExchange('vortex', 'topic', { durable: true });
+          await channel.assertQueue(QueueName.NOTIFICATION_QUEUE, {
+            durable: true,
+          });
         },
       });
 
-      await channelWrapper.publish('vortex', 'user.created', {
+      const payload = {
+        event: 'user.created',
         eventName: 'user.created',
         timestamp: new Date(),
         data: {
@@ -191,7 +196,10 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
         },
-      });
+      };
+
+      await channelWrapper.publish('vortex', 'user.created', payload);
+      await channelWrapper.sendToQueue(QueueName.NOTIFICATION_QUEUE, payload);
 
       logger.info('📤 Published user.created event');
     } catch (error) {

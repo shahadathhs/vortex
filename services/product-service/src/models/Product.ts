@@ -8,6 +8,7 @@ const productSchema = new Schema<IProduct>(
     description: { type: String, required: true },
     price: { type: Number, required: true },
     stock: { type: Number, required: true, default: 0 },
+    category: { type: String, default: '' },
   },
   {
     toJSON: {
