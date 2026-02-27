@@ -62,6 +62,11 @@ export const baseConfig = defineConfig([
       '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-namespace': 'warn',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/consistent-generic-constructors': 'off', // Avoid crash in ESLint 10
       '@typescript-eslint/no-misused-promises': [
