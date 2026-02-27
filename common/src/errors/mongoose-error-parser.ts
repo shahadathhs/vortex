@@ -1,4 +1,4 @@
-import { ApiError, ApiErrorIdentifier } from './ApiErrors';
+import { ApiError, ApiErrorIdentifier } from './api-errors';
 
 interface MongoError extends Error {
   code?: number;

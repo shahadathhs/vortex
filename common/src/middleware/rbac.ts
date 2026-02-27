@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { Permission, Role, RolePermissions } from '../constants/constants';
-import { ForbiddenError, UnauthorizedError } from '../errors/ApiErrors';
+import { Permission, Role, RolePermissions } from '../constants';
+import { ForbiddenError, UnauthorizedError } from '../errors/api-errors';
 
 export const checkPermission = (permission: Permission) => {
   return (req: Request, res: Response, next: NextFunction) => {

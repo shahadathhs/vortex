@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { verifyToken } from '../core/jwt';
-import { UnauthorizedError } from '../errors/ApiErrors';
+import { UnauthorizedError } from '../errors/api-errors';
 import { AuthUser } from '../types/auth';
 
 export const protect = (secret: string) => {

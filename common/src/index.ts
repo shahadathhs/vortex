@@ -5,25 +5,25 @@
  */
 
 // Constants & Enums
-export * from './constants/constants';
+export * from './constants';
 
 // Core Logic (Config, Messaging, JWT)
-export * from './core/Config';
+export * from './core/config';
 export * from './core/jwt';
-export * from './core/RabbitMQManager';
+export * from './core/rabbit-mq-manager';
 
 // Error Handling
-export * from './errors/ApiErrors';
-export * from './errors/errorHandler';
-export * from './errors/MongooseErrorParser';
+export * from './errors/api-errors';
+export * from './errors/error-handler';
+export * from './errors/mongoose-error-parser';
 
 // Middleware
-export * from './middleware/auth.middleware';
-export * from './middleware/rbac.middleware';
-export * from './middleware/validateRequest';
+export * from './middleware/auth';
+export * from './middleware/rbac';
+export * from './middleware/validate-request';
 
 // Utilities
-export * from './utils/asyncHandler';
+export * from './utils/async-handler';
 export * from './utils/logger';
 
 // Type definitions

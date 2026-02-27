@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { z, ZodError } from 'zod';
 
-import { BadRequestError } from '../errors/ApiErrors';
+import { BadRequestError } from '../errors/api-errors';
 
 export const validateRequest = (schema: z.ZodTypeAny) => {
   return async (req: Request, res: Response, next: NextFunction) => {

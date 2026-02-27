@@ -1,21 +1,61 @@
 {
   "name": "@vortex/common",
   "version": "1.0.0",
-  "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Shared utilities, core logic, and middlewares for the Vortex microservices platform. Config, JWT, RabbitMQ, error handling, and Express middleware.",
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shahadathhs/vortex.git",
+    "directory": "common"
+  },
+  "homepage": "https://github.com/shahadathhs/vortex/tree/main/common#readme",
+  "bugs": {
+    "url": "https://github.com/shahadathhs/vortex/issues"
+  },
+  "keywords": [
+    "vortex",
+    "common",
+    "microservices",
+    "express",
+    "middleware",
+    "config",
+    "jwt",
+    "rabbitmq",
+    "error-handling",
+    "mongoose",
+    "typescript",
+    "node"
+  ],
+  "author": "Shahadath Hossen Sajib <shahadathhossensajib732@gmail.com> (https://github.com/shahadathhs)",
+  "license": "MIT",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check . --ignore-path .prettierignore",
     "format:fix": "prettier --write . --ignore-path .prettierignore",
     "clean": "rimraf dist node_modules",
-    "clean:turbo": "rimraf .turbo dist node_modules"
+    "clean:turbo": "rimraf .turbo dist node_modules",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "amqp-connection-manager": "^5.0.0",
@@ -30,12 +70,18 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@systemix/eslint": "^0.4.0",
+    "@systemix/typescript": "^0.4.0",
     "@types/amqplib": "^0.10.8",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.0",
     "@types/node": "^25.2.3",
-    "@systemix/eslint": "^0.4.0",
-    "@systemix/typescript": "^0.4.0"
+    "rimraf": "^6.1.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
