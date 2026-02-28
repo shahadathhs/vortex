@@ -15,7 +15,7 @@ WORKDIR /app
 # Copy Required Files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/product-service ./services/product-service
-COPY packages ./packages
+COPY common ./common
 
 # Install Dependencies
 RUN pnpm install --frozen-lockfile
@@ -37,9 +37,9 @@ WORKDIR /app
 # Copy Built Files from Build Stage
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/packages ./packages
+COPY --from=build /app/common ./common
 COPY --from=build /app/services/product-service ./services/product-service
 
 ENV NODE_ENV=production
 
-CMD ["node", "services/product-service/dist/index.js"]
+CMD ["node", "services/product-service/dist/server.js"]

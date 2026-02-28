@@ -5,7 +5,7 @@ export interface IUser extends Document {
   password: string;
   firstName: string;
   lastName: string;
-  role: 'customer' | 'admin' | 'vendor';
+  role: 'superadmin' | 'admin' | 'vendor' | 'customer';
   isEmailVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;

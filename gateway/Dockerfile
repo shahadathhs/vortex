@@ -15,12 +15,11 @@ WORKDIR /app
 # Copy Required Files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY gateway ./gateway
-COPY packages ./packages
+COPY common ./common
 
 # Install Dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build Application
 # Build Application
 RUN pnpm --filter gateway... build
 
@@ -38,9 +37,9 @@ WORKDIR /app
 # Copy Built Files from Build Stage
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/packages ./packages
+COPY --from=build /app/common ./common
 COPY --from=build /app/gateway ./gateway
 
 ENV NODE_ENV=production
 
-CMD ["node", "gateway/dist/index.js"]
+CMD ["node", "gateway/dist/server.js"]

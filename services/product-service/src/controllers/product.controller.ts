@@ -19,6 +19,37 @@ export class ProductController {
     }
   };
 
+  public updateProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const product = await productService.updateProduct(
+        req.params.id as string,
+        req.body as Partial<IProduct>,
+      );
+      res.json(product);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deleteProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const result = await productService.deleteProduct(
+        req.params.id as string,
+      );
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getProducts = async (
     req: Request,
     res: Response,

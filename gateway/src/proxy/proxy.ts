@@ -6,9 +6,10 @@ import { config } from '../config/config';
 const router: Router = Router();
 
 const services = [
-  { path: '/auth', url: config.getOrThrow('AUTH_SERVICE_URL') },
-  { path: '/products', url: config.getOrThrow('PRODUCT_SERVICE_URL') },
-  { path: '/orders', url: config.getOrThrow('ORDER_SERVICE_URL') },
+  { path: '/api/auth', url: config.getOrThrow('AUTH_SERVICE_URL') },
+  { path: '/api/products', url: config.getOrThrow('PRODUCT_SERVICE_URL') },
+  { path: '/api/orders', url: config.getOrThrow('ORDER_SERVICE_URL') },
+  { path: '/api/cart', url: config.getOrThrow('ORDER_SERVICE_URL') },
 ];
 
 services.forEach(({ path, url }) => {

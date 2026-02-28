@@ -1,7 +1,7 @@
 export interface AuthUser {
   id: string;
   email: string;
-  role: 'customer' | 'admin' | 'vendor';
+  role: 'superadmin' | 'admin' | 'vendor' | 'customer';
 }
 
 export interface JWTPayload {

@@ -1,4 +1,5 @@
 export enum ProductEnv {
+  JWT_SECRET = 'JWT_SECRET',
   MONGODB_URI = 'MONGODB_URI',
   PORT = 'PORT',
   RABBITMQ_URL = 'RABBITMQ_URL',

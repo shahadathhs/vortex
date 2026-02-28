@@ -101,48 +101,6 @@ export class AuthService {
     return { token, refreshToken };
   }
 
-  async forgotPassword(email: string) {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      // Don't reveal if user exists
-      return { message: 'If email exists, password reset link has been sent' };
-    }
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    user.passwordResetToken = crypto
-      .createHash('sha256')
-      .update(resetToken)
-      .digest('hex');
-    user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    await user.save();
-
-    // TODO: Send email with resetToken
-    logger.info(`Password reset token for ${email}: ${resetToken}`);
-
-    return { message: 'If email exists, password reset link has been sent' };
-  }
-
-  async resetPassword(token: string, newPassword: string) {
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
-    const user = await User.findOne({
-      passwordResetToken: hashedToken,
-      passwordResetExpires: { $gt: new Date() },
-    });
-
-    if (!user) {
-      throw new BadRequestError('Invalid or expired reset token');
-    }
-
-    user.password = newPassword;
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-    await user.save();
-
-    return { message: 'Password reset successfully' };
-  }
-
   async getProfile(userId: string) {
     const user = await User.findById(userId).select('-password -refreshToken');
 
@@ -156,6 +114,79 @@ export class AuthService {
   async logout(userId: string) {
     await User.findByIdAndUpdate(userId, { refreshToken: undefined });
     return { message: 'Logged out successfully' };
+  }
+
+  async createAdmin(data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+  }) {
+    const existingUser = await User.findOne({ email: data.email });
+    if (existingUser) {
+      throw new ConflictError('User with this email already exists');
+    }
+
+    const user = await User.create({
+      ...data,
+      role: 'admin',
+    });
+
+    logger.info(`Admin created: ${user.email} by superadmin`);
+
+    return {
+      message: 'Admin created successfully',
+      user: {
+        id: String(user._id),
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+    };
+  }
+
+  async deleteAdmin(adminId: string) {
+    const user = await User.findById(adminId);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    if (user.role !== 'admin') {
+      throw new BadRequestError('Can only delete users with admin role');
+    }
+
+    await User.findByIdAndDelete(adminId);
+    logger.info(`Admin deleted: ${user.email} by superadmin`);
+    return { message: 'Admin deleted successfully' };
+  }
+
+  async listAdmins() {
+    const admins = await User.find({ role: 'admin' })
+      .select(
+        '-password -refreshToken -passwordResetToken -passwordResetExpires',
+      )
+      .sort({ createdAt: -1 });
+    return { admins };
+  }
+
+  async resetUserPassword(
+    targetUserId: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const user = await User.findById(targetUserId);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    user.password = newPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    user.refreshToken = undefined;
+    await user.save();
+
+    logger.info(`Password reset for ${user.email} by superadmin`);
+
+    return { message: 'Password reset successfully' };
   }
 
   private generateAccessToken(user: IUser) {
@@ -182,8 +213,8 @@ export class AuthService {
         },
       });
 
-      await channelWrapper.publish('vortex', 'user.created', {
-        eventName: 'user.created',
+      const payload = {
+        event: 'user.created',
         timestamp: new Date(),
         data: {
           userId: String(user._id),
@@ -191,7 +222,9 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
         },
-      });
+      };
+
+      await channelWrapper.publish('vortex', 'user.created', payload);
 
       logger.info('📤 Published user.created event');
     } catch (error) {

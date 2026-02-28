@@ -6,11 +6,34 @@ export const createProductSchema = z.object({
     description: z.string().optional(),
     price: z.number().positive('Price must be positive'),
     stock: z.number().int().nonnegative('Stock must be a non-negative integer'),
+    category: z.string().optional(),
+  }),
+});
+
+export const productIdParamSchema = z.object({
+  params: z.object({
+    id: z.string().min(1, 'Product ID is required'),
+  }),
+});
+
+export const updateProductSchema = z.object({
+  params: z.object({
+    id: z.string().min(1, 'Product ID is required'),
+  }),
+  body: z.object({
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    price: z.number().positive().optional(),
+    stock: z.number().int().nonnegative().optional(),
+    category: z.string().optional(),
   }),
 });
 
 export const getProductsSchema = z.object({
   query: z.object({
     q: z.string().optional(),
+    category: z.string().optional(),
+    minPrice: z.coerce.number().optional(),
+    maxPrice: z.coerce.number().optional(),
   }),
 });

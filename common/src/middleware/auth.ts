@@ -4,6 +4,18 @@ import { verifyToken } from '../core/jwt';
 import { UnauthorizedError } from '../errors/api-errors';
 import { AuthUser } from '../types/auth';
 
+/** Asserts req.user exists (use after protect). */
+export const requireUser = (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) => {
+  if (!req.user) {
+    return next(new UnauthorizedError('Unauthorized'));
+  }
+  next();
+};
+
 export const protect = (secret: string) => {
   return (req: Request, _res: Response, next: NextFunction) => {
     let token: string | undefined;

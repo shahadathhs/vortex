@@ -42,37 +42,6 @@ export class AuthController {
     }
   };
 
-  public forgotPassword = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
-    try {
-      const { email } = req.body as { email: string };
-      const result = await authService.forgotPassword(email);
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public resetPassword = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
-    try {
-      const { token, newPassword } = req.body as {
-        token: string;
-        newPassword: string;
-      };
-      const result = await authService.resetPassword(token, newPassword);
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  };
-
   public getProfile = async (
     req: AuthRequest,
     res: Response,
@@ -103,6 +72,59 @@ export class AuthController {
         return;
       }
       const result = await authService.logout(userId);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public createAdmin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const result = await authService.createAdmin(req.body);
+      res.status(201).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deleteAdmin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const result = await authService.deleteAdmin(String(req.params.id ?? ''));
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public listAdmins = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const result = await authService.listAdmins();
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public resetUserPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { userId, newPassword } = req.body;
+      const result = await authService.resetUserPassword(userId, newPassword);
       res.json(result);
     } catch (error) {
       next(error);

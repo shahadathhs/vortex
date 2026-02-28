@@ -1,17 +1,17 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["package.json", "tsconfig.json"],
-  "globalEnv": ["NODE_ENV"],
+  "globalEnv": ["NODE_ENV", "SUPERADMIN_EMAIL", "SUPERADMIN_PASSWORD"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["src/**", "package.json", "tsconfig.json"],
       "outputs": ["dist/**"],
-      "cache": true
+      "cache": false
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],
-      "cache": true
+      "cache": false
     },
     "lint": {
       "dependsOn": ["^lint"],
