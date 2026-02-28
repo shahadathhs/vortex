@@ -42,7 +42,7 @@ export class NotificationService {
   private handleMessage(content: string) {
     try {
       const payload: NotificationPayload = JSON.parse(content);
-      const event = String(payload.event ?? payload.eventName ?? 'unknown');
+      const event = String(payload.eventName ?? 'unknown');
 
       if (event === 'order.created') {
         this.handleOrderCreated(payload.data ?? {});
