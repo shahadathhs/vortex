@@ -54,5 +54,21 @@ export const adminResetPasswordSchema = z.object({
   }),
 });
 
+export const updateProfileSchema = z.object({
+  body: z.object({
+    firstName: z.string().min(1, 'First name is required').optional(),
+    lastName: z.string().min(1, 'Last name is required').optional(),
+  }),
+});
+
+export const updatePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+  }),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>['body'];
 export type LoginInput = z.infer<typeof loginSchema>['body'];
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>['body'];
+export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>['body'];

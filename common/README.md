@@ -19,7 +19,8 @@ npm install @vortex/common
 - **RabbitMQ** — Singleton connection manager via `RabbitMQManager.getConnection()`
 - **Error handling** — `ApiError` hierarchy, `errorHandler` middleware, `MongooseErrorParser`
 - **Middleware** — `protect` (auth), `checkPermission` (RBAC), `validateRequest` (Zod)
-- **Utilities** — `asyncHandler`, `logger` (Winston)
+- **Utilities** — `asyncHandler`, `logger` (Winston), `successResponse`, `successPaginatedResponse`
+- **Schemas** — `paginationQuerySchema` (Zod)
 
 ## Usage
 
@@ -66,17 +67,18 @@ app.post('/orders', validateRequest(orderSchema), orderController.create);
 
 ## API
 
-| Export                                                   | Description                          |
-| -------------------------------------------------------- | ------------------------------------ |
-| `createConfig`, `Config`                                 | Environment config factory and class |
-| `generateToken`, `verifyToken`, `TokenPayload`           | JWT utilities                        |
-| `RabbitMQManager`                                        | RabbitMQ connection manager          |
-| `ApiError`, `BadRequestError`, `UnauthorizedError`, etc. | Error classes                        |
-| `errorHandler`                                           | Express error handler middleware     |
-| `MongooseErrorParser`                                    | Mongoose error → ApiError parser     |
-| `protect`, `checkPermission`, `validateRequest`          | Express middleware                   |
-| `asyncHandler`, `logger`                                 | Utilities                            |
-| `EventName`, `QueueName`, `AuthEnv`, `OrderEnv`, etc.    | Enums and constants                  |
+| Export                                                                  | Description                          |
+| ----------------------------------------------------------------------- | ------------------------------------ |
+| `createConfig`, `Config`                                                | Environment config factory and class |
+| `generateToken`, `verifyToken`, `TokenPayload`                          | JWT utilities                        |
+| `RabbitMQManager`                                                       | RabbitMQ connection manager          |
+| `ApiError`, `BadRequestError`, `UnauthorizedError`, etc.                | Error classes                        |
+| `errorHandler`                                                          | Express error handler middleware     |
+| `MongooseErrorParser`                                                   | Mongoose error → ApiError parser     |
+| `protect`, `checkPermission`, `validateRequest`                         | Express middleware                   |
+| `asyncHandler`, `logger`, `successResponse`, `successPaginatedResponse` | Utilities                            |
+| `paginationQuerySchema`, `PaginationQuery`                              | Pagination schema                    |
+| `EventName`, `QueueName`, `AuthEnv`, `OrderEnv`, etc.                   | Enums and constants                  |
 
 ## License
 

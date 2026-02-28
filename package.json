@@ -43,7 +43,7 @@
   },
   "keywords": [],
   "author": "https://github.com/shahadathhs",
-  "license": "UNLICENSED",
+  "license": "ISC",
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",

@@ -7,6 +7,8 @@ export interface IUser extends Document {
   lastName: string;
   role: 'superadmin' | 'admin' | 'vendor' | 'customer';
   isEmailVerified: boolean;
+  isActive: boolean;
+  isDeleted: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
   passwordResetToken?: string;
@@ -15,4 +17,7 @@ export interface IUser extends Document {
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;
+  updatePassword(newPassword: string): Promise<void>;
+  toProfileJSON(): Record<string, unknown>;
+  isAdmin(): boolean;
 }

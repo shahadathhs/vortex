@@ -1,4 +1,9 @@
-import { protect, requireUser, validateRequest } from '@vortex/common';
+import {
+  asyncHandler,
+  protect,
+  requireUser,
+  validateRequest,
+} from '@vortex/common';
 import { Router } from 'express';
 
 import { config } from '../config/config';
@@ -19,31 +24,31 @@ router.post(
   '/',
   ...auth,
   validateRequest(createOrderSchema),
-  orderController.createOrder,
+  asyncHandler(orderController.createOrder),
 );
 router.get(
   '/',
   ...auth,
   validateRequest(getOrdersQuerySchema),
-  orderController.getOrders,
+  asyncHandler(orderController.getOrders),
 );
 router.get(
   '/user/:userId',
   ...auth,
   validateRequest(userIdParamSchema),
-  orderController.getOrdersByUser,
+  asyncHandler(orderController.getOrdersByUser),
 );
 router.get(
   '/:id',
   ...auth,
   validateRequest(orderIdParamSchema),
-  orderController.getOrderById,
+  asyncHandler(orderController.getOrderById),
 );
 router.put(
   '/:id/status',
   ...auth,
   validateRequest(updateOrderStatusSchema),
-  orderController.updateOrderStatus,
+  asyncHandler(orderController.updateOrderStatus),
 );
 
 export default router;

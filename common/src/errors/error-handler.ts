@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { logger } from '../utils/logger';
-import { ApiError } from './api-errors';
-import { MongooseErrorParser } from './mongoose-error-parser';
+import { simplifyError } from './simplify-error';
 
 export const errorHandler = (
   err: unknown,
@@ -11,34 +10,23 @@ export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) => {
-  let error = err;
+  const errorResponse = simplifyError(err);
 
-  // Parse Mongoose Errors
-  const mongooseError = MongooseErrorParser.parse(err);
-  if (mongooseError) {
-    error = mongooseError;
-  }
-
-  const statusCode = error instanceof ApiError ? error.statusCode : 500;
-  const message =
-    error instanceof Error ? error.message : 'Internal Server Error';
-  const code = error instanceof ApiError ? error.code : 'INTERNAL_SERVER_ERROR';
-  const errors = error instanceof ApiError ? error.errors : [];
-  const stack = error instanceof Error ? error.stack : undefined;
-
-  logger.error(`${statusCode} - ${message}`, {
+  logger.error(`${errorResponse.statusCode} - ${errorResponse.message}`, {
     url: req.originalUrl,
     method: req.method,
-    stack,
-    code,
-    errors,
+    stack: err instanceof Error ? err.stack : undefined,
+    errorSources: errorResponse.errorSources,
   });
 
-  res.status(statusCode).json({
-    status: 'error',
-    code,
-    message,
-    ...(errors.length > 0 && { errors }),
-    ...(process.env.NODE_ENV === 'development' && { stack }),
-  });
+  if (!res.headersSent) {
+    res.status(errorResponse.statusCode).json({
+      success: false,
+      statusCode: errorResponse.statusCode,
+      message: errorResponse.message,
+      error: errorResponse.errorSources,
+      ...(process.env.NODE_ENV === 'development' &&
+        err instanceof Error && { stack: err.stack }),
+    });
+  }
 };

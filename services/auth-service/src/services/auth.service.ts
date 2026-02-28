@@ -22,7 +22,10 @@ export class AuthService {
   async register(data: RegisterInput) {
     const { email, password, firstName, lastName } = data;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      email,
+      isDeleted: { $ne: true },
+    });
     if (existingUser) {
       throw new ConflictError('User already exists');
     }
@@ -60,10 +63,14 @@ export class AuthService {
 
   async login(data: LoginInput) {
     const { email, password } = data;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, isDeleted: { $ne: true } });
 
     if (!user || !(await user.comparePassword(password))) {
       throw new UnauthorizedError('Invalid credentials');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedError('Account is inactive');
     }
 
     const token = this.generateAccessToken(user);
@@ -86,7 +93,10 @@ export class AuthService {
   }
 
   async refreshToken(oldRefreshToken: string) {
-    const user = await User.findOne({ refreshToken: oldRefreshToken });
+    const user = await User.findOne({
+      refreshToken: oldRefreshToken,
+      isDeleted: { $ne: true },
+    });
 
     if (!user) {
       throw new UnauthorizedError('Invalid refresh token');
@@ -102,7 +112,12 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-    const user = await User.findById(userId).select('-password -refreshToken');
+    const user = await User.findOne({
+      _id: userId,
+      isDeleted: { $ne: true },
+    })
+      .select('-password -refreshToken')
+      .lean();
 
     if (!user) {
       throw new NotFoundError('User not found');
@@ -111,9 +126,64 @@ export class AuthService {
     return { user };
   }
 
+  async updateProfile(
+    userId: string,
+    data: { firstName?: string; lastName?: string },
+  ) {
+    const user = await User.findOne({
+      _id: userId,
+      isDeleted: { $ne: true },
+    });
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    if (data.firstName !== undefined) user.firstName = data.firstName;
+    if (data.lastName !== undefined) user.lastName = data.lastName;
+    await user.save();
+
+    return { user: user.toProfileJSON() };
+  }
+
+  async updatePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    const user = await User.findOne({
+      _id: userId,
+      isDeleted: { $ne: true },
+    });
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      throw new UnauthorizedError('Current password is incorrect');
+    }
+
+    await user.updatePassword(newPassword);
+
+    return { message: 'Password updated successfully' };
+  }
+
   async logout(userId: string) {
     await User.findByIdAndUpdate(userId, { refreshToken: undefined });
     return { message: 'Logged out successfully' };
+  }
+
+  /** Fetch user for protect middleware (check existence + isActive) */
+  async fetchUserForAuth(
+    userId: string,
+  ): Promise<{ isActive?: boolean } | null> {
+    const user = await User.findById(userId)
+      .select('isActive isDeleted')
+      .lean();
+    if (!user || user.isDeleted) return null;
+    return { isActive: user.isActive };
   }
 
   async createAdmin(data: {
@@ -122,7 +192,10 @@ export class AuthService {
     firstName: string;
     lastName: string;
   }) {
-    const existingUser = await User.findOne({ email: data.email });
+    const existingUser = await User.findOne({
+      email: data.email,
+      isDeleted: { $ne: true },
+    });
     if (existingUser) {
       throw new ConflictError('User with this email already exists');
     }
@@ -147,7 +220,10 @@ export class AuthService {
   }
 
   async deleteAdmin(adminId: string) {
-    const user = await User.findById(adminId);
+    const user = await User.findOne({
+      _id: adminId,
+      isDeleted: { $ne: true },
+    });
     if (!user) {
       throw new NotFoundError('User not found');
     }
@@ -155,13 +231,16 @@ export class AuthService {
       throw new BadRequestError('Can only delete users with admin role');
     }
 
-    await User.findByIdAndDelete(adminId);
+    user.isDeleted = true;
+    user.isActive = false;
+    user.refreshToken = undefined;
+    await user.save();
     logger.info(`Admin deleted: ${user.email} by superadmin`);
     return { message: 'Admin deleted successfully' };
   }
 
   async listAdmins() {
-    const admins = await User.find({ role: 'admin' })
+    const admins = await User.find({ role: 'admin', isDeleted: { $ne: true } })
       .select(
         '-password -refreshToken -passwordResetToken -passwordResetExpires',
       )
@@ -173,7 +252,10 @@ export class AuthService {
     targetUserId: string,
     newPassword: string,
   ): Promise<{ message: string }> {
-    const user = await User.findById(targetUserId);
+    const user = await User.findOne({
+      _id: targetUserId,
+      isDeleted: { $ne: true },
+    });
     if (!user) {
       throw new NotFoundError('User not found');
     }

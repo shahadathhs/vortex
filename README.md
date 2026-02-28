@@ -3,11 +3,12 @@
 [![CI](https://github.com/shahadathhs/vortex/actions/workflows/ci.yml/badge.svg)](https://github.com/shahadathhs/vortex/actions/workflows/ci.yml)
 [![Release](https://github.com/shahadathhs/vortex/actions/workflows/release.yml/badge.svg)](https://github.com/shahadathhs/vortex/actions/workflows/release.yml)
 [![Version](https://img.shields.io/github/v/release/shahadathhs/vortex)](https://github.com/shahadathhs/vortex/releases)
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](./LICENSE)
 
 A **portfolio project** showcasing production-grade microservices architecture for e-commerce platforms. Built with Node.js, TypeScript, and designed to demonstrate scalable, cloud-native system design patterns.
 
-> 🛠️ **Interested in contributing?** Read our [Contributing Guide](./CONTRIBUTING.md).
+> 🛠️ **Interested in contributing?** Read our [Contributing Guide](./CONTRIBUTING.md).  
+> 📜 [Code of Conduct](./CODE_OF_CONDUCT.md) · [Security Policy](./SECURITY.md)
 
 ## 🎯 Project Overview
 
@@ -655,7 +656,12 @@ This is a **portfolio project** designed to showcase:
 
 ## 📜 License
 
-ISC
+This project is licensed under the **ISC License**. See the [LICENSE](./LICENSE) file for details.
+
+## 📋 Community
+
+- [Code of Conduct](./CODE_OF_CONDUCT.md) – Our standards for community participation
+- [Security Policy](./SECURITY.md) – How to report security vulnerabilities
 
 ---
 
