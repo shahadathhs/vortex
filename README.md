@@ -25,13 +25,13 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
 
 ### Microservices
 
-| Service                  | Purpose                                            | Database                   | Events                               |
-| ------------------------ | -------------------------------------------------- | -------------------------- | ------------------------------------ |
-| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                  |
-| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`       |
-| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated` |
-| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`     |
-| **Notification Service** | Event-driven notifications (order confirmations)   | N/A (event consumer)       | Consumes `user.created`, `order.*`   |
+| Service                  | Purpose                                            | Database                        | Events                               |
+| ------------------------ | -------------------------------------------------- | ------------------------------- | ------------------------------------ |
+| **Gateway**              | API Gateway for routing and load balancing         | N/A                             | N/A                                  |
+| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)         | `user.created`, `user.updated`       |
+| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`)      | `product.created`, `product.updated` |
+| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)        | `order.created`, `order.updated`     |
+| **Notification Service** | Event-driven notifications (order confirmations)   | N/A (event consumer)            | Consumes `user.created`, `order.*`   |
 
 ### Infrastructure Components
 
