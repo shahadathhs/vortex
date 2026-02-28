@@ -1,19 +1,23 @@
+import { AuthUser } from '@vortex/common';
 import { NextFunction, Request, Response } from 'express';
 
 import { cartService } from '../services/cart.service';
 import { ICartItem } from '../types/cart.interface';
 
-function getUserIdFromQuery(q: Request['query']): string {
-  const v = q.userId;
-  return typeof v === 'string' ? v : '';
+interface AuthRequest extends Request {
+  user?: AuthUser;
 }
 
 export class CartController {
-  public getCart = async (req: Request, res: Response, next: NextFunction) => {
+  public getCart = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-      const userId = getUserIdFromQuery(req.query);
+      const userId = req.user?.id;
       if (!userId) {
-        res.status(400).json({ message: 'userId is required' });
+        res.status(401).json({ message: 'Unauthorized' });
         return;
       }
       const cart = await cartService.getCart(userId);
@@ -23,15 +27,21 @@ export class CartController {
     }
   };
 
-  public addItem = async (req: Request, res: Response, next: NextFunction) => {
+  public addItem = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-      const { userId, productId, quantity } = req.body;
-      if (!userId || !productId || !quantity) {
-        res.status(400).json({
-          message: 'userId, productId, and quantity are required',
-        });
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({ message: 'Unauthorized' });
         return;
       }
+      const { productId, quantity } = req.body as {
+        productId: string;
+        quantity: number;
+      };
       const cart = await cartService.addItem(userId, {
         productId,
         quantity,
@@ -43,23 +53,19 @@ export class CartController {
   };
 
   public updateItem = async (
-    req: Request,
+    req: AuthRequest,
     res: Response,
     next: NextFunction,
   ) => {
     try {
-      const userId = getUserIdFromQuery(req.query);
-      const productId =
-        typeof req.params.productId === 'string' ? req.params.productId : '';
+      const userId = req.user?.id;
       if (!userId) {
-        res.status(400).json({ message: 'userId is required' });
+        res.status(401).json({ message: 'Unauthorized' });
         return;
       }
-      const cart = await cartService.updateItem(
-        userId,
-        productId,
-        Number(req.body.quantity ?? 0),
-      );
+      const productId = String(req.params.productId ?? '');
+      const { quantity } = req.body as { quantity: number };
+      const cart = await cartService.updateItem(userId, productId, quantity);
       res.json(cart);
     } catch (error) {
       next(error);
@@ -67,18 +73,17 @@ export class CartController {
   };
 
   public removeItem = async (
-    req: Request,
+    req: AuthRequest,
     res: Response,
     next: NextFunction,
   ) => {
     try {
-      const userId = getUserIdFromQuery(req.query);
-      const productId =
-        typeof req.params.productId === 'string' ? req.params.productId : '';
+      const userId = req.user?.id;
       if (!userId) {
-        res.status(400).json({ message: 'userId is required' });
+        res.status(401).json({ message: 'Unauthorized' });
         return;
       }
+      const productId = String(req.params.productId ?? '');
       const cart = await cartService.removeItem(userId, productId);
       res.json(cart);
     } catch (error) {
@@ -87,16 +92,14 @@ export class CartController {
   };
 
   public clearCart = async (
-    req: Request,
+    req: AuthRequest,
     res: Response,
     next: NextFunction,
   ) => {
     try {
-      const userId =
-        getUserIdFromQuery(req.query) ||
-        (typeof req.body.userId === 'string' ? req.body.userId : '');
+      const userId = req.user?.id;
       if (!userId) {
-        res.status(400).json({ message: 'userId is required' });
+        res.status(401).json({ message: 'Unauthorized' });
         return;
       }
       const cart = await cartService.clearCart(userId);

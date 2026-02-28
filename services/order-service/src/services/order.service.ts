@@ -3,7 +3,6 @@ import {
   EventName,
   logger,
   NotFoundError,
-  QueueName,
   RabbitMQManager,
 } from '@vortex/common';
 
@@ -80,17 +79,15 @@ export class OrderService {
     try {
       const channelWrapper = this.rabbitMQ.createChannel({
         json: true,
-        setup: (channel: ConfirmChannel) =>
-          channel.assertQueue(QueueName.NOTIFICATION_QUEUE, { durable: true }),
+        setup: async (channel: ConfirmChannel) => {
+          await channel.assertExchange('vortex', 'topic', { durable: true });
+        },
       });
 
-      await channelWrapper.sendToQueue(QueueName.NOTIFICATION_QUEUE, {
-        event,
-        timestamp: new Date(),
-        data,
-      });
+      const payload = { event, timestamp: new Date(), data };
+      await channelWrapper.publish('vortex', event, payload);
 
-      logger.info(`📤 Published ${event} to notification queue`);
+      logger.info(`📤 Published ${event} to vortex exchange`);
     } catch (error) {
       logger.error(`Failed to publish ${event}:`, error);
     }

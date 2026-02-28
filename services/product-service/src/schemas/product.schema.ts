@@ -10,7 +10,16 @@ export const createProductSchema = z.object({
   }),
 });
 
+export const productIdParamSchema = z.object({
+  params: z.object({
+    id: z.string().min(1, 'Product ID is required'),
+  }),
+});
+
 export const updateProductSchema = z.object({
+  params: z.object({
+    id: z.string().min(1, 'Product ID is required'),
+  }),
   body: z.object({
     name: z.string().min(1).optional(),
     description: z.string().optional(),

@@ -25,13 +25,13 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
 
 ### Microservices
 
-| Service                  | Purpose                                            | Database                        | Events                               |
-| ------------------------ | -------------------------------------------------- | ------------------------------- | ------------------------------------ |
-| **Gateway**              | API Gateway for routing and load balancing         | N/A                             | N/A                                  |
-| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)         | `user.created`, `user.updated`       |
-| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`)      | `product.created`, `product.updated` |
-| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)        | `order.created`, `order.updated`     |
-| **Notification Service** | Event-driven notifications (order confirmations)   | N/A (event consumer)            | Consumes `user.created`, `order.*`   |
+| Service                  | Purpose                                            | Database                   | Events                               |
+| ------------------------ | -------------------------------------------------- | -------------------------- | ------------------------------------ |
+| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                  |
+| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`       |
+| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated` |
+| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`     |
+| **Notification Service** | Event-driven notifications (order confirmations)   | N/A (event consumer)       | Consumes `user.created`, `order.*`   |
 
 ### Infrastructure Components
 
@@ -563,7 +563,17 @@ All routes go through the Gateway at `http://localhost:3000`.
 | **Auth**     | `/api/auth`     | `POST /register`, `POST /login`, `POST /refresh-token`, `POST /forgot-password`, `POST /reset-password`, `GET /profile`, `POST /logout` |
 | **Products** | `/api/products` | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                       |
 | **Orders**   | `/api/orders`   | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                   |
-| **Cart**     | `/api/cart`     | `GET /?userId=`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                       |
+| **Cart**     | `/api/cart`     | `GET /`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                               |
+
+### API Authentication
+
+Protected endpoints require the `Authorization: Bearer <token>` header with a valid JWT from `/api/auth/login` or `/api/auth/register`.
+
+| Area         | Auth Required | Notes                                                                                                                                                       |
+| ------------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cart**     | Yes           | All cart endpoints require authentication. User is inferred from JWT.                                                                                       |
+| **Orders**   | Yes           | All order endpoints require authentication. User/ownership from JWT.                                                                                        |
+| **Products** | Partial       | `GET /` and `GET /:id` are public. `POST /`, `PUT /:id`, `DELETE /:id` require admin or vendor role (`PRODUCT_CREATE`, `PRODUCT_UPDATE`, `PRODUCT_DELETE`). |
 
 ## 📊 Service Health Checks
 
