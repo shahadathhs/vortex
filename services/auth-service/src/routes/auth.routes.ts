@@ -29,7 +29,7 @@ router.post(
   authController.refreshToken,
 );
 // Protected routes
-router.get('/profile', protect(config.JWT_SECRET), authController.getProfile);
-router.post('/logout', protect(config.JWT_SECRET), authController.logout);
+router.get('/profile', protect(config.JWT_SECRET), requireUser, authController.getProfile);
+router.post('/logout', protect(config.JWT_SECRET), requireUser, authController.logout);
 
 export default router;
