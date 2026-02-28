@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/scripts/seed-superadmin.ts",
     "build": "rimraf dist && tsc",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -22,7 +23,8 @@
     "helmet": "catalog:",
     "mongoose": "catalog:",
     "zod": "catalog:",
-    "bcryptjs": "catalog:"
+    "bcryptjs": "catalog:",
+    "dotenv": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",

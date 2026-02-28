@@ -4,6 +4,12 @@ export enum Permission {
   USER_UPDATE = 'USER_UPDATE',
   USER_DELETE = 'USER_DELETE',
 
+  // Admin management (superadmin only)
+  ADMIN_CREATE = 'ADMIN_CREATE',
+  ADMIN_DELETE = 'ADMIN_DELETE',
+  ADMIN_RESET_PASSWORD = 'ADMIN_RESET_PASSWORD',
+  ADMIN_LIST = 'ADMIN_LIST',
+
   // Product permissions
   PRODUCT_CREATE = 'PRODUCT_CREATE',
   PRODUCT_UPDATE = 'PRODUCT_UPDATE',
@@ -18,13 +24,31 @@ export enum Permission {
 }
 
 export enum Role {
+  SUPERADMIN = 'superadmin',
   ADMIN = 'admin',
   VENDOR = 'vendor',
   CUSTOMER = 'customer',
 }
 
+const superadminPermissions = [
+  ...Object.values(Permission),
+  Permission.ADMIN_CREATE,
+  Permission.ADMIN_DELETE,
+  Permission.ADMIN_RESET_PASSWORD,
+  Permission.ADMIN_LIST,
+];
+
 export const RolePermissions: Record<Role, Permission[]> = {
-  [Role.ADMIN]: Object.values(Permission),
+  [Role.SUPERADMIN]: superadminPermissions,
+  [Role.ADMIN]: Object.values(Permission).filter(
+    (p) =>
+      ![
+        Permission.ADMIN_CREATE,
+        Permission.ADMIN_DELETE,
+        Permission.ADMIN_RESET_PASSWORD,
+        Permission.ADMIN_LIST,
+      ].includes(p),
+  ),
   [Role.VENDOR]: [
     Permission.PRODUCT_CREATE,
     Permission.PRODUCT_UPDATE,

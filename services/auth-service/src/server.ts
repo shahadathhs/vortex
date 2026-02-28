@@ -3,6 +3,7 @@ import { logger, RabbitMQManager } from '@vortex/common';
 import app from './app';
 import { config } from './config/config';
 import { connectDB } from './config/db';
+import { seedSuperadmin } from './scripts/seed-superadmin';
 
 const start = async () => {
   try {
@@ -10,6 +11,9 @@ const start = async () => {
 
     // Initialize RabbitMQ connection
     RabbitMQManager.getConnection(config.RABBITMQ_URL);
+
+    // Seed superadmin
+    await seedSuperadmin();
 
     app.listen(config.PORT, () => {
       logger.info(`Auth Service listening on port ${config.PORT}`);

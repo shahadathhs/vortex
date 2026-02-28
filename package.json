@@ -19,6 +19,7 @@
     "prepare": "husky",
     "commit": "cz",
     "auth:dev": "pnpm --filter=auth-service dev",
+    "auth:seed": "pnpm --filter=auth-service seed",
     "auth:build": "pnpm --filter=auth-service... build",
     "order:dev": "pnpm --filter=order-service dev",
     "order:build": "pnpm --filter=order-service... build",

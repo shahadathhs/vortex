@@ -4,14 +4,17 @@ import { Router } from 'express';
 import { config } from '../config/config';
 import { authController } from '../controllers/auth.controller';
 import {
-  forgotPasswordSchema,
   loginSchema,
   refreshTokenSchema,
   registerSchema,
-  resetPasswordSchema,
 } from '../schemas/auth.schema';
 
+import adminRoutes from './admin.routes';
+
 const router: Router = Router();
+
+// Superadmin/Admin management (protected)
+router.use('/admin', adminRoutes);
 
 // Public routes
 router.post(
@@ -25,17 +28,6 @@ router.post(
   validateRequest(refreshTokenSchema),
   authController.refreshToken,
 );
-router.post(
-  '/forgot-password',
-  validateRequest(forgotPasswordSchema),
-  authController.forgotPassword,
-);
-router.post(
-  '/reset-password',
-  validateRequest(resetPasswordSchema),
-  authController.resetPassword,
-);
-
 // Protected routes
 router.get('/profile', protect(config.JWT_SECRET), authController.getProfile);
 router.post('/logout', protect(config.JWT_SECRET), authController.logout);

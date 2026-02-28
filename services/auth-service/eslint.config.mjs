@@ -7,6 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
+  { ignores: ['src/scripts/**', 'dist/**', '.turbo/**', 'node_modules/**'] },
   ...expressConfig,
   {
     languageOptions: {
@@ -14,6 +15,10 @@ export default [
         project: true,
         tsconfigRootDir: __dirname,
       },
+    },
+    rules: {
+      // eslint-plugin-import@2.x has compatibility issues with ESLint 10 (getTokenOrCommentAfter)
+      'import/order': 'off',
     },
   },
 ];

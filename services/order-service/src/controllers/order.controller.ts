@@ -67,7 +67,10 @@ export class OrderController {
       const order = await orderService.getOrderById(
         String(req.params.id ?? ''),
       );
-      if (order.userId !== req.user!.id && !canManageAllOrders(req.user!.role)) {
+      if (
+        order.userId !== req.user!.id &&
+        !canManageAllOrders(req.user!.role)
+      ) {
         throw new ForbiddenError('You do not have access to this order');
       }
       res.json(order);
@@ -83,7 +86,10 @@ export class OrderController {
   ) => {
     try {
       const targetUserId = String(req.params.userId ?? '');
-      if (targetUserId !== req.user!.id && !canManageAllOrders(req.user!.role)) {
+      if (
+        targetUserId !== req.user!.id &&
+        !canManageAllOrders(req.user!.role)
+      ) {
         throw new ForbiddenError('You do not have access to these orders');
       }
       const orders = await orderService.getOrdersByUser(targetUserId);

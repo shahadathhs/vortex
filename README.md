@@ -417,11 +417,14 @@ vortex/
    ```
 
 3. **Install dependencies (for local development)**
+
    ```bash
    pnpm install
    # or
    make install
    ```
+
+4. **Superadmin seed** – Runs automatically on auth-service startup when `SUPERADMIN_EMAIL` and `SUPERADMIN_PASSWORD` are set. Or run manually: `pnpm auth:seed`
 
 ### Running with Docker
 
@@ -558,12 +561,13 @@ make pull          # Pull all images from registry
 
 All routes go through the Gateway at `http://localhost:3000`.
 
-| Service      | Base Path       | Endpoints                                                                                                                               |
-| ------------ | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **Auth**     | `/api/auth`     | `POST /register`, `POST /login`, `POST /refresh-token`, `POST /forgot-password`, `POST /reset-password`, `GET /profile`, `POST /logout` |
-| **Products** | `/api/products` | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                       |
-| **Orders**   | `/api/orders`   | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                   |
-| **Cart**     | `/api/cart`     | `GET /`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                               |
+| Service               | Base Path         | Endpoints                                                                                                                                     |
+| --------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Auth**              | `/api/auth`       | `POST /register`, `POST /login`, `POST /refresh-token`, `GET /profile`, `POST /logout`                                                        |
+| **Auth (Superadmin)** | `/api/auth/admin` | `POST /` (create admin), `GET /` (list admins), `DELETE /:id` (delete admin), `POST /reset-password` (superadmin: change any user's password) |
+| **Products**          | `/api/products`   | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                             |
+| **Orders**            | `/api/orders`     | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                         |
+| **Cart**              | `/api/cart`       | `GET /`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                                     |
 
 ### API Authentication
 
