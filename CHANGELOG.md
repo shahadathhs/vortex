@@ -1,3 +1,12 @@
+# [1.3.0](https://github.com/shahadathhs/vortex/compare/v1.2.1...v1.3.0) (2026-02-28)
+
+### Features
+
+- add product deletion event and enhance authentication middleware ([4c777e1](https://github.com/shahadathhs/vortex/commit/4c777e11166e38a4a55a2e1a1c3db4f19397f607))
+- enhance JWT authentication and product management across services ([ffb6948](https://github.com/shahadathhs/vortex/commit/ffb69485ab4590c128e3f00422eca4a2edbe710f))
+- enhance order and notification services with new features and improvements ([3362d63](https://github.com/shahadathhs/vortex/commit/3362d630c8a1cb9f00481c103fc0ee1600961d91))
+- implement superadmin functionality and enhance user management ([e52a374](https://github.com/shahadathhs/vortex/commit/e52a374a91976de23c6eb7cf423af74bc681b0f3))
+
 ## [1.2.1](https://github.com/shahadathhs/vortex/compare/v1.2.0...v1.2.1) (2026-02-27)
 
 ### Bug Fixes

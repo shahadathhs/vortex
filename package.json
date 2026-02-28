@@ -1,6 +1,6 @@
 {
   "name": "vortex",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "private": true,
   "description": "Vortex - A Event-Driven E-Commerce Ecosystem",
   "packageManager": "pnpm@10.26.0",
