@@ -1,5 +1,4 @@
 import {
-  AuthUser,
   ForbiddenError,
   Permission,
   Role,
@@ -10,10 +9,6 @@ import { NextFunction, Request, Response } from 'express';
 import { orderService } from '../services/order.service';
 import { IOrder, OrderStatus } from '../types/order.interface';
 
-interface AuthRequest extends Request {
-  user?: AuthUser;
-}
-
 function canManageAllOrders(role: string): boolean {
   return (RolePermissions[role as Role] ?? []).includes(
     Permission.ORDER_MANAGE_ALL,
@@ -22,20 +17,15 @@ function canManageAllOrders(role: string): boolean {
 
 export class OrderController {
   public createOrder = async (
-    req: AuthRequest,
+    req: Request,
     res: Response,
     next: NextFunction,
   ) => {
     try {
-      const userId = req.user?.id;
-      if (!userId) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
-      }
       const body = req.body as Partial<IOrder>;
       const order = await orderService.createOrder({
         ...body,
-        userId,
+        userId: req.user!.id,
       });
       res.status(201).json(order);
     } catch (error) {
@@ -44,16 +34,11 @@ export class OrderController {
   };
 
   public getOrders = async (
-    req: AuthRequest,
+    req: Request,
     res: Response,
     next: NextFunction,
   ) => {
     try {
-      const userId = req.user?.id;
-      if (!userId) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
-      }
       const { userId: queryUserId, status } = req.query as {
         userId?: string;
         status?: OrderStatus;
@@ -63,7 +48,7 @@ export class OrderController {
         if (queryUserId) filter.userId = queryUserId;
         if (status) filter.status = status;
       } else {
-        filter.userId = userId;
+        filter.userId = req.user!.id;
         if (status) filter.status = status;
       }
       const orders = await orderService.getOrders(filter);
@@ -74,18 +59,15 @@ export class OrderController {
   };
 
   public getOrderById = async (
-    req: AuthRequest,
+    req: Request,
     res: Response,
     next: NextFunction,
   ) => {
     try {
-      const userId = req.user?.id;
-      if (!userId) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
-      }
-      const order = await orderService.getOrderById(req.params.id as string);
-      if (order.userId !== userId && !canManageAllOrders(req.user!.role)) {
+      const order = await orderService.getOrderById(
+        String(req.params.id ?? ''),
+      );
+      if (order.userId !== req.user!.id && !canManageAllOrders(req.user!.role)) {
         throw new ForbiddenError('You do not have access to this order');
       }
       res.json(order);
@@ -95,18 +77,13 @@ export class OrderController {
   };
 
   public getOrdersByUser = async (
-    req: AuthRequest,
+    req: Request,
     res: Response,
     next: NextFunction,
   ) => {
     try {
-      const userId = req.user?.id;
-      if (!userId) {
-        res.status(401).json({ message: 'Unauthorized' });
-        return;
-      }
-      const targetUserId = req.params.userId as string;
-      if (targetUserId !== userId && !canManageAllOrders(req.user!.role)) {
+      const targetUserId = String(req.params.userId ?? '');
+      if (targetUserId !== req.user!.id && !canManageAllOrders(req.user!.role)) {
         throw new ForbiddenError('You do not have access to these orders');
       }
       const orders = await orderService.getOrdersByUser(targetUserId);
@@ -117,7 +94,7 @@ export class OrderController {
   };
 
   public updateOrderStatus = async (
-    req: AuthRequest,
+    req: Request,
     res: Response,
     next: NextFunction,
   ) => {
@@ -125,10 +102,9 @@ export class OrderController {
       if (!canManageAllOrders(req.user?.role ?? '')) {
         throw new ForbiddenError('Only admins can update order status');
       }
-      const order = await orderService.updateOrderStatus(
-        req.params.id as string,
-        req.body.status as OrderStatus,
-      );
+      const id = String(req.params.id ?? '');
+      const { status } = req.body;
+      const order = await orderService.updateOrderStatus(id, status);
       res.json(order);
     } catch (error) {
       next(error);

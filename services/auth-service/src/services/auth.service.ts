@@ -184,7 +184,6 @@ export class AuthService {
 
       const payload = {
         event: 'user.created',
-        eventName: 'user.created',
         timestamp: new Date(),
         data: {
           userId: String(user._id),

@@ -44,6 +44,7 @@ export class ProductService {
     if (!product) {
       throw new NotFoundError('Product not found');
     }
+    await this.publishEvent(EventName.PRODUCT_DELETED, product);
     return { message: 'Product deleted successfully' };
   }
 
@@ -89,7 +90,7 @@ export class ProductService {
       });
 
       await channelWrapper.publish('vortex', eventName, {
-        eventName,
+        event: eventName,
         timestamp: new Date(),
         data: {
           productId: String(product._id),

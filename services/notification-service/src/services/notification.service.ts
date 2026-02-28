@@ -10,7 +10,6 @@ import { config } from '../config/config';
 
 interface NotificationPayload {
   event?: string;
-  eventName?: string;
   timestamp?: string;
   data?: Record<string, unknown>;
 }
@@ -44,7 +43,7 @@ export class NotificationService {
   private handleMessage(content: string) {
     try {
       const payload: NotificationPayload = JSON.parse(content);
-      const event = String(payload.event ?? payload.eventName ?? 'unknown');
+      const event = String(payload.event ?? 'unknown');
 
       if (event === 'order.created') {
         this.handleOrderCreated(payload.data ?? {});
@@ -52,7 +51,11 @@ export class NotificationService {
         this.handleOrderUpdated(payload.data ?? {});
       } else if (event === 'user.created') {
         this.handleUserCreated(payload.data ?? {});
-      } else if (event === 'product.created' || event === 'product.updated') {
+      } else if (
+        event === 'product.created' ||
+        event === 'product.updated' ||
+        event === 'product.deleted'
+      ) {
         this.handleProductEvent(event, payload.data ?? {});
       } else {
         logger.info('Received event:', event, payload.data);

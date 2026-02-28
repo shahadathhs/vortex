@@ -5,8 +5,11 @@ import { ICartItem } from '../types/cart.interface';
 
 export class CartService {
   async getCart(userId: string) {
-    let cart = await Cart.findOne({ userId });
-    cart ??= await Cart.create({ userId, items: [] });
+    const cart = await Cart.findOneAndUpdate(
+      { userId },
+      { $setOnInsert: { userId, items: [] } },
+      { new: true, upsert: true },
+    );
     return cart;
   }
 

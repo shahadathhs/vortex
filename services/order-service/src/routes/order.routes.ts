@@ -1,4 +1,4 @@
-import { protect, validateRequest } from '@vortex/common';
+import { protect, requireUser, validateRequest } from '@vortex/common';
 import { Router } from 'express';
 
 import { config } from '../config/config';
@@ -11,35 +11,37 @@ import {
   userIdParamSchema,
 } from '../schemas/order.schema';
 
+const auth = [protect(config.JWT_SECRET), requireUser];
+
 const router: Router = Router();
 
 router.post(
   '/',
-  protect(config.JWT_SECRET),
+  ...auth,
   validateRequest(createOrderSchema),
   orderController.createOrder,
 );
 router.get(
   '/',
-  protect(config.JWT_SECRET),
+  ...auth,
   validateRequest(getOrdersQuerySchema),
   orderController.getOrders,
 );
 router.get(
   '/user/:userId',
-  protect(config.JWT_SECRET),
+  ...auth,
   validateRequest(userIdParamSchema),
   orderController.getOrdersByUser,
 );
 router.get(
   '/:id',
-  protect(config.JWT_SECRET),
+  ...auth,
   validateRequest(orderIdParamSchema),
   orderController.getOrderById,
 );
 router.put(
   '/:id/status',
-  protect(config.JWT_SECRET),
+  ...auth,
   validateRequest(updateOrderStatusSchema),
   orderController.updateOrderStatus,
 );

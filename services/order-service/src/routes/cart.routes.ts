@@ -1,4 +1,4 @@
-import { protect, validateRequest } from '@vortex/common';
+import { protect, requireUser, validateRequest } from '@vortex/common';
 import { Router } from 'express';
 
 import { config } from '../config/config';
@@ -11,7 +11,7 @@ import {
 
 const router: Router = Router();
 
-router.use(protect(config.JWT_SECRET));
+router.use(protect(config.JWT_SECRET), requireUser);
 
 router.get('/', cartController.getCart);
 router.post('/', validateRequest(addCartItemSchema), cartController.addItem);
