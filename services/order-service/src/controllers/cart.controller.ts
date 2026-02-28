@@ -14,8 +14,7 @@ export class CartController {
 
   public addItem = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const productId = String(req.body.productId ?? '');
-      const quantity = Number(req.body.quantity ?? 0);
+      const { productId, quantity } = req.body;
       const cart = await cartService.addItem(req.user!.id, {
         productId,
         quantity,

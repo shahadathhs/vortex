@@ -7,11 +7,11 @@
       "dependsOn": ["^build"],
       "inputs": ["src/**", "package.json", "tsconfig.json"],
       "outputs": ["dist/**"],
-      "cache": true
+      "cache": false
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],
-      "cache": true
+      "cache": false
     },
     "lint": {
       "dependsOn": ["^lint"],
