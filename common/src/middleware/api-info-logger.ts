@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 import { logger } from '../utils/logger';
 
-/** Request/response logging middleware (barisathi-server apiInfoLogger style) */
+/** Request/response logging middleware */
 export const apiInfoLogger = (
   req: Request,
   res: Response,

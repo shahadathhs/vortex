@@ -5,7 +5,7 @@ import { config } from './config/config';
 import { connectDB } from './config/db';
 import { seedSuperadmin } from './scripts/seed-superadmin';
 
-// Process-level error handlers (barisathi-server style)
+// Process-level error handlers
 process.on('uncaughtException', (err: Error) => {
   logger.error('UNCAUGHT EXCEPTION! Shutting down...', err);
   process.exit(1);

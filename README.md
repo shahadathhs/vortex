@@ -26,13 +26,13 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
 
 ### Microservices
 
-| Service                  | Purpose                                            | Database                   | Events                               |
-| ------------------------ | -------------------------------------------------- | -------------------------- | ------------------------------------ |
-| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                  |
-| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`       |
-| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated` |
-| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`     |
-| **Notification Service** | Event-driven notifications (order confirmations)   | N/A (event consumer)       | Consumes `user.created`, `order.*`   |
+| Service                  | Purpose                                            | Database                   | Events                                          |
+| ------------------------ | -------------------------------------------------- | -------------------------- | ----------------------------------------------- |
+| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                             |
+| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`                  |
+| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated`            |
+| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`                |
+| **Notification Service** | Event consumer (RabbitMQ → logs)                   | N/A (event consumer)       | Consumes `user.created`, `order.*`, `product.*` |
 
 ### Infrastructure Components
 
@@ -60,295 +60,52 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
             └─────────────┘ └──────────┘ └─────────────┘
 ```
 
-## 📋 Business Requirements
+## 📋 Implemented Features
 
-### Platform Goal
+All features below are **fully implemented**—no placeholders or stubs.
 
-Vortex will be a **B2C e-commerce platform** for digital and physical product sales, focusing on demonstrating:
+### 🔐 Auth Service
 
-- Complete order-to-delivery workflow
-- Real-time inventory management
-- Event-driven order processing
-- Multi-channel notifications
-- Secure payment integration
-- Scalable architecture for high-traffic scenarios
+- **Registration & Login**: Email/password signup and signin with bcrypt hashing
+- **JWT Auth**: Access tokens + refresh tokens (opaque, stored in DB); `POST /refresh-token` to rotate
+- **Profile**: `GET /profile`, `PATCH /profile` (firstName, lastName), `PATCH /password` (change own password)
+- **Logout**: `POST /logout` invalidates refresh token
+- **RBAC**: Roles (customer, vendor, admin) with permission checks (`PRODUCT_CREATE`, `ADMIN_CREATE`, etc.)
+- **Superadmin**: Seed via `SUPERADMIN_EMAIL`/`SUPERADMIN_PASSWORD`; admin CRUD (`POST/GET/DELETE /api/auth/admin`); `POST /api/auth/admin/reset-password` to reset any user's password
 
-### Target Users
+### 🛍️ Product Service
 
-#### 1. **Customers** (End Users)
+- **CRUD**: Create, read, update, delete products (admin/vendor only for write)
+- **Search & Filter**: `?q=` (text search), `?category=`, `?minPrice=`, `?maxPrice=`
+- **Stock**: Products have `stock`; catalog events published to RabbitMQ on create/update/delete
 
-- Browse and search product catalog
-- Add products to cart and checkout
-- Track order status in real-time
-- Receive order notifications (email/SMS)
-- Manage user profile and order history
-- Write product reviews and ratings
+### 🛒 Cart & Order Service
 
-#### 2. **Vendors/Sellers** (Future scope)
+- **Cart**: Get, add item, update quantity, remove item, clear; persisted per user
+- **Orders**: Create order from cart items; list by user; get by ID; update status (pending → confirmed → processing → shipped → delivered → completed)
+- **Events**: `order.created` and `order.updated` published to RabbitMQ on create/status change
 
-- List products with inventory management
-- Monitor sales and analytics
-- Process orders and update status
-- Handle returns and refunds
+### 🔔 Notification Service
 
-#### 3. **Administrators**
+- **Event Consumer**: Subscribes to RabbitMQ `vortex` exchange; consumes `user.created`, `order.created`, `order.updated`, `product.*`
+- **Handlers**: Parse events and log (order confirmation, welcome, product changes). No email/SMS delivery yet—ready for provider integration (SendGrid, SES, etc.)
 
-- Manage product catalog
-- View system analytics
-- Handle customer support
-- Monitor system health
+### 🏗️ Infrastructure & DevOps
 
-### Core Features & Requirements
+- **Gateway**: HTTP proxy to services; health checks
+- **Monorepo**: Turborepo, pnpm workspaces, shared `@vortex/common`
+- **Docker**: Compose for infra (MongoDB, RabbitMQ, Redis, Mongo Express) and all services
+- **CI**: GitHub Actions—lint, format, typecheck, build on push/PR
+- **Release**: Automated versioning and Docker image push via GitHub Actions
 
-#### 🔐 Authentication & User Management (Auth Service)
+---
 
-**Functional Requirements:**
+## 📋 Roadmap (Planned)
 
-- User registration with email verification
-- JWT-based authentication with refresh tokens
-- Role-based access control (Customer, Vendor, Admin)
-- Password reset functionality
-- Social login (Google, GitHub) - optional
-- Session management and logout
-
-**User Stories:**
-
-- As a customer, I want to register an account so I can place orders
-- As a user, I want to securely log in to access my account
-- As a customer, I want to reset my password if I forget it
-
-#### 🛍️ Product Management (Product Service)
-
-**Functional Requirements:**
-
-- Product CRUD operations (Admin/Vendor)
-- Multi-category product organization
-- Product variants (size, color, etc.)
-- Image upload and management
-- Inventory tracking with stock levels
-- Product search and filtering (name, category, price range)
-- Product recommendations (related/similar items)
-- Product reviews and ratings
-
-**Business Rules:**
-
-- Products with zero stock should be marked as "Out of Stock"
-- Products can have multiple images (max 5)
-- Product prices must be positive values
-- Inventory should be decremented on order placement
-- Inventory should be reserved during checkout process
-
-**User Stories:**
-
-- As a customer, I want to browse products by category
-- As a customer, I want to search for products by name or description
-- As an admin, I want to add new products to the catalog
-- As a customer, I want to see product ratings before purchasing
-
-#### 🛒 Shopping Cart & Checkout (Order Service)
-
-**Functional Requirements:**
-
-- Add/remove items from cart
-- Update item quantities
-- Apply discount codes/coupons
-- Calculate totals (subtotal, tax, shipping, discounts)
-- Save cart for later (persistent cart)
-- Guest checkout option
-- Multiple shipping addresses
-- Order summary before payment
-
-**Business Rules:**
-
-- Cart items must have available inventory
-- Discounts cannot reduce total below zero
-- Minimum order value requirements
-- Maximum cart item quantity limits
-
-**User Stories:**
-
-- As a customer, I want to add multiple items to my cart
-- As a customer, I want to apply a promo code for discounts
-- As a customer, I want to save my cart and return later
-- As a customer, I want to review my order before payment
-
-#### 📦 Order Processing (Order Service)
-
-**Functional Requirements:**
-
-- Create orders from cart
-- Order status tracking (Pending → Confirmed → Processing → Shipped → Delivered → Completed)
-- Order history and details
-- Order cancellation (before shipping)
-- Return/refund requests
-- Order invoice generation
-- Payment integration (Stripe/PayPal)
-
-**Events Published:**
-
-- `order.created` → Triggers inventory deduction, payment processing
-- `order.confirmed` → Triggers shipping preparation
-- `order.shipped` → Sends tracking notification
-- `order.delivered` → Requests product review
-- `order.cancelled` → Restores inventory, processes refund
-
-**Business Rules:**
-
-- Orders can only be cancelled before shipping
-- Payment must be successful before order confirmation
-- Inventory must be available for all items
-- Failed payments should release inventory
-- Order total must match cart calculation
-
-**User Stories:**
-
-- As a customer, I want to track my order status in real-time
-- As a customer, I want to cancel an order if it hasn't shipped yet
-- As an admin, I want to update order status as it progresses
-- As a customer, I want to receive an invoice for my purchase
-
-#### 🔔 Notifications (Notification Service)
-
-**Functional Requirements:**
-
-- Email notifications (order confirmation, shipping, delivery)
-- SMS notifications for critical updates
-- In-app notifications
-- Notification preferences management
-- Notification history/archive
-- Template-based messaging
-
-**Triggered By:**
-
-- User registration → Welcome email
-- Order placed → Order confirmation email
-- Payment received → Payment receipt
-- Order shipped → Shipping notification with tracking
-- Order delivered → Delivery confirmation
-- Password reset → Reset link email
-
-**User Stories:**
-
-- As a customer, I want to receive email confirmation when I place an order
-- As a customer, I want SMS notifications when my order ships
-- As a customer, I want to manage my notification preferences
-
-#### 💳 Payment Processing (Future - Payment Service)
-
-**Functional Requirements:**
-
-- Multiple payment methods (Credit Card, Debit Card, Digital Wallets)
-- Payment gateway integration (Stripe/Razorpay)
-- Secure payment processing (PCI compliance)
-- Payment status tracking
-- Refund processing
-- Payment history
-
-**Business Rules:**
-
-- All transactions must be encrypted
-- Failed payments should be retried (max 3 attempts)
-- Refunds processed within 5-7 business days
-
-### Non-Functional Requirements
-
-#### Performance
-
-- API response time < 200ms for 95% of requests
-- Support 1000+ concurrent users
-- Database queries optimized with indexing
-- Redis caching for frequently accessed data
-
-#### Security
-
-- JWT tokens with expiration
-- Rate limiting on API endpoints
-- Input validation and sanitization
-- SQL injection prevention
-- XSS protection
-- CORS configuration
-- Environment-based secrets management
-
-#### Scalability
-
-- Horizontal scaling of microservices
-- Database connection pooling
-- Message queue for async processing
-- CDN for static assets (images)
-- Load balancing at Gateway level
-
-#### Reliability
-
-- 99.9% uptime target
-- Graceful error handling
-- Retry mechanisms for failed operations
-- Database backups (daily)
-- Transaction rollback on failures
-
-#### Observability
-
-- Centralized logging (Winston/Pino)
-- Request tracing with correlation IDs
-- Health check endpoints
-- Performance monitoring
-- Error tracking and alerting
-
-### Current Scope (Foundation)
-
-1. **Service Architecture**
-   - ✅ Microservices foundation with service isolation
-   - ✅ API Gateway for unified entry point
-   - ✅ Event-driven communication infrastructure
-   - ✅ Environment-based configuration management
-
-2. **Development Infrastructure**
-   - ✅ Monorepo structure with Turborepo
-   - ✅ Shared packages for common utilities
-   - ✅ Centralized configuration (TypeScript, ESLint, Prettier)
-   - ✅ Docker containerization for all services
-   - ✅ Multi-environment support (dev, prod, infra)
-
-3. **Data Layer**
-   - ✅ Database-per-service pattern
-   - ✅ MongoDB integration with authentication
-   - ✅ Redis caching infrastructure
-   - ✅ Data persistence with Docker volumes
-
-### Planned Features (Roadmap)
-
-#### Phase 1: Core E-Commerce Functionality ✅
-
-- [x] User registration and authentication (JWT-based)
-- [x] Product CRUD operations with search/filtering
-- [x] Shopping cart management
-- [x] Order placement and tracking
-- [x] Basic notification system (order confirmations)
-
-#### Phase 2: Advanced Features
-
-- [ ] Payment gateway integration
-- [ ] Inventory management with stock tracking (decrement on order)
-- [x] Order status workflows (pending → confirmed → processing → shipped → delivered → completed)
-- [x] User profile management (`GET /api/auth/profile`)
-- [ ] Product reviews and ratings
-
-#### Phase 3: Enterprise Features
-
-- [ ] API documentation (Swagger/OpenAPI)
-- [ ] Comprehensive logging and monitoring (ELK/Prometheus)
-- [ ] Distributed tracing (Jaeger/Zipkin)
-- [ ] Rate limiting and API throttling
-- [ ] GraphQL gateway option
-- [ ] Kubernetes deployment manifests
-- [ ] CI/CD pipelines (GitHub Actions)
-
-#### Phase 4: Business Intelligence
-
-- [ ] Analytics and reporting
-- [ ] Recommendation engine
-- [ ] Admin dashboard
-- [ ] Customer support integration
-- [ ] Multi-tenant support
+| Phase     | Items                                                                                                    |
+| --------- | -------------------------------------------------------------------------------------------------------- |
+| **Next**  | Inventory decrement on order • Email/SMS via provider • Self-service password reset • API docs (Swagger) |
+| **Later** | Payment gateway • Product reviews • Rate limiting • Kubernetes manifests                                 |
 
 ## 🛠️ Tech Stack
 
@@ -564,7 +321,7 @@ All routes go through the Gateway at `http://localhost:3000`.
 
 | Service               | Base Path         | Endpoints                                                                                                                                     |
 | --------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Auth**              | `/api/auth`       | `POST /register`, `POST /login`, `POST /refresh-token`, `GET /profile`, `POST /logout`                                                        |
+| **Auth**              | `/api/auth`       | `POST /register`, `POST /login`, `POST /refresh-token`, `GET /profile`, `PATCH /profile`, `PATCH /password`, `POST /logout`                   |
 | **Auth (Superadmin)** | `/api/auth/admin` | `POST /` (create admin), `GET /` (list admins), `DELETE /:id` (delete admin), `POST /reset-password` (superadmin: change any user's password) |
 | **Products**          | `/api/products`   | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                             |
 | **Orders**            | `/api/orders`     | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                         |
@@ -665,6 +422,6 @@ This project is licensed under the **ISC License**. See the [LICENSE](./LICENSE)
 
 ---
 
-**Status**: ✅ Phase 1 Complete - Core E-Commerce Features Implemented
+**Status**: Core e-commerce flow implemented (auth, products, cart, orders, event bus). Email/SMS and inventory decrement planned.
 
-**Purpose**: Portfolio & Learning Demonstration of Modern Microservices Architecture
+**Purpose**: Portfolio demonstration of event-driven microservices architecture.

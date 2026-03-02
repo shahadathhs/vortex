@@ -7,8 +7,8 @@ import {
 } from '@vortex/common';
 import { Router } from 'express';
 
-import { config } from '../config/config';
 import { productController } from '../controllers/product.controller';
+import { config } from '../config/config';
 import {
   createProductSchema,
   getProductsSchema,

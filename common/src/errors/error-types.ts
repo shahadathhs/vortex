@@ -1,5 +1,5 @@
 /**
- * Standardized error response types (inspired by barisathi-server)
+ * Standardized error response types
  */
 export interface IErrorSource {
   path: string | number;

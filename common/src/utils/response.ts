@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { HttpStatusCode } from '../constants/http-status';
 
 /**
- * Standardized API response utilities (barisathi-server style)
+ * Standardized API response utilities
  */
 
 export interface TResponse<T = unknown> {
@@ -24,7 +24,7 @@ export interface TPaginatedResponse<T = unknown> {
   };
 }
 
-/** Send standardized response with status code (barisathi-server sendResponse) */
+/** Send standardized response with status code */
 export const sendResponse = <T>(
   res: Response,
   options: {

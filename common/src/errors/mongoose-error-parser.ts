@@ -15,7 +15,7 @@ interface MongooseCastError extends Error {
   value: unknown;
 }
 
-/** MongoDB driver error codes (from RAG handle-error.simplify) */
+/** MongoDB driver error codes */
 const MONGODB_ERROR_CODES: Record<number, { status: number; message: string }> =
   {
     11000: { status: 409, message: 'Duplicate value error.' },

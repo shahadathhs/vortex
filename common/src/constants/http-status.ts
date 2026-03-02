@@ -1,5 +1,5 @@
 /**
- * HTTP status codes (barisathi-server style)
+ * HTTP status codes
  */
 export enum HttpStatusCode {
   OK = 200,

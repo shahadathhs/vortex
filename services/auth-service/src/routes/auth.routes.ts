@@ -6,9 +6,9 @@ import {
 } from '@vortex/common';
 import { Router } from 'express';
 
-import { config } from '../config/config';
 import { authController } from '../controllers/auth.controller';
 import { authService } from '../services/auth.service';
+import { config } from '../config/config';
 import {
   loginSchema,
   refreshTokenSchema,
@@ -23,7 +23,7 @@ const router: Router = Router();
 
 const auth = [
   protect(config.JWT_SECRET, {
-    fetchUser: (id) => authService.fetchUserForAuth(id),
+    fetchUser: authService.fetchUserForAuth,
   }),
   requireUser,
 ];
