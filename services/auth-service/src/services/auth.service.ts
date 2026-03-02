@@ -12,6 +12,7 @@ import {
 } from '@vortex/common';
 
 import { config } from '../config/config';
+import { publishPasswordResetRequested } from '../lib/password-reset.events';
 import { User } from '../models/User';
 import { LoginInput, RegisterInput } from '../schemas/auth.schema';
 import { IUser } from '../types/user.interface';
@@ -284,6 +285,47 @@ async function listAdmins() {
   return { admins };
 }
 
+async function forgotPassword(email: string): Promise<{ message: string }> {
+  const user = await User.findOne({ email, isDeleted: { $ne: true } });
+  if (!user) {
+    return { message: 'If the email exists, a reset link will be sent' };
+  }
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now() + 60 * 60 * 1000);
+  user.passwordResetToken = resetToken;
+  user.passwordResetExpires = expires;
+  await user.save();
+
+  const appUrl = config.APP_URL;
+  const resetUrl = `${appUrl}/reset-password?token=${resetToken}`;
+
+  await publishPasswordResetRequested(config.RABBITMQ_URL, {
+    email: user.email,
+    resetToken,
+    resetUrl,
+  });
+  return { message: 'If the email exists, a reset link will be sent' };
+}
+
+async function resetPasswordWithToken(
+  token: string,
+  newPassword: string,
+): Promise<{ message: string }> {
+  const user = await User.findOne({
+    passwordResetToken: token,
+    isDeleted: { $ne: true },
+  });
+  if (
+    !user ||
+    !user.passwordResetExpires ||
+    user.passwordResetExpires < new Date()
+  ) {
+    throw new BadRequestError('Invalid or expired reset token');
+  }
+  await user.updatePassword(newPassword);
+  return { message: 'Password reset successfully' };
+}
+
 async function resetUserPassword(
   targetUserId: string,
   newPassword: string,
@@ -315,6 +357,8 @@ export const authService = {
   updateProfile,
   updatePassword,
   logout,
+  forgotPassword,
+  resetPasswordWithToken,
   fetchUserForAuth,
   createAdmin,
   deleteAdmin,

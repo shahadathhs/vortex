@@ -68,6 +68,22 @@ export class Config<T extends Record<string, string>> {
   get JWT_SECRET(): string {
     return this.getOrThrow('JWT_SECRET' as keyof T);
   }
+
+  /**
+   * Get APP_URL with default (auth service)
+   */
+  get APP_URL(): string {
+    const v = this.get('APP_URL' as keyof T);
+    return v?.trim() ? v : 'http://localhost:3000';
+  }
+
+  /**
+   * Get FROM_EMAIL with default (notification service)
+   */
+  get FROM_EMAIL(): string {
+    const v = this.get('FROM_EMAIL' as keyof T);
+    return v?.trim() ? v : 'noreply@vortex.local';
+  }
 }
 
 /**

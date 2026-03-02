@@ -1,4 +1,4 @@
 export enum QueueName {
   NOTIFICATION_QUEUE = 'notification_queue',
-  ORDER_QUEUE = 'order_queue',
+  INVENTORY_QUEUE = 'inventory_queue',
 }

@@ -66,9 +66,9 @@ export async function seedSuperadmin(): Promise<void> {
  */
 async function runStandalone() {
   const mongoose = await import('mongoose');
-  const mongoUri = process.env.MONGODB_URI;
-  const email = process.env.SUPERADMIN_EMAIL;
-  const password = process.env.SUPERADMIN_PASSWORD;
+  const mongoUri = config.MONGODB_URI;
+  const email = config.get('SUPERADMIN_EMAIL')?.trim();
+  const password = config.get('SUPERADMIN_PASSWORD');
 
   if (!mongoUri || !email || !password) {
     console.error(

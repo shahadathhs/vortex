@@ -136,6 +136,29 @@ async function listAdmins(req: Request, res: Response) {
   });
 }
 
+async function forgotPassword(req: Request, res: Response) {
+  const { email } = req.body as { email: string };
+  const result = await authService.forgotPassword(email);
+  sendResponse(res, {
+    statusCode: HttpStatusCode.OK,
+    message: result.message,
+    data: result,
+  });
+}
+
+async function resetPassword(req: Request, res: Response) {
+  const { token, newPassword } = req.body as {
+    token: string;
+    newPassword: string;
+  };
+  const result = await authService.resetPasswordWithToken(token, newPassword);
+  sendResponse(res, {
+    statusCode: HttpStatusCode.OK,
+    message: result.message,
+    data: result,
+  });
+}
+
 async function resetUserPassword(req: Request, res: Response) {
   const { userId, newPassword } = req.body;
   const result = await authService.resetUserPassword(userId, newPassword);
@@ -154,6 +177,8 @@ export const authController = {
   updateProfile,
   updatePassword,
   logout,
+  forgotPassword,
+  resetPassword,
   createAdmin,
   deleteAdmin,
   listAdmins,

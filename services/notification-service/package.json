@@ -19,10 +19,12 @@
     "@vortex/common": "workspace:*",
     "cors": "catalog:",
     "express": "catalog:",
-    "helmet": "catalog:"
+    "helmet": "catalog:",
+    "nodemailer": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",
+    "@types/nodemailer": "catalog:",
     "@types/express": "catalog:",
     "rimraf": "catalog:",
     "ts-node-dev": "catalog:",

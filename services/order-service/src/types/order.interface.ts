@@ -17,6 +17,7 @@ export interface IOrderItem {
 
 export interface IOrder extends Document {
   userId: string;
+  userEmail?: string;
   items: IOrderItem[];
   totalPrice: number;
   status: OrderStatus;

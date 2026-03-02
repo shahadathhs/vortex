@@ -6,6 +6,12 @@ import {
   RabbitMQManager,
 } from '@vortex/common';
 
+import {
+  handleOrderCreated,
+  handleOrderUpdated,
+} from '../handlers/order.handlers';
+import { handlePasswordResetRequested } from '../handlers/password.handlers';
+import { handleUserCreated } from '../handlers/user.handlers';
 import { config } from '../config/config';
 
 interface NotificationPayload {
@@ -14,65 +20,31 @@ interface NotificationPayload {
   data?: Record<string, unknown>;
 }
 
-function safeStr(v: unknown): string {
-  if (typeof v === 'string') return v;
-  if (typeof v === 'number') return String(v);
-  return '';
-}
+async function handleMessage(content: string) {
+  const payload: NotificationPayload = JSON.parse(content);
+  const event = String(payload.event ?? 'unknown');
+  const data = payload.data ?? {};
 
-function handleOrderCreated(data: Record<string, unknown>) {
-  const orderId = safeStr(data.orderId);
-  const userId = safeStr(data.userId);
-  const totalPrice = safeStr(data.totalPrice);
-  logger.info(
-    `📧 [Order Confirmation] Order ${orderId} placed by user ${userId}. Total: $${totalPrice}`,
-  );
-  // TODO: Send email via provider (SendGrid, AWS SES, etc.)
-}
-
-function handleOrderUpdated(data: Record<string, unknown>) {
-  const orderId = safeStr(data.orderId);
-  const userId = safeStr(data.userId);
-  const status = safeStr(data.status);
-  logger.info(
-    `📧 [Order Update] Order ${orderId} (user ${userId}) status: ${status}`,
-  );
-  // TODO: Send shipping/delivery notification when status is shipped/delivered
-}
-
-function handleUserCreated(data: Record<string, unknown>) {
-  const email = safeStr(data.email);
-  const firstName = safeStr(data.firstName);
-  logger.info(`📧 [Welcome Email] Sending to ${email} (${firstName})`);
-  // TODO: Send welcome email via provider
-}
-
-function handleProductEvent(event: string, data: Record<string, unknown>) {
-  const productId = safeStr(data.productId);
-  const name = safeStr(data.name);
-  logger.info(`📧 [Product ${event}] ${name} (${productId})`);
-  // TODO: Notify admins/vendors of catalog changes
-}
-
-function handleMessage(content: string) {
   try {
-    const payload: NotificationPayload = JSON.parse(content);
-    const event = String(payload.event ?? 'unknown');
-
     if (event === 'order.created') {
-      handleOrderCreated(payload.data ?? {});
+      await handleOrderCreated(data);
     } else if (event === 'order.updated') {
-      handleOrderUpdated(payload.data ?? {});
+      await handleOrderUpdated(data);
     } else if (event === 'user.created') {
-      handleUserCreated(payload.data ?? {});
+      await handleUserCreated(data);
+    } else if (event === 'password.reset.requested') {
+      await handlePasswordResetRequested(data);
     } else if (
       event === 'product.created' ||
       event === 'product.updated' ||
       event === 'product.deleted'
     ) {
-      handleProductEvent(event, payload.data ?? {});
+      const productId =
+        typeof data.productId === 'string' ? data.productId : '';
+      const name = typeof data.name === 'string' ? data.name : '';
+      logger.info(`[Product ${event}] ${name} (${productId})`);
     } else {
-      logger.info('Received event:', event, payload.data);
+      logger.info('Received event:', event, data);
     }
   } catch (error) {
     logger.error('Failed to handle notification:', error);
@@ -93,8 +65,9 @@ function startConsumer() {
         QueueName.NOTIFICATION_QUEUE,
         (msg: ConsumeMessage | null) => {
           if (msg) {
-            handleMessage(msg.content.toString());
-            channel.ack(msg);
+            void handleMessage(msg.content.toString()).finally(() =>
+              channel.ack(msg),
+            );
           }
         },
       );

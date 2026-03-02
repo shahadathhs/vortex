@@ -1,7 +1,8 @@
 import { logger } from '@vortex/common';
 
 import app from './app';
-import { config } from './config/config';
+import { config, getSmtpConfig } from './config/config';
+import { initEmailTransport } from './lib/email';
 import { notificationService } from './services/notification.service';
 
 process.on('uncaughtException', (err: Error) => {
@@ -16,6 +17,14 @@ process.on('unhandledRejection', (reason: unknown) => {
 
 const start = () => {
   try {
+    const smtp = getSmtpConfig();
+    initEmailTransport(
+      smtp.host,
+      smtp.port,
+      smtp.user,
+      smtp.pass,
+      smtp.fromEmail,
+    );
     notificationService.startConsumer();
 
     const server = app.listen(config.PORT, () => {

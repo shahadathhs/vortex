@@ -10,9 +10,11 @@ import { authController } from '../controllers/auth.controller';
 import { authService } from '../services/auth.service';
 import { config } from '../config/config';
 import {
+  forgotPasswordSchema,
   loginSchema,
   refreshTokenSchema,
   registerSchema,
+  resetPasswordSchema,
   updatePasswordSchema,
   updateProfileSchema,
 } from '../schemas/auth.schema';
@@ -46,6 +48,16 @@ router.post(
   '/refresh-token',
   validateRequest(refreshTokenSchema),
   asyncHandler(authController.refreshToken),
+);
+router.post(
+  '/forgot-password',
+  validateRequest(forgotPasswordSchema),
+  asyncHandler(authController.forgotPassword),
+);
+router.post(
+  '/reset-password',
+  validateRequest(resetPasswordSchema),
+  asyncHandler(authController.resetPassword),
 );
 // Protected routes
 router.get('/profile', ...auth, asyncHandler(authController.getProfile));

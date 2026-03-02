@@ -2,6 +2,7 @@ import { logger, RabbitMQManager } from '@vortex/common';
 import mongoose from 'mongoose';
 
 import app from './app';
+import { startOrderConsumer } from './consumers/order.consumer';
 import { config } from './config/config';
 
 process.on('uncaughtException', (err: Error) => {
@@ -20,6 +21,7 @@ const start = async () => {
     logger.info('Product DB connected');
 
     RabbitMQManager.getConnection(config.RABBITMQ_URL);
+    startOrderConsumer();
 
     const server = app.listen(config.PORT, () => {
       logger.info(`Product Service listening on port ${config.PORT}`);

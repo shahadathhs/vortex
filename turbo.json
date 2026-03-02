@@ -1,7 +1,17 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["package.json", "tsconfig.json"],
-  "globalEnv": ["NODE_ENV", "SUPERADMIN_EMAIL", "SUPERADMIN_PASSWORD"],
+  "globalEnv": [
+    "NODE_ENV",
+    "SUPERADMIN_EMAIL",
+    "SUPERADMIN_PASSWORD",
+    "FROM_EMAIL",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "APP_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

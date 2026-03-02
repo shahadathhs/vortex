@@ -21,6 +21,7 @@ async function createOrder(req: Request, res: Response) {
   const order = await orderService.createOrder({
     ...body,
     userId: req.user!.id,
+    userEmail: req.user!.email,
   });
   res.status(201).json(successResponse(order, 'Order created successfully'));
 }

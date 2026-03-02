@@ -26,13 +26,13 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
 
 ### Microservices
 
-| Service                  | Purpose                                            | Database                   | Events                                          |
-| ------------------------ | -------------------------------------------------- | -------------------------- | ----------------------------------------------- |
-| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                             |
-| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`                  |
-| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated`            |
-| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`                |
-| **Notification Service** | Event consumer (RabbitMQ → logs)                   | N/A (event consumer)       | Consumes `user.created`, `order.*`, `product.*` |
+| Service                  | Purpose                                            | Database                   | Events                                                                      |
+| ------------------------ | -------------------------------------------------- | -------------------------- | --------------------------------------------------------------------------- |
+| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                                                         |
+| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`                                              |
+| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated`                                        |
+| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`                                            |
+| **Notification Service** | Event consumer + email (Nodemailer/SMTP)           | N/A (event consumer)       | Consumes `user.created`, `order.*`, `product.*`, `password.reset.requested` |
 
 ### Infrastructure Components
 
@@ -72,40 +72,33 @@ All features below are **fully implemented**—no placeholders or stubs.
 - **Logout**: `POST /logout` invalidates refresh token
 - **RBAC**: Roles (customer, vendor, admin) with permission checks (`PRODUCT_CREATE`, `ADMIN_CREATE`, etc.)
 - **Superadmin**: Seed via `SUPERADMIN_EMAIL`/`SUPERADMIN_PASSWORD`; admin CRUD (`POST/GET/DELETE /api/auth/admin`); `POST /api/auth/admin/reset-password` to reset any user's password
+- **Password Reset**: `POST /forgot-password` (email) → sends reset link; `POST /reset-password` (token, newPassword) → resets password
 
 ### 🛍️ Product Service
 
 - **CRUD**: Create, read, update, delete products (admin/vendor only for write)
 - **Search & Filter**: `?q=` (text search), `?category=`, `?minPrice=`, `?maxPrice=`
 - **Stock**: Products have `stock`; catalog events published to RabbitMQ on create/update/delete
+- **Inventory**: Consumes `order.created` → decrements stock; `order.updated` (cancelled) → restores stock
 
 ### 🛒 Cart & Order Service
 
 - **Cart**: Get, add item, update quantity, remove item, clear; persisted per user
 - **Orders**: Create order from cart items; list by user; get by ID; update status (pending → confirmed → processing → shipped → delivered → completed)
-- **Events**: `order.created` and `order.updated` published to RabbitMQ on create/status change
+- **Events**: `order.created` and `order.updated` published to RabbitMQ (includes `userEmail` for notifications)
 
 ### 🔔 Notification Service
 
-- **Event Consumer**: Subscribes to RabbitMQ `vortex` exchange; consumes `user.created`, `order.created`, `order.updated`, `product.*`
-- **Handlers**: Parse events and log (order confirmation, welcome, product changes). No email/SMS delivery yet—ready for provider integration (SendGrid, SES, etc.)
+- **Event Consumer**: Subscribes to RabbitMQ `vortex` exchange; consumes `user.created`, `order.created`, `order.updated`, `product.*`, `password.reset.requested`
+- **Email**: Nodemailer/SMTP; welcome (user.created), order confirmation (order.created), shipped/delivered (order.updated), password reset link (password.reset.requested). Set `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` to enable; otherwise logs only
 
 ### 🏗️ Infrastructure & DevOps
 
-- **Gateway**: HTTP proxy to services; health checks
+- **Gateway**: HTTP proxy to services; health checks; rate limiting (100 req/15min); Swagger UI at `/api-docs`
 - **Monorepo**: Turborepo, pnpm workspaces, shared `@vortex/common`
 - **Docker**: Compose for infra (MongoDB, RabbitMQ, Redis, Mongo Express) and all services
 - **CI**: GitHub Actions—lint, format, typecheck, build on push/PR
 - **Release**: Automated versioning and Docker image push via GitHub Actions
-
----
-
-## 📋 Roadmap (Planned)
-
-| Phase     | Items                                                                                                    |
-| --------- | -------------------------------------------------------------------------------------------------------- |
-| **Next**  | Inventory decrement on order • Email/SMS via provider • Self-service password reset • API docs (Swagger) |
-| **Later** | Payment gateway • Product reviews • Rate limiting • Kubernetes manifests                                 |
 
 ## 🛠️ Tech Stack
 
@@ -319,13 +312,13 @@ make pull          # Pull all images from registry
 
 All routes go through the Gateway at `http://localhost:3000`.
 
-| Service               | Base Path         | Endpoints                                                                                                                                     |
-| --------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Auth**              | `/api/auth`       | `POST /register`, `POST /login`, `POST /refresh-token`, `GET /profile`, `PATCH /profile`, `PATCH /password`, `POST /logout`                   |
-| **Auth (Superadmin)** | `/api/auth/admin` | `POST /` (create admin), `GET /` (list admins), `DELETE /:id` (delete admin), `POST /reset-password` (superadmin: change any user's password) |
-| **Products**          | `/api/products`   | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                             |
-| **Orders**            | `/api/orders`     | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                         |
-| **Cart**              | `/api/cart`       | `GET /`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                                     |
+| Service               | Base Path         | Endpoints                                                                                                                                                                    |
+| --------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Auth**              | `/api/auth`       | `POST /register`, `POST /login`, `POST /refresh-token`, `GET /profile`, `PATCH /profile`, `PATCH /password`, `POST /logout`, `POST /forgot-password`, `POST /reset-password` |
+| **Auth (Superadmin)** | `/api/auth/admin` | `POST /` (create admin), `GET /` (list admins), `DELETE /:id` (delete admin), `POST /reset-password` (superadmin: change any user's password)                                |
+| **Products**          | `/api/products`   | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                                                            |
+| **Orders**            | `/api/orders`     | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                                                        |
+| **Cart**              | `/api/cart`       | `GET /`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                                                                    |
 
 ### API Authentication
 
@@ -337,9 +330,10 @@ Protected endpoints require the `Authorization: Bearer <token>` header with a va
 | **Orders**   | Yes           | All order endpoints require authentication. User/ownership from JWT.                                                                                        |
 | **Products** | Partial       | `GET /` and `GET /:id` are public. `POST /`, `PUT /:id`, `DELETE /:id` require admin or vendor role (`PRODUCT_CREATE`, `PRODUCT_UPDATE`, `PRODUCT_DELETE`). |
 
-## 📊 Service Health Checks
+## 📊 Service Health Checks & API Docs
 
 - Gateway: http://localhost:3000/health
+- API Docs (Swagger): http://localhost:3000/api-docs
 - Auth: http://localhost:3001/health
 - Product: http://localhost:3002/health
 - Order: http://localhost:3003/health
@@ -422,6 +416,6 @@ This project is licensed under the **ISC License**. See the [LICENSE](./LICENSE)
 
 ---
 
-**Status**: Core e-commerce flow implemented (auth, products, cart, orders, event bus). Email/SMS and inventory decrement planned.
+**Status**: Full e-commerce flow: auth, products, cart, orders, inventory decrement, email notifications, password reset, API docs, rate limiting.
 
 **Purpose**: Portfolio demonstration of event-driven microservices architecture.

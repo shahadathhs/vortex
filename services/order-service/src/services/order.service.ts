@@ -34,10 +34,11 @@ async function publishToNotification(
 }
 
 async function createOrder(data: Partial<IOrder>) {
-  const { userId, items, totalPrice } = data;
+  const { userId, userEmail, items, totalPrice } = data;
 
   const order = await Order.create({
     userId: userId!,
+    userEmail,
     items: items ?? [],
     totalPrice: totalPrice!,
     status: 'pending',
@@ -46,6 +47,7 @@ async function createOrder(data: Partial<IOrder>) {
   await publishToNotification(EventName.ORDER_CREATED, {
     orderId: String(order._id),
     userId: userId!,
+    userEmail: userEmail ?? '',
     totalPrice: totalPrice!,
     items: items ?? [],
   });
@@ -85,8 +87,10 @@ async function updateOrderStatus(id: string, status: OrderStatus) {
   await publishToNotification(EventName.ORDER_UPDATED, {
     orderId: String(order._id),
     userId: order.userId,
+    userEmail: order.userEmail ?? '',
     status,
     totalPrice: order.totalPrice,
+    items: order.items,
   });
 
   return order;
