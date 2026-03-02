@@ -6,11 +6,11 @@ import {
   RabbitMQManager,
 } from '@vortex/common';
 
-import { config } from '../config/config';
+import { env } from '../config/config';
 import { Product } from '../models/Product';
 import { IProduct } from '../types/product.interface';
 
-const rabbitMQ = RabbitMQManager.getConnection(config.RABBITMQ_URL);
+const rabbitMQ = RabbitMQManager.getConnection(env.RABBITMQ_URL);
 
 async function publishEvent(eventName: EventName, product: IProduct) {
   try {

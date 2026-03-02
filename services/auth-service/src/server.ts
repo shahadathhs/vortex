@@ -1,7 +1,7 @@
 import { logger, RabbitMQManager } from '@vortex/common';
 
 import app from './app';
-import { config } from './config/config';
+import { env, mongoUri } from './config/config';
 import { connectDB } from './config/db';
 import { seedSuperadmin } from './scripts/seed-superadmin';
 
@@ -18,16 +18,16 @@ process.on('unhandledRejection', (reason: unknown) => {
 
 const start = async () => {
   try {
-    await connectDB(config.MONGODB_URI);
+    await connectDB(mongoUri);
 
     // Initialize RabbitMQ connection
-    RabbitMQManager.getConnection(config.RABBITMQ_URL);
+    RabbitMQManager.getConnection(env.RABBITMQ_URL);
 
     // Seed superadmin
     await seedSuperadmin();
 
-    const server = app.listen(config.PORT, () => {
-      logger.info(`Auth Service listening on port ${config.PORT}`);
+    const server = app.listen(env.PORT, () => {
+      logger.info(`Auth Service listening on port ${env.PORT}`);
     });
 
     process.on('SIGTERM', () => {

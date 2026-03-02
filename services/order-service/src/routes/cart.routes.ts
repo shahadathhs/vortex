@@ -6,7 +6,7 @@ import {
 } from '@vortex/common';
 import { Router } from 'express';
 
-import { config } from '../config/config';
+import { jwtSecret } from '../config/config';
 import { cartController } from '../controllers/cart.controller';
 import {
   addCartItemSchema,
@@ -16,7 +16,7 @@ import {
 
 const router: Router = Router();
 
-router.use(protect(config.JWT_SECRET), requireUser);
+router.use(protect(jwtSecret), requireUser);
 
 router.get('/', asyncHandler(cartController.getCart));
 router.post(

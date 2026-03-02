@@ -20,7 +20,8 @@
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
-    "stripe": "catalog:"
+    "stripe": "catalog:",
+    "@systemix/env": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",

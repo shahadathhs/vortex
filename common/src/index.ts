@@ -7,8 +7,7 @@
 // Constants & Enums
 export * from './constants';
 
-// Core Logic (Config, Messaging, JWT)
-export * from './core/config';
+// Core Logic (Messaging, JWT)
 export * from './core/jwt';
 export * from './core/rabbit-mq-manager';
 

@@ -24,7 +24,7 @@
     "mongoose": "catalog:",
     "zod": "catalog:",
     "bcryptjs": "catalog:",
-    "dotenv": "catalog:"
+    "@systemix/env": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",

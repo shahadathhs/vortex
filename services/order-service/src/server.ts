@@ -2,7 +2,7 @@ import { logger, RabbitMQManager } from '@vortex/common';
 import mongoose from 'mongoose';
 
 import app from './app';
-import { config } from './config/config';
+import { env, mongoUri } from './config/config';
 
 process.on('uncaughtException', (err: Error) => {
   logger.error('UNCAUGHT EXCEPTION! Shutting down...', err);
@@ -16,13 +16,13 @@ process.on('unhandledRejection', (reason: unknown) => {
 
 const start = async () => {
   try {
-    await mongoose.connect(config.MONGODB_URI);
+    await mongoose.connect(mongoUri);
     logger.info('Order DB connected');
 
-    RabbitMQManager.getConnection(config.RABBITMQ_URL);
+    RabbitMQManager.getConnection(env.RABBITMQ_URL);
 
-    const server = app.listen(config.PORT, () => {
-      logger.info(`Order Service listening on port ${config.PORT}`);
+    const server = app.listen(env.PORT, () => {
+      logger.info(`Order Service listening on port ${env.PORT}`);
     });
 
     process.on('SIGTERM', () => {

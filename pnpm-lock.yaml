@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@systemix/env':
+      specifier: ^0.2.0
+      version: 0.2.0
     '@types/cors':
       specifier: ^2.8.19
       version: 2.8.19
@@ -27,9 +30,6 @@ catalogs:
     cors:
       specifier: ^2.8.6
       version: 2.8.6
-    dotenv:
-      specifier: ^17.3.1
-      version: 17.3.1
     express:
       specifier: ^5.2.1
       version: 5.2.1
@@ -67,6 +67,10 @@ catalogs:
 importers:
 
   .:
+    dependencies:
+      '@systemix/env':
+        specifier: 'catalog:'
+        version: 0.2.0
     devDependencies:
       '@semantic-release/changelog':
         specifier: ^6.0.3
@@ -137,9 +141,6 @@ importers:
       amqplib:
         specifier: ^0.10.9
         version: 0.10.9
-      dotenv:
-        specifier: 'catalog:'
-        version: 17.3.1
       express:
         specifier: 'catalog:'
         version: 5.2.1
@@ -180,6 +181,9 @@ importers:
 
   gateway:
     dependencies:
+      '@systemix/env':
+        specifier: 'catalog:'
+        version: 0.2.0
       '@vortex/common':
         specifier: workspace:*
         version: link:../common
@@ -223,6 +227,9 @@ importers:
 
   services/auth-service:
     dependencies:
+      '@systemix/env':
+        specifier: 'catalog:'
+        version: 0.2.0
       '@vortex/common':
         specifier: workspace:*
         version: link:../../common
@@ -232,9 +239,6 @@ importers:
       cors:
         specifier: 'catalog:'
         version: 2.8.6
-      dotenv:
-        specifier: 'catalog:'
-        version: 17.3.1
       express:
         specifier: 'catalog:'
         version: 5.2.1
@@ -269,6 +273,9 @@ importers:
 
   services/notification-service:
     dependencies:
+      '@systemix/env':
+        specifier: 'catalog:'
+        version: 0.2.0
       '@vortex/common':
         specifier: workspace:*
         version: link:../../common
@@ -306,6 +313,9 @@ importers:
 
   services/order-service:
     dependencies:
+      '@systemix/env':
+        specifier: 'catalog:'
+        version: 0.2.0
       '@vortex/common':
         specifier: workspace:*
         version: link:../../common
@@ -343,6 +353,9 @@ importers:
 
   services/payment-service:
     dependencies:
+      '@systemix/env':
+        specifier: 'catalog:'
+        version: 0.2.0
       '@vortex/common':
         specifier: workspace:*
         version: link:../../common
@@ -377,6 +390,9 @@ importers:
 
   services/product-service:
     dependencies:
+      '@systemix/env':
+        specifier: 'catalog:'
+        version: 0.2.0
       '@vortex/common':
         specifier: workspace:*
         version: link:../../common
@@ -1028,6 +1044,9 @@ packages:
 
   '@so-ric/colorspace@1.1.6':
     resolution: {integrity: sha512-/KiKkpHNOBgkFJwu9sh48LkHSMYGyuTcSFK/qMBdnOAlrRJzRSXAOFB5qwzaVQuDl8wAvHVMkaASQDReTahxuw==}
+
+  '@systemix/env@0.2.0':
+    resolution: {integrity: sha512-8jYR518fVjMajSvgVALbaJWJje1FbetS3OOG5lmBiTEHKwPQY3FTadpmNtOsol6lFxH7om308+SQ2ZWhvxDtBw==}
 
   '@systemix/eslint@0.4.0':
     resolution: {integrity: sha512-8Fpt/wgtCt+2GOidFrEv7y0mBWUwLNUHwiEIf9HNZg1v7t7MjIGvUOJwsP5v7aVKx3GImAwosqFLiDZnNilE/Q==}
@@ -1737,10 +1756,6 @@ packages:
 
   dotenv@16.0.3:
     resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
-    engines: {node: '>=12'}
-
-  dotenv@17.3.1:
-    resolution: {integrity: sha512-IO8C/dzEb6O3F9/twg6ZLXz164a2fhTnEWb95H23Dm4OuN+92NmEAlTrupP9VW6Jm3sO26tQlqyvyi4CsnY9GA==}
     engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
@@ -4847,6 +4862,8 @@ snapshots:
       color: 5.0.3
       text-hex: 1.0.0
 
+  '@systemix/env@0.2.0': {}
+
   '@systemix/eslint@0.4.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.11)(typescript@5.9.3)':
     dependencies:
       '@eslint/js': 10.0.1(eslint@10.0.2(jiti@2.6.1))
@@ -5637,8 +5654,6 @@ snapshots:
       is-obj: 2.0.0
 
   dotenv@16.0.3: {}
-
-  dotenv@17.3.1: {}
 
   dunder-proto@1.0.1:
     dependencies:

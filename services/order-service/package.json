@@ -21,7 +21,8 @@
     "express": "catalog:",
     "helmet": "catalog:",
     "mongoose": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@systemix/env": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",

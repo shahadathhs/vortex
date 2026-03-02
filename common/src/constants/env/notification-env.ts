@@ -1,9 +1,0 @@
-export enum NotificationEnv {
-  PORT = 'PORT',
-  RABBITMQ_URL = 'RABBITMQ_URL',
-  SMTP_HOST = 'SMTP_HOST',
-  SMTP_PORT = 'SMTP_PORT',
-  SMTP_USER = 'SMTP_USER',
-  SMTP_PASS = 'SMTP_PASS',
-  FROM_EMAIL = 'FROM_EMAIL',
-}

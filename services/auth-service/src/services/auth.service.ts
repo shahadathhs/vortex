@@ -11,13 +11,13 @@ import {
   UnauthorizedError,
 } from '@vortex/common';
 
-import { config } from '../config/config';
+import { env, jwtSecret } from '../config/config';
 import { publishPasswordResetRequested } from '../lib/password-reset.events';
 import { User } from '../models/User';
 import { LoginInput, RegisterInput } from '../schemas/auth.schema';
 import { IUser } from '../types/user.interface';
 
-const rabbitMQ = RabbitMQManager.getConnection(config.RABBITMQ_URL);
+const rabbitMQ = RabbitMQManager.getConnection(env.RABBITMQ_URL);
 
 function generateAccessToken(user: IUser) {
   return generateToken(
@@ -26,7 +26,7 @@ function generateAccessToken(user: IUser) {
       email: user.email,
       role: user.role,
     },
-    config.JWT_SECRET,
+    jwtSecret,
   );
 }
 
@@ -296,10 +296,10 @@ async function forgotPassword(email: string): Promise<{ message: string }> {
   user.passwordResetExpires = expires;
   await user.save();
 
-  const appUrl = config.APP_URL;
+  const appUrl = env.APP_URL;
   const resetUrl = `${appUrl}/reset-password?token=${resetToken}`;
 
-  await publishPasswordResetRequested(config.RABBITMQ_URL, {
+  await publishPasswordResetRequested(env.RABBITMQ_URL, {
     email: user.email,
     resetToken,
     resetUrl,

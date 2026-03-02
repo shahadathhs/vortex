@@ -8,7 +8,7 @@ import {
 import { Router } from 'express';
 
 import { productController } from '../controllers/product.controller';
-import { config } from '../config/config';
+import { jwtSecret } from '../config/config';
 import {
   createProductSchema,
   getProductsSchema,
@@ -20,7 +20,7 @@ const router: Router = Router();
 
 router.post(
   '/',
-  protect(config.JWT_SECRET),
+  protect(jwtSecret),
   checkPermission(Permission.PRODUCT_CREATE),
   validateRequest(createProductSchema),
   asyncHandler(productController.createProduct),
@@ -33,14 +33,14 @@ router.get(
 router.get('/:id', asyncHandler(productController.getProductById));
 router.put(
   '/:id',
-  protect(config.JWT_SECRET),
+  protect(jwtSecret),
   checkPermission(Permission.PRODUCT_UPDATE),
   validateRequest(updateProductSchema),
   asyncHandler(productController.updateProduct),
 );
 router.delete(
   '/:id',
-  protect(config.JWT_SECRET),
+  protect(jwtSecret),
   checkPermission(Permission.PRODUCT_DELETE),
   validateRequest(productIdParamSchema),
   asyncHandler(productController.deleteProduct),

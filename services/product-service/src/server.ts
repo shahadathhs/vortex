@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 import app from './app';
 import { startOrderConsumer } from './consumers/order.consumer';
-import { config } from './config/config';
+import { env, mongoUri } from './config/config';
 
 process.on('uncaughtException', (err: Error) => {
   logger.error('UNCAUGHT EXCEPTION! Shutting down...', err);
@@ -17,14 +17,14 @@ process.on('unhandledRejection', (reason: unknown) => {
 
 const start = async () => {
   try {
-    await mongoose.connect(config.MONGODB_URI);
+    await mongoose.connect(mongoUri);
     logger.info('Product DB connected');
 
-    RabbitMQManager.getConnection(config.RABBITMQ_URL);
+    RabbitMQManager.getConnection(env.RABBITMQ_URL);
     startOrderConsumer();
 
-    const server = app.listen(config.PORT, () => {
-      logger.info(`Product Service listening on port ${config.PORT}`);
+    const server = app.listen(env.PORT, () => {
+      logger.info(`Product Service listening on port ${env.PORT}`);
     });
 
     process.on('SIGTERM', () => {

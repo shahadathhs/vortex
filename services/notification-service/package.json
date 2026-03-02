@@ -20,7 +20,8 @@
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
-    "nodemailer": "catalog:"
+    "nodemailer": "catalog:",
+    "@systemix/env": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",
