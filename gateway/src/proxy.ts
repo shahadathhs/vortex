@@ -15,6 +15,14 @@ const services = [
   },
   { path: '/api/orders', url: config.getOrThrow(GatewayEnv.ORDER_SERVICE_URL) },
   { path: '/api/cart', url: config.getOrThrow(GatewayEnv.ORDER_SERVICE_URL) },
+  {
+    path: '/api/checkout',
+    url: config.getOrThrow(GatewayEnv.PAYMENT_SERVICE_URL),
+  },
+  {
+    path: '/api/webhooks',
+    url: config.getOrThrow(GatewayEnv.PAYMENT_SERVICE_URL),
+  },
 ];
 
 services.forEach(({ path, url }) => {

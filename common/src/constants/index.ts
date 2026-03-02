@@ -6,6 +6,7 @@ export {
   GatewayEnv,
   NotificationEnv,
   OrderEnv,
+  PaymentEnv,
   ProductEnv,
 } from './env';
 export { Permission, Role, RolePermissions } from './permissions';

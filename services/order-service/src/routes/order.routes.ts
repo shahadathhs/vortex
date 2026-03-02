@@ -9,7 +9,6 @@ import { Router } from 'express';
 import { config } from '../config/config';
 import { orderController } from '../controllers/order.controller';
 import {
-  createOrderSchema,
   getOrdersQuerySchema,
   orderIdParamSchema,
   updateOrderStatusSchema,
@@ -20,12 +19,6 @@ const auth = [protect(config.JWT_SECRET), requireUser];
 
 const router: Router = Router();
 
-router.post(
-  '/',
-  ...auth,
-  validateRequest(createOrderSchema),
-  asyncHandler(orderController.createOrder),
-);
 router.get(
   '/',
   ...auth,

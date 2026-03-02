@@ -33,6 +33,14 @@ export default {
       },
     },
     {
+      name: 'vortex-payment-service',
+      script: './services/payment-service/dist/server.js',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3005,
+      },
+    },
+    {
       name: 'vortex-notification-service',
       script: './services/notification-service/dist/server.js',
       env: {

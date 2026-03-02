@@ -15,6 +15,7 @@ catalog:
   nodemailer: ^6.9.16
   swagger-ui-express: ^5.0.1
   express-rate-limit: ^7.5.0
+  stripe: ^17.5.0
   # Dev - shared
   typescript: ^5.9.3
   rimraf: ^6.1.3

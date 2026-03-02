@@ -31,7 +31,8 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
 | **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                                                         |
 | **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`                                              |
 | **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated`                                        |
-| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`                                            |
+| **Order Service**        | Order processing, cart, order lifecycle            | MongoDB (`vortex_order`)   | `order.created`, `order.updated`                                            |
+| **Payment Service**      | Checkout from cart, Stripe PaymentIntent, webhooks | N/A                        | N/A                                                                         |
 | **Notification Service** | Event consumer + email (Nodemailer/SMTP)           | N/A (event consumer)       | Consumes `user.created`, `order.*`, `product.*`, `password.reset.requested` |
 
 ### Infrastructure Components
@@ -84,8 +85,14 @@ All features below are **fully implemented**—no placeholders or stubs.
 ### 🛒 Cart & Order Service
 
 - **Cart**: Get, add item, update quantity, remove item, clear; persisted per user
-- **Orders**: Create order from cart items; list by user; get by ID; update status (pending → confirmed → processing → shipped → delivered → completed)
+- **Orders**: List by user; get by ID; update status (admin). Orders created via checkout only
 - **Events**: `order.created` and `order.updated` published to RabbitMQ (includes `userEmail` for notifications)
+
+### 💳 Payment Service
+
+- **Checkout**: `POST /api/checkout` (auth) – validates cart, fetches product prices, creates order (pending), creates Stripe PaymentIntent; returns `{ orderId, clientSecret }`
+- **Webhook**: `POST /api/webhooks/stripe` – handles `payment_intent.succeeded` (confirm order, clear cart) and `payment_intent.payment_failed` (cancel order)
+- **Flow**: Customer adds to cart → checkout → pay via Stripe.js → webhook confirms → cart cleared, order confirmed
 
 ### 🔔 Notification Service
 
@@ -134,7 +141,8 @@ vortex/
 │   ├── auth-service/          # Authentication & Authorization (port 3001)
 │   ├── product-service/       # Product Catalog Management (port 3002)
 │   ├── order-service/         # Order Processing + Cart (port 3003)
-│   └── notification-service/  # Event-driven Notifications (port 3004)
+│   ├── notification-service/  # Event-driven Notifications (port 3004)
+│   └── payment-service/       # Checkout & Stripe (port 3005)
 ├── compose.infra.yaml         # MongoDB, RabbitMQ, Redis, Mongo Express
 ├── compose.yaml               # Application services
 ├── ecosystem.config.mjs       # PM2 process definitions
@@ -207,6 +215,7 @@ make up-auth          # Auth service only
 make up-product       # Product service only
 make up-order         # Order service only
 make up-notification  # Notification service only
+make up-payment       # Payment service only
 make up-gateway       # Gateway only
 ```
 
@@ -240,12 +249,14 @@ make dev-auth
 make dev-order
 make dev-product
 make dev-notification
+make dev-payment
 
 # Or use pnpm directly
 pnpm auth:dev
 pnpm product:dev
 pnpm order:dev
 pnpm notification:dev
+pnpm payment:dev
 pnpm gateway:dev
 ```
 
@@ -317,7 +328,8 @@ All routes go through the Gateway at `http://localhost:3000`.
 | **Auth**              | `/api/auth`       | `POST /register`, `POST /login`, `POST /refresh-token`, `GET /profile`, `PATCH /profile`, `PATCH /password`, `POST /logout`, `POST /forgot-password`, `POST /reset-password` |
 | **Auth (Superadmin)** | `/api/auth/admin` | `POST /` (create admin), `GET /` (list admins), `DELETE /:id` (delete admin), `POST /reset-password` (superadmin: change any user's password)                                |
 | **Products**          | `/api/products`   | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                                                            |
-| **Orders**            | `/api/orders`     | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                                                        |
+| **Checkout**          | `/api/checkout`   | `POST /` (from cart → `{ orderId, clientSecret }`)                                                                                                                           |
+| **Orders**            | `/api/orders`     | `GET /`, `GET /:id`, `GET /user/:userId`, `PUT /:id/status`                                                                                                                  |
 | **Cart**              | `/api/cart`       | `GET /`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                                                                    |
 
 ### API Authentication
@@ -326,8 +338,9 @@ Protected endpoints require the `Authorization: Bearer <token>` header with a va
 
 | Area         | Auth Required | Notes                                                                                                                                                       |
 | ------------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Checkout** | Yes           | Requires authentication. Returns Stripe clientSecret for frontend payment.                                                                                  |
 | **Cart**     | Yes           | All cart endpoints require authentication. User is inferred from JWT.                                                                                       |
-| **Orders**   | Yes           | All order endpoints require authentication. User/ownership from JWT.                                                                                        |
+| **Orders**   | Yes           | All order endpoints require authentication. User/ownership from JWT. Orders created via checkout only.                                                      |
 | **Products** | Partial       | `GET /` and `GET /:id` are public. `POST /`, `PUT /:id`, `DELETE /:id` require admin or vendor role (`PRODUCT_CREATE`, `PRODUCT_UPDATE`, `PRODUCT_DELETE`). |
 
 ## 📊 Service Health Checks & API Docs
@@ -337,6 +350,7 @@ Protected endpoints require the `Authorization: Bearer <token>` header with a va
 - Auth: http://localhost:3001/health
 - Product: http://localhost:3002/health
 - Order: http://localhost:3003/health
+- Payment: http://localhost:3005/health
 - Notification: http://localhost:3004/health
 
 ## 🔐 Admin Interfaces
@@ -416,6 +430,6 @@ This project is licensed under the **ISC License**. See the [LICENSE](./LICENSE)
 
 ---
 
-**Status**: Full e-commerce flow: auth, products, cart, orders, inventory decrement, email notifications, password reset, API docs, rate limiting.
+**Status**: Full e-commerce flow: auth, products, cart, checkout (Stripe), orders, inventory decrement, email notifications, password reset, API docs, rate limiting.
 
 **Purpose**: Portfolio demonstration of event-driven microservices architecture.

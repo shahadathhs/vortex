@@ -101,40 +101,50 @@ export const openApiSpec = {
         responses: { 200: { description: 'OK' } },
       },
     },
-    '/api/orders': {
-      get: {
-        summary: 'List orders',
-        security: [{ bearerAuth: [] }],
-        responses: { 200: { description: 'OK' } },
-      },
+    '/api/checkout': {
       post: {
-        summary: 'Create order',
+        summary: 'Checkout from cart',
+        description:
+          'Validates cart, creates order (pending), creates Stripe PaymentIntent. Returns orderId and clientSecret for Stripe.js confirmPayment.',
         security: [{ bearerAuth: [] }],
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['items', 'totalPrice'],
-                properties: {
-                  items: {
-                    type: 'array',
-                    items: {
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    data: {
                       type: 'object',
                       properties: {
-                        productId: { type: 'string' },
-                        quantity: { type: 'number' },
-                        price: { type: 'number' },
+                        orderId: { type: 'string' },
+                        clientSecret: { type: 'string' },
                       },
                     },
                   },
-                  totalPrice: { type: 'number' },
                 },
               },
             },
           },
         },
-        responses: { 201: { description: 'Created' } },
+      },
+    },
+    '/api/orders': {
+      get: {
+        summary: 'List orders',
+        description:
+          'Orders are created via checkout only. No direct POST /orders.',
+        security: [{ bearerAuth: [] }],
+        responses: { 200: { description: 'OK' } },
+      },
+    },
+    '/api/webhooks/stripe': {
+      post: {
+        summary: 'Stripe webhook',
+        description:
+          'Internal endpoint for Stripe webhooks. Handles payment_intent.succeeded and payment_intent.payment_failed.',
+        responses: { 200: { description: 'OK' } },
       },
     },
     '/api/cart': {

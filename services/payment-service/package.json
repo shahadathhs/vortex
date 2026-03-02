@@ -1,0 +1,32 @@
+{
+  "name": "payment-service",
+  "version": "1.0.0",
+  "description": "Payment & Checkout Service for Vortex",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
+    "build": "rimraf dist && tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check . --ignore-path .prettierignore",
+    "format:fix": "prettier --write . --ignore-path .prettierignore",
+    "clean": "rimraf dist node_modules",
+    "clean:turbo": "rimraf .turbo dist node_modules"
+  },
+  "dependencies": {
+    "@vortex/common": "workspace:*",
+    "cors": "catalog:",
+    "express": "catalog:",
+    "helmet": "catalog:",
+    "stripe": "catalog:"
+  },
+  "devDependencies": {
+    "@types/cors": "catalog:",
+    "@types/express": "catalog:",
+    "rimraf": "catalog:",
+    "ts-node-dev": "catalog:",
+    "typescript": "catalog:"
+  }
+}
