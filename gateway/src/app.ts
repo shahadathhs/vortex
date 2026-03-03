@@ -2,9 +2,7 @@ import { apiInfoLogger, errorHandler, notFound } from '@vortex/common';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import swaggerUi from 'swagger-ui-express';
 
-import { openApiSpec } from './docs/openapi';
 import { apiRateLimiter } from './middleware/rate-limit';
 import proxyRouter from './proxy';
 
@@ -15,7 +13,46 @@ app.use(cors());
 app.use(apiRateLimiter);
 app.use(apiInfoLogger);
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
+app.get('/', (req, res) => {
+  const base = `${req.protocol}://${req.get('host')}`;
+  res.json({
+    name: 'Vortex API Gateway',
+    gateway: {
+      health: `${base}/health`,
+    },
+    services: [
+      {
+        name: 'auth-service',
+        api: `${base}/api/auth`,
+        health: `${base}/api/auth/health`,
+      },
+      {
+        name: 'product-service',
+        api: `${base}/api/products`,
+        health: `${base}/api/products/health`,
+      },
+      {
+        name: 'order-service',
+        api: `${base}/api/orders`,
+        health: `${base}/api/orders/health`,
+      },
+      {
+        name: 'cart (order-service)',
+        api: `${base}/api/cart`,
+        health: `${base}/api/cart/health`,
+      },
+      {
+        name: 'payment-service',
+        api: `${base}/api/checkout`,
+        health: `${base}/api/checkout/health`,
+      },
+      {
+        name: 'notification-service',
+        note: 'internal event consumer — no public API',
+      },
+    ],
+  });
+});
 
 app.get('/health', (req, res) => {
   res.json({ service: 'gateway', status: 'healthy', timestamp: new Date() });

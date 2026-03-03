@@ -10,7 +10,7 @@ import { Router } from 'express';
 
 import { authController } from '../controllers/auth.controller';
 import { authService } from '../services/auth.service';
-import { jwtSecret } from '../config/config';
+import { config } from '../config/config';
 import {
   adminIdParamSchema,
   adminResetPasswordSchema,
@@ -20,7 +20,7 @@ import {
 const router: Router = Router();
 
 const auth = [
-  protect(jwtSecret, {
+  protect(config.JWT_SECRET, {
     fetchUser: authService.fetchUserForAuth,
   }),
   requireUser,

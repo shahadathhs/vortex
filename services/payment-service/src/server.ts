@@ -1,7 +1,7 @@
 import { logger } from '@vortex/common';
 
 import app from './app';
-import { env } from './config/config';
+import { config } from './config/config';
 
 process.on('uncaughtException', (err: Error) => {
   logger.error('UNCAUGHT EXCEPTION! Shutting down...', err);
@@ -15,8 +15,8 @@ process.on('unhandledRejection', (reason: unknown) => {
 
 const start = () => {
   try {
-    const server = app.listen(env.PORT, () => {
-      logger.info(`Payment Service listening on port ${env.PORT}`);
+    const server = app.listen(config.PORT, () => {
+      logger.info(`Payment Service listening on port ${config.PORT}`);
     });
 
     process.on('SIGTERM', () => {

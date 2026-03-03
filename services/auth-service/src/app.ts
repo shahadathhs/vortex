@@ -14,6 +14,13 @@ app.use(express.json());
 app.use(apiInfoLogger);
 
 // Routes
+app.get('/', (req, res) => {
+  res.json({
+    service: 'auth-service',
+    routes: { auth: '/api/auth', health: '/health' },
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({
     service: 'auth-service',

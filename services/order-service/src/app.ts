@@ -14,6 +14,13 @@ app.use(cors());
 app.use(express.json());
 app.use(apiInfoLogger);
 
+app.get('/', (req, res) => {
+  res.json({
+    service: 'order-service',
+    routes: { orders: '/api/orders', cart: '/api/cart', health: '/health' },
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({
     service: 'order-service',

@@ -1,7 +1,8 @@
-import { env, internalSecret } from '../config/config';
+import { config } from '../config/config';
 
-const orderUrl = env.ORDER_SERVICE_URL ?? 'http://localhost:3003';
-const productUrl = env.PRODUCT_SERVICE_URL ?? 'http://localhost:3002';
+const orderUrl = config.ORDER_SERVICE_URL;
+const productUrl = config.PRODUCT_SERVICE_URL;
+const internalSecret = config.INTERNAL_SECRET;
 
 export async function getCart(authHeader: string) {
   const res = await fetch(`${orderUrl}/api/cart`, {

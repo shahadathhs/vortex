@@ -171,8 +171,9 @@ vortex/
 2. **Configure environment variables**
 
    ```bash
-   cp .env.production .env.local
-   # Edit .env.local with your credentials
+   cp .env.example .env
+   # Fill in: JWT_SECRET, INTERNAL_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+   # All other values have sensible defaults for local development
    ```
 
 3. **Install dependencies (for local development)**
@@ -276,14 +277,15 @@ make pm2-stop       # Stop all
 
 ### pnpm / Make Commands
 
-| Command                           | Description             |
-| --------------------------------- | ----------------------- |
-| `make install`                    | Install dependencies    |
-| `make build-js`                   | Build all packages      |
-| `make typecheck`                  | Type-check all packages |
-| `make lint` / `make lint-fix`     | Lint and fix            |
-| `make format` / `make format-fix` | Format code             |
-| `make ci-fix`                     | Lint + format fix       |
+| Command                           | Description                           |
+| --------------------------------- | ------------------------------------- |
+| `make install`                    | Install dependencies                  |
+| `make build-js`                   | Build all packages                    |
+| `make typecheck`                  | Type-check all packages               |
+| `make lint` / `make lint-fix`     | Lint and fix                          |
+| `make format` / `make format-fix` | Format code                           |
+| `make ci-check`                   | Lint + format + typecheck (read-only) |
+| `make ci-fix`                     | Lint + format fix                     |
 
 ### Build All Services
 
@@ -365,17 +367,23 @@ Protected endpoints require the `Authorization: Bearer <token>` header with a va
 
 ## 📝 Configuration
 
-All services use environment-based configuration via the `@vortex/common` package:
+Each service loads its own environment variables via `dotenv` with a `config.ts` file. All values have sensible defaults so the project runs locally with no `.env` required — only secrets need to be set.
 
 ```typescript
-import { createConfig, AuthEnv } from '@vortex/common';
+// services/<name>/src/config/config.ts
+import dotenv from 'dotenv';
+dotenv.config();
 
-export const config = createConfig(AuthEnv);
-
-// Access configuration
-const port = config.PORT;
-const mongoUri = config.MONGODB_URI;
+export const config = {
+  PORT: Number(process.env.PORT) || 3001,
+  MONGODB_URI:
+    process.env.MONGODB_URI ?? 'mongodb://localhost:27017/vortex-auth',
+  JWT_SECRET: process.env.JWT_SECRET ?? '',
+  RABBITMQ_URL: process.env.RABBITMQ_URL ?? 'amqp://127.0.0.1:5672',
+};
 ```
+
+A single root `.env` file is used for all services. Copy `.env.example` to `.env` and set the required secrets.
 
 ## 🎯 Design Principles
 

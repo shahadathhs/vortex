@@ -12,7 +12,7 @@ import {
 } from '../handlers/order.handlers';
 import { handlePasswordResetRequested } from '../handlers/password.handlers';
 import { handleUserCreated } from '../handlers/user.handlers';
-import { env } from '../config/config';
+import { config } from '../config/config';
 
 interface NotificationPayload {
   event?: string;
@@ -52,7 +52,7 @@ async function handleMessage(content: string) {
 }
 
 function startConsumer() {
-  const connection = RabbitMQManager.getConnection(env.RABBITMQ_URL);
+  const connection = RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
   connection.createChannel({
     setup: async (channel: Channel) => {

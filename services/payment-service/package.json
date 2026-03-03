@@ -21,7 +21,7 @@
     "express": "catalog:",
     "helmet": "catalog:",
     "stripe": "catalog:",
-    "@systemix/env": "catalog:"
+    "dotenv": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",

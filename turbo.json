@@ -3,17 +3,26 @@
   "globalDependencies": ["package.json", "tsconfig.json"],
   "globalEnv": [
     "NODE_ENV",
+    "PORT",
+    "MONGODB_URI",
+    "JWT_SECRET",
+    "RABBITMQ_URL",
     "SUPERADMIN_EMAIL",
     "SUPERADMIN_PASSWORD",
+    "APP_URL",
+    "AUTH_SERVICE_URL",
+    "PRODUCT_SERVICE_URL",
+    "ORDER_SERVICE_URL",
+    "NOTIFICATION_SERVICE_URL",
+    "PAYMENT_SERVICE_URL",
+    "INTERNAL_SECRET",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
     "FROM_EMAIL",
     "SMTP_HOST",
     "SMTP_PORT",
     "SMTP_USER",
-    "SMTP_PASS",
-    "APP_URL",
-    "INTERNAL_SECRET",
-    "STRIPE_SECRET_KEY",
-    "STRIPE_WEBHOOK_SECRET"
+    "SMTP_PASS"
   ],
   "tasks": {
     "build": {

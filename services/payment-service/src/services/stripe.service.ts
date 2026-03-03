@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
 
-import { env } from '../config/config';
+import { config } from '../config/config';
 
-const secretKey = env.STRIPE_SECRET_KEY;
+const secretKey = config.STRIPE_SECRET_KEY;
 let stripe: Stripe | null = null;
 
 if (secretKey) {
@@ -29,7 +29,7 @@ export function constructWebhookEvent(
   payload: string | Buffer,
   signature: string,
 ): Stripe.Event {
-  const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
+  const webhookSecret = config.STRIPE_WEBHOOK_SECRET;
   if (!stripe || !webhookSecret) {
     throw new Error('Stripe webhook not configured');
   }

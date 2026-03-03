@@ -11,6 +11,17 @@ const app: express.Application = express();
 app.use(helmet());
 app.use(cors());
 
+app.get('/', (req, res) => {
+  res.json({
+    service: 'payment-service',
+    routes: {
+      checkout: '/api/checkout',
+      webhooks: '/api/webhooks/stripe',
+      health: '/health',
+    },
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({
     service: 'payment-service',

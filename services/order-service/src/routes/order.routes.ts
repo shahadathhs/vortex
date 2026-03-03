@@ -6,7 +6,7 @@ import {
 } from '@vortex/common';
 import { Router } from 'express';
 
-import { jwtSecret } from '../config/config';
+import { config } from '../config/config';
 import { orderController } from '../controllers/order.controller';
 import {
   getOrdersQuerySchema,
@@ -15,7 +15,7 @@ import {
   userIdParamSchema,
 } from '../schemas/order.schema';
 
-const auth = [protect(jwtSecret), requireUser];
+const auth = [protect(config.JWT_SECRET), requireUser];
 
 const router: Router = Router();
 

@@ -5,7 +5,7 @@ import {
   QueueName,
   RabbitMQManager,
 } from '@vortex/common';
-import { env } from '../config/config';
+import { config } from '../config/config';
 import { Product } from '../models/Product';
 
 interface OrderItem {
@@ -79,7 +79,7 @@ function handleMessage(content: string) {
 }
 
 export function startOrderConsumer() {
-  const connection = RabbitMQManager.getConnection(env.RABBITMQ_URL);
+  const connection = RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
   connection.createChannel({
     setup: async (channel: Channel) => {

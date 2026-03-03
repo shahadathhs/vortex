@@ -1,7 +1,7 @@
 import { logger } from '@vortex/common';
 
 import app from './app';
-import { env, getSmtpConfig } from './config/config';
+import { config, getSmtpConfig } from './config/config';
 import { initEmailTransport } from './lib/email';
 import { notificationService } from './services/notification.service';
 
@@ -27,8 +27,8 @@ const start = () => {
     );
     notificationService.startConsumer();
 
-    const server = app.listen(env.PORT, () => {
-      logger.info(`Notification Service listening on port ${env.PORT}`);
+    const server = app.listen(config.PORT, () => {
+      logger.info(`Notification Service listening on port ${config.PORT}`);
     });
 
     process.on('SIGTERM', () => {

@@ -1,23 +1,23 @@
-import { load } from '@systemix/env';
+import dotenv from 'dotenv';
 
-const schema = {
-  PORT: { type: 'number' as const, default: 3004 },
-  RABBITMQ_URL: { type: 'string' as const, default: 'amqp://127.0.0.1:5672' },
-  SMTP_HOST: { type: 'string' as const, default: '' },
-  SMTP_PORT: { type: 'string' as const, default: '587' },
-  SMTP_USER: { type: 'string' as const, default: '' },
-  SMTP_PASS: { type: 'string' as const, default: '', secret: true },
-  FROM_EMAIL: { type: 'string' as const, default: 'noreply@vortex.local' },
+dotenv.config({ path: '.env' });
+
+export const config = {
+  PORT: Number(process.env.PORT) || 3004,
+  RABBITMQ_URL: process.env.RABBITMQ_URL ?? 'amqp://127.0.0.1:5672',
+  SMTP_HOST: process.env.SMTP_HOST ?? '',
+  SMTP_PORT: Number(process.env.SMTP_PORT) || 587,
+  SMTP_USER: process.env.SMTP_USER ?? '',
+  SMTP_PASS: process.env.SMTP_PASS ?? '',
+  FROM_EMAIL: process.env.FROM_EMAIL ?? 'noreply@vortex.local',
 };
-
-export const env = load(schema, { fromFile: ['.env', '.env.local'] });
 
 export function getSmtpConfig() {
   return {
-    host: env.SMTP_HOST,
-    port: parseInt(env.SMTP_PORT ?? '587', 10),
-    user: env.SMTP_USER,
-    pass: env.SMTP_PASS,
-    fromEmail: env.FROM_EMAIL,
+    host: config.SMTP_HOST,
+    port: config.SMTP_PORT,
+    user: config.SMTP_USER,
+    pass: config.SMTP_PASS,
+    fromEmail: config.FROM_EMAIL,
   };
 }

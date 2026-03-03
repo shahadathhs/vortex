@@ -1,111 +1,85 @@
 export const openApiSpec = {
   openapi: '3.0.0',
-  info: { title: 'Vortex API', version: '1.0.0' },
-  servers: [{ url: '/', description: 'Gateway' }],
+  info: {
+    title: 'Vortex API',
+    version: '1.3.0',
+    description: `
+## Vortex — Event-Driven E-Commerce API
+
+All requests go through the **API Gateway** at \`/\`.
+
+### Services
+
+| Service | Base Path | Description |
+|---|---|---|
+| **Auth** | \`/api/auth\` | Registration, login, JWT, profile, password reset, admin management |
+| **Products** | \`/api/products\` | Product catalog, search, inventory |
+| **Cart** | \`/api/cart\` | Per-user cart: add, update, remove, clear |
+| **Orders** | \`/api/orders\` | Order lifecycle — created via checkout only |
+| **Checkout** | \`/api/checkout\` | Validates cart → creates order → returns Stripe \`clientSecret\` |
+| **Webhooks** | \`/api/webhooks\` | Stripe webhook — confirms or cancels orders |
+
+### Authentication
+
+Protected endpoints require \`Authorization: Bearer <token>\`.
+Get a token from \`POST /api/auth/login\` or \`POST /api/auth/register\`.
+
+### E-Commerce Flow
+
+1. Register / login → receive JWT
+2. Browse products → \`GET /api/products\`
+3. Add to cart → \`POST /api/cart\`
+4. Checkout → \`POST /api/checkout\` → receive \`clientSecret\`
+5. Confirm payment via Stripe.js using \`clientSecret\`
+6. Stripe webhook → order confirmed, cart cleared, inventory decremented
+    `,
+  },
+  servers: [{ url: '/', description: 'API Gateway' }],
   paths: {
-    '/api/auth/register': {
-      post: {
-        summary: 'Register',
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['email', 'password', 'firstName', 'lastName'],
-                properties: {
-                  email: { type: 'string', format: 'email' },
-                  password: { type: 'string', minLength: 6 },
-                  firstName: { type: 'string' },
-                  lastName: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-        responses: { 201: { description: 'Created' } },
-      },
-    },
-    '/api/auth/login': {
-      post: {
-        summary: 'Login',
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['email', 'password'],
-                properties: {
-                  email: { type: 'string' },
-                  password: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-        responses: { 200: { description: 'OK' } },
-      },
-    },
-    '/api/auth/forgot-password': {
-      post: {
-        summary: 'Request password reset',
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['email'],
-                properties: { email: { type: 'string', format: 'email' } },
-              },
-            },
-          },
-        },
-        responses: { 200: { description: 'OK' } },
-      },
-    },
-    '/api/auth/reset-password': {
-      post: {
-        summary: 'Reset password with token',
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['token', 'newPassword'],
-                properties: {
-                  token: { type: 'string' },
-                  newPassword: { type: 'string', minLength: 8 },
-                },
-              },
-            },
-          },
-        },
-        responses: { 200: { description: 'OK' } },
-      },
-    },
-    '/api/auth/profile': {
+    '/api/auth': {
       get: {
-        summary: 'Get profile',
-        security: [{ bearerAuth: [] }],
+        tags: ['Auth Service'],
+        summary: 'Auth Service',
+        description:
+          'Handles user registration, login, JWT access + refresh tokens, profile, password reset, and admin CRUD. Key routes: `POST /register`, `POST /login`, `POST /refresh-token`, `POST /logout`, `GET /profile`, `PATCH /profile`, `PATCH /password`, `POST /forgot-password`, `POST /reset-password`. Admin routes (superadmin only): `POST /admin`, `GET /admin`, `DELETE /admin/:id`, `POST /admin/reset-password`.',
         responses: { 200: { description: 'OK' } },
       },
     },
     '/api/products': {
       get: {
-        summary: 'List products',
-        parameters: [
-          { name: 'q', in: 'query', schema: { type: 'string' } },
-          { name: 'category', in: 'query', schema: { type: 'string' } },
-          { name: 'minPrice', in: 'query', schema: { type: 'number' } },
-          { name: 'maxPrice', in: 'query', schema: { type: 'number' } },
-        ],
+        tags: ['Product Service'],
+        summary: 'Product Service',
+        description:
+          'Product catalog with search and filtering. Public: `GET /` (supports `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`), `GET /:id`. Protected (admin/vendor): `POST /`, `PUT /:id`, `DELETE /:id`.',
+        responses: { 200: { description: 'OK' } },
+      },
+    },
+    '/api/cart': {
+      get: {
+        tags: ['Cart (Order Service)'],
+        summary: 'Cart Service',
+        description:
+          'Per-user cart persisted in the Order Service. All endpoints require authentication. Routes: `GET /`, `POST /` (add item), `PUT /:productId` (update qty), `DELETE /:productId` (remove), `POST /clear`.',
+        security: [{ bearerAuth: [] }],
+        responses: { 200: { description: 'OK' } },
+      },
+    },
+    '/api/orders': {
+      get: {
+        tags: ['Order Service'],
+        summary: 'Order Service',
+        description:
+          'Orders are created via checkout only — no direct `POST /orders`. Routes: `GET /` (own orders), `GET /:id`, `GET /user/:userId` (admin), `PUT /:id/status` (admin).',
+        security: [{ bearerAuth: [] }],
         responses: { 200: { description: 'OK' } },
       },
     },
     '/api/checkout': {
       post: {
-        summary: 'Checkout from cart',
+        tags: ['Payment Service'],
+        summary: 'Checkout',
         description:
-          'Validates cart, creates order (pending), creates Stripe PaymentIntent. Returns orderId and clientSecret for Stripe.js confirmPayment.',
+          'Validates cart items and stock, fetches live product prices, creates a pending order, and creates a Stripe PaymentIntent. Returns `{ orderId, clientSecret }` — use `clientSecret` with Stripe.js `confirmPayment` to complete the payment on the frontend.',
         security: [{ bearerAuth: [] }],
         responses: {
           200: {
@@ -115,13 +89,8 @@ export const openApiSpec = {
                 schema: {
                   type: 'object',
                   properties: {
-                    data: {
-                      type: 'object',
-                      properties: {
-                        orderId: { type: 'string' },
-                        clientSecret: { type: 'string' },
-                      },
-                    },
+                    orderId: { type: 'string' },
+                    clientSecret: { type: 'string' },
                   },
                 },
               },
@@ -130,27 +99,12 @@ export const openApiSpec = {
         },
       },
     },
-    '/api/orders': {
-      get: {
-        summary: 'List orders',
-        description:
-          'Orders are created via checkout only. No direct POST /orders.',
-        security: [{ bearerAuth: [] }],
-        responses: { 200: { description: 'OK' } },
-      },
-    },
     '/api/webhooks/stripe': {
       post: {
-        summary: 'Stripe webhook',
+        tags: ['Payment Service'],
+        summary: 'Stripe Webhook',
         description:
-          'Internal endpoint for Stripe webhooks. Handles payment_intent.succeeded and payment_intent.payment_failed.',
-        responses: { 200: { description: 'OK' } },
-      },
-    },
-    '/api/cart': {
-      get: {
-        summary: 'Get cart',
-        security: [{ bearerAuth: [] }],
+          'Receives Stripe webhook events. `payment_intent.succeeded` → confirms order + clears cart. `payment_intent.payment_failed` → cancels order. Configure in Stripe Dashboard pointing to this endpoint.',
         responses: { 200: { description: 'OK' } },
       },
     },

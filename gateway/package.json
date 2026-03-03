@@ -22,7 +22,7 @@
     "helmet": "catalog:",
     "express-rate-limit": "catalog:",
     "http-proxy-middleware": "^3.0.5",
-    "@systemix/env": "catalog:",
+    "dotenv": "catalog:",
     "swagger-ui-express": "catalog:"
   },
   "devDependencies": {

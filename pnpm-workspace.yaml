@@ -5,7 +5,7 @@ packages:
 
 catalog:
   # Runtime - shared across packages
-  '@systemix/env': ^0.2.0
+  dotenv: ^17.3.1
   bcryptjs: ^3.0.3
   cors: ^2.8.6
   express: ^5.2.1

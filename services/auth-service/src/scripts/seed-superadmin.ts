@@ -4,12 +4,12 @@
  */
 import { logger } from '@vortex/common';
 
-import { env } from '../config/config';
+import { config } from '../config/config';
 import { User } from '../models/User';
 
 export async function seedSuperadmin(): Promise<void> {
-  const email = env.SUPERADMIN_EMAIL?.trim();
-  const password = env.SUPERADMIN_PASSWORD;
+  const email = config.SUPERADMIN_EMAIL.trim();
+  const password = config.SUPERADMIN_PASSWORD;
 
   if (!email || !password) {
     logger.info(
@@ -59,9 +59,9 @@ export async function seedSuperadmin(): Promise<void> {
  */
 async function runStandalone() {
   const mongoose = await import('mongoose');
-  const mongoUri = env.MONGODB_URI;
-  const email = env.SUPERADMIN_EMAIL?.trim();
-  const password = env.SUPERADMIN_PASSWORD;
+  const mongoUri = config.MONGODB_URI;
+  const email = config.SUPERADMIN_EMAIL?.trim();
+  const password = config.SUPERADMIN_PASSWORD;
 
   if (!mongoUri || !email || !password) {
     console.error(

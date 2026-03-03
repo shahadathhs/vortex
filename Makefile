@@ -1,5 +1,5 @@
-# Config
-ENV_FILE := .env.production
+# Config — override any of these via .env or environment
+ENV_FILE := .env
 DOCKER_REGISTRY := shahadathhs
 PACKAGE_NAME := vortex
 VERSION := latest
@@ -13,7 +13,7 @@ COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 # Services List
 SERVICES := gateway auth product order payment notification
 
-.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
+.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-check ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
 
 help:
 	@echo "Vortex - Makefile Commands"
@@ -29,7 +29,8 @@ help:
 	@echo "  make lint-fix         Lint and fix all packages"
 	@echo "  make format           Check formatting"
 	@echo "  make format-fix       Format all packages"
-	@echo "  make ci-fix          Lint + format fix (CI)"
+	@echo "  make ci-check        Lint + format + typecheck (read-only CI check)
+  make ci-fix          Lint + format fix (auto-fix)"
 	@echo "  make clean-pkg       Clean build artifacts and node_modules"
 	@echo "  make deploy-<svc>   Deploy package to ./dist/deploy/<svc> (gateway, auth, order, product, notification)"
 	@echo ""
@@ -103,6 +104,9 @@ format:
 
 format-fix:
 	pnpm format:fix
+
+ci-check:
+	pnpm ci:check
 
 ci-fix:
 	pnpm ci:fix

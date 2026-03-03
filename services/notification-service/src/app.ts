@@ -10,6 +10,14 @@ app.use(cors());
 app.use(express.json());
 app.use(apiInfoLogger);
 
+app.get('/', (req, res) => {
+  res.json({
+    service: 'notification-service',
+    note: 'internal event consumer — no public API',
+    routes: { health: '/health' },
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({
     service: 'notification-service',

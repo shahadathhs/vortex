@@ -1,7 +1,7 @@
 import { UnauthorizedError } from '@vortex/common';
 import type { Request, Response, NextFunction } from 'express';
 
-import { internalSecret } from '../config/config';
+import { config } from '../config/config';
 
 export function requireInternalSecret(
   req: Request,
@@ -9,7 +9,7 @@ export function requireInternalSecret(
   next: NextFunction,
 ) {
   const secret = req.headers['x-internal-secret'];
-  if (secret !== internalSecret) {
+  if (secret !== config.INTERNAL_SECRET) {
     return next(new UnauthorizedError('Invalid internal secret'));
   }
   next();

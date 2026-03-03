@@ -137,8 +137,13 @@ services:
       - PORT=3004
       - NODE_ENV=production
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - FROM_EMAIL=${FROM_EMAIL:-noreply@vortex.local}
+      - APP_URL=${APP_URL:-http://localhost:3000}
     depends_on:
-      - mongodb
       - rabbitmq
     networks:
       - network

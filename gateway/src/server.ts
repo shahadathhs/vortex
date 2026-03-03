@@ -1,10 +1,10 @@
 import { logger } from '@vortex/common';
 
 import app from './app';
-import { env } from './config/config';
+import { config } from './config/config';
 
-const server = app.listen(env.PORT, () => {
-  logger.info(`API Gateway listening on port ${env.PORT}`);
+const server = app.listen(config.PORT, () => {
+  logger.info(`API Gateway listening on port ${config.PORT}`);
 });
 
 process.on('uncaughtException', (err: Error) => {
