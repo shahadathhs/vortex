@@ -2,21 +2,14 @@
  * Seeds a superadmin user. Runs on auth-service startup when SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD are set.
  * Can also run standalone: pnpm auth:seed
  */
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Load env before config (for standalone run)
-dotenv.config({ path: path.join(process.cwd(), '.env') });
-dotenv.config({ path: path.join(process.cwd(), '.env.local') });
-
 import { logger } from '@vortex/common';
 
 import { config } from '../config/config';
 import { User } from '../models/User';
 
 export async function seedSuperadmin(): Promise<void> {
-  const email = config.get('SUPERADMIN_EMAIL')?.trim();
-  const password = config.get('SUPERADMIN_PASSWORD');
+  const email = config.SUPERADMIN_EMAIL.trim();
+  const password = config.SUPERADMIN_PASSWORD;
 
   if (!email || !password) {
     logger.info(
@@ -66,9 +59,9 @@ export async function seedSuperadmin(): Promise<void> {
  */
 async function runStandalone() {
   const mongoose = await import('mongoose');
-  const mongoUri = process.env.MONGODB_URI;
-  const email = process.env.SUPERADMIN_EMAIL;
-  const password = process.env.SUPERADMIN_PASSWORD;
+  const mongoUri = config.MONGODB_URI;
+  const email = config.SUPERADMIN_EMAIL?.trim();
+  const password = config.SUPERADMIN_PASSWORD;
 
   if (!mongoUri || !email || !password) {
     console.error(

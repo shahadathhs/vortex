@@ -15,5 +15,9 @@ export default [
         tsconfigRootDir: __dirname,
       },
     },
+    rules: {
+      // eslint-plugin-import@2.x has compatibility issues with ESLint 10 (getTokenOrCommentBefore)
+      'import/order': 'off',
+    },
   },
 ];

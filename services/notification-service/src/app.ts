@@ -1,4 +1,4 @@
-import { errorHandler } from '@vortex/common';
+import { apiInfoLogger, errorHandler, notFound } from '@vortex/common';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
@@ -8,6 +8,15 @@ const app: express.Application = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(apiInfoLogger);
+
+app.get('/', (req, res) => {
+  res.json({
+    service: 'notification-service',
+    note: 'internal event consumer — no public API',
+    routes: { health: '/health' },
+  });
+});
 
 app.get('/health', (req, res) => {
   res.json({
@@ -17,6 +26,7 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use(notFound);
 app.use(errorHandler);
 
 export default app;

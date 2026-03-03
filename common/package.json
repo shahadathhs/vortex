@@ -60,7 +60,6 @@
   "dependencies": {
     "amqp-connection-manager": "^5.0.0",
     "amqplib": "^0.10.9",
-    "dotenv": "catalog:",
     "express": "catalog:",
     "jsonwebtoken": "^9.0.0",
     "winston": "^3.17.0",

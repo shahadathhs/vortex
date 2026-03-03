@@ -20,10 +20,14 @@
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
-    "http-proxy-middleware": "^3.0.5"
+    "express-rate-limit": "catalog:",
+    "http-proxy-middleware": "^3.0.5",
+    "dotenv": "catalog:",
+    "swagger-ui-express": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",
+    "@types/swagger-ui-express": "catalog:",
     "@types/express": "catalog:",
     "rimraf": "catalog:",
     "ts-node-dev": "catalog:",

@@ -1,4 +1,5 @@
 import {
+  asyncHandler,
   checkPermission,
   Permission,
   protect,
@@ -6,8 +7,8 @@ import {
 } from '@vortex/common';
 import { Router } from 'express';
 
-import { config } from '../config/config';
 import { productController } from '../controllers/product.controller';
+import { config } from '../config/config';
 import {
   createProductSchema,
   getProductsSchema,
@@ -22,27 +23,27 @@ router.post(
   protect(config.JWT_SECRET),
   checkPermission(Permission.PRODUCT_CREATE),
   validateRequest(createProductSchema),
-  productController.createProduct,
+  asyncHandler(productController.createProduct),
 );
 router.get(
   '/',
   validateRequest(getProductsSchema),
-  productController.getProducts,
+  asyncHandler(productController.getProducts),
 );
-router.get('/:id', productController.getProductById);
+router.get('/:id', asyncHandler(productController.getProductById));
 router.put(
   '/:id',
   protect(config.JWT_SECRET),
   checkPermission(Permission.PRODUCT_UPDATE),
   validateRequest(updateProductSchema),
-  productController.updateProduct,
+  asyncHandler(productController.updateProduct),
 );
 router.delete(
   '/:id',
   protect(config.JWT_SECRET),
   checkPermission(Permission.PRODUCT_DELETE),
   validateRequest(productIdParamSchema),
-  productController.deleteProduct,
+  asyncHandler(productController.deleteProduct),
 );
 
 export default router;

@@ -1,5 +1,5 @@
-# Config
-ENV_FILE := .env.production
+# Config — override any of these via .env or environment
+ENV_FILE := .env
 DOCKER_REGISTRY := shahadathhs
 PACKAGE_NAME := vortex
 VERSION := latest
@@ -11,9 +11,9 @@ COMPOSE_CMD := docker compose $(COMPOSE_FILE_ARGS) $(COMPOSE_ENV_ARGS)
 COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 
 # Services List
-SERVICES := gateway auth product order notification
+SERVICES := gateway auth product order payment notification
 
-.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
+.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-check ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
 
 help:
 	@echo "Vortex - Makefile Commands"
@@ -22,14 +22,15 @@ help:
 	@echo "pnpm / Development:"
 	@echo "  make install          Install dependencies"
 	@echo "  make dev              Run all services in dev (turbo)"
-	@echo "  make dev-<service>    Run specific service (gateway, auth, order, product, notification)"
+	@echo "  make dev-<service>    Run specific service (gateway, auth, order, product, payment, notification)"
 	@echo "  make build-js         Build all packages (pnpm)"
 	@echo "  make typecheck        Type-check all packages"
 	@echo "  make lint             Lint all packages"
 	@echo "  make lint-fix         Lint and fix all packages"
 	@echo "  make format           Check formatting"
 	@echo "  make format-fix       Format all packages"
-	@echo "  make ci-fix          Lint + format fix (CI)"
+	@echo "  make ci-check        Lint + format + typecheck (read-only CI check)
+  make ci-fix          Lint + format fix (auto-fix)"
 	@echo "  make clean-pkg       Clean build artifacts and node_modules"
 	@echo "  make deploy-<svc>   Deploy package to ./dist/deploy/<svc> (gateway, auth, order, product, notification)"
 	@echo ""
@@ -40,12 +41,12 @@ help:
 	@echo "  make pm2-delete     Delete all PM2 processes"
 	@echo "  make pm2-status     Show PM2 process list"
 	@echo "  make pm2-logs       Tail PM2 logs (all apps)"
-	@echo "  make pm2-logs-<svc> Tail logs for specific app (gateway, auth, order, product, notification)"
+	@echo "  make pm2-logs-<svc> Tail logs for specific app (gateway, auth, order, product, payment, notification)"
 	@echo ""
 	@echo "Docker / Environment:"
 	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
 	@echo "  make up               Start all services"
-	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, notification)"
+	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, payment, notification)"
 	@echo "  make tools           Start dev tools (Mongo Express)"
 	@echo "  make down            Stop all containers"
 	@echo ""
@@ -83,6 +84,9 @@ dev-product:
 dev-notification:
 	pnpm --filter=notification-service dev
 
+dev-payment:
+	pnpm --filter=payment-service dev
+
 build-js:
 	pnpm build
 
@@ -100,6 +104,9 @@ format:
 
 format-fix:
 	pnpm format:fix
+
+ci-check:
+	pnpm ci:check
 
 ci-fix:
 	pnpm ci:fix
@@ -122,6 +129,9 @@ deploy-product:
 
 deploy-notification:
 	pnpm deploy --filter=notification-service dist/deploy/notification-service
+
+deploy-payment:
+	pnpm deploy --filter=payment-service dist/deploy/payment-service
 
 # --- PM2 (production) ---
 
@@ -157,6 +167,9 @@ pm2-logs-product:
 
 pm2-logs-notification:
 	pm2 logs vortex-notification-service
+
+pm2-logs-payment:
+	pm2 logs vortex-payment-service
 
 # --- Docker / Environment ---
 

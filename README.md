@@ -3,11 +3,12 @@
 [![CI](https://github.com/shahadathhs/vortex/actions/workflows/ci.yml/badge.svg)](https://github.com/shahadathhs/vortex/actions/workflows/ci.yml)
 [![Release](https://github.com/shahadathhs/vortex/actions/workflows/release.yml/badge.svg)](https://github.com/shahadathhs/vortex/actions/workflows/release.yml)
 [![Version](https://img.shields.io/github/v/release/shahadathhs/vortex)](https://github.com/shahadathhs/vortex/releases)
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](./LICENSE)
 
 A **portfolio project** showcasing production-grade microservices architecture for e-commerce platforms. Built with Node.js, TypeScript, and designed to demonstrate scalable, cloud-native system design patterns.
 
-> 🛠️ **Interested in contributing?** Read our [Contributing Guide](./CONTRIBUTING.md).
+> 🛠️ **Interested in contributing?** Read our [Contributing Guide](./CONTRIBUTING.md).  
+> 📜 [Code of Conduct](./CODE_OF_CONDUCT.md) · [Security Policy](./SECURITY.md)
 
 ## 🎯 Project Overview
 
@@ -25,13 +26,14 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
 
 ### Microservices
 
-| Service                  | Purpose                                            | Database                   | Events                               |
-| ------------------------ | -------------------------------------------------- | -------------------------- | ------------------------------------ |
-| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                  |
-| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`       |
-| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated` |
-| **Order Service**        | Order processing, order lifecycle management       | MongoDB (`vortex_order`)   | `order.created`, `order.updated`     |
-| **Notification Service** | Event-driven notifications (order confirmations)   | N/A (event consumer)       | Consumes `user.created`, `order.*`   |
+| Service                  | Purpose                                            | Database                   | Events                                                                      |
+| ------------------------ | -------------------------------------------------- | -------------------------- | --------------------------------------------------------------------------- |
+| **Gateway**              | API Gateway for routing and load balancing         | N/A                        | N/A                                                                         |
+| **Auth Service**         | User authentication, authorization, JWT management | MongoDB (`vortex_auth`)    | `user.created`, `user.updated`                                              |
+| **Product Service**      | Product catalog, inventory management              | MongoDB (`vortex_product`) | `product.created`, `product.updated`                                        |
+| **Order Service**        | Order processing, cart, order lifecycle            | MongoDB (`vortex_order`)   | `order.created`, `order.updated`                                            |
+| **Payment Service**      | Checkout from cart, Stripe PaymentIntent, webhooks | N/A                        | N/A                                                                         |
+| **Notification Service** | Event consumer + email (Nodemailer/SMTP)           | N/A (event consumer)       | Consumes `user.created`, `order.*`, `product.*`, `password.reset.requested` |
 
 ### Infrastructure Components
 
@@ -59,295 +61,51 @@ Vortex is a **portfolio demonstration** of modern backend engineering practices,
             └─────────────┘ └──────────┘ └─────────────┘
 ```
 
-## 📋 Business Requirements
+## 📋 Implemented Features
 
-### Platform Goal
+All features below are **fully implemented**—no placeholders or stubs.
 
-Vortex will be a **B2C e-commerce platform** for digital and physical product sales, focusing on demonstrating:
+### 🔐 Auth Service
 
-- Complete order-to-delivery workflow
-- Real-time inventory management
-- Event-driven order processing
-- Multi-channel notifications
-- Secure payment integration
-- Scalable architecture for high-traffic scenarios
+- **Registration & Login**: Email/password signup and signin with bcrypt hashing
+- **JWT Auth**: Access tokens + refresh tokens (opaque, stored in DB); `POST /refresh-token` to rotate
+- **Profile**: `GET /profile`, `PATCH /profile` (firstName, lastName), `PATCH /password` (change own password)
+- **Logout**: `POST /logout` invalidates refresh token
+- **RBAC**: Roles (customer, vendor, admin) with permission checks (`PRODUCT_CREATE`, `ADMIN_CREATE`, etc.)
+- **Superadmin**: Seed via `SUPERADMIN_EMAIL`/`SUPERADMIN_PASSWORD`; admin CRUD (`POST/GET/DELETE /api/auth/admin`); `POST /api/auth/admin/reset-password` to reset any user's password
+- **Password Reset**: `POST /forgot-password` (email) → sends reset link; `POST /reset-password` (token, newPassword) → resets password
 
-### Target Users
+### 🛍️ Product Service
 
-#### 1. **Customers** (End Users)
+- **CRUD**: Create, read, update, delete products (admin/vendor only for write)
+- **Search & Filter**: `?q=` (text search), `?category=`, `?minPrice=`, `?maxPrice=`
+- **Stock**: Products have `stock`; catalog events published to RabbitMQ on create/update/delete
+- **Inventory**: Consumes `order.created` → decrements stock; `order.updated` (cancelled) → restores stock
 
-- Browse and search product catalog
-- Add products to cart and checkout
-- Track order status in real-time
-- Receive order notifications (email/SMS)
-- Manage user profile and order history
-- Write product reviews and ratings
+### 🛒 Cart & Order Service
 
-#### 2. **Vendors/Sellers** (Future scope)
+- **Cart**: Get, add item, update quantity, remove item, clear; persisted per user
+- **Orders**: List by user; get by ID; update status (admin). Orders created via checkout only
+- **Events**: `order.created` and `order.updated` published to RabbitMQ (includes `userEmail` for notifications)
 
-- List products with inventory management
-- Monitor sales and analytics
-- Process orders and update status
-- Handle returns and refunds
+### 💳 Payment Service
 
-#### 3. **Administrators**
+- **Checkout**: `POST /api/checkout` (auth) – validates cart, fetches product prices, creates order (pending), creates Stripe PaymentIntent; returns `{ orderId, clientSecret }`
+- **Webhook**: `POST /api/webhooks/stripe` – handles `payment_intent.succeeded` (confirm order, clear cart) and `payment_intent.payment_failed` (cancel order)
+- **Flow**: Customer adds to cart → checkout → pay via Stripe.js → webhook confirms → cart cleared, order confirmed
 
-- Manage product catalog
-- View system analytics
-- Handle customer support
-- Monitor system health
+### 🔔 Notification Service
 
-### Core Features & Requirements
+- **Event Consumer**: Subscribes to RabbitMQ `vortex` exchange; consumes `user.created`, `order.created`, `order.updated`, `product.*`, `password.reset.requested`
+- **Email**: Nodemailer/SMTP; welcome (user.created), order confirmation (order.created), shipped/delivered (order.updated), password reset link (password.reset.requested). Set `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` to enable; otherwise logs only
 
-#### 🔐 Authentication & User Management (Auth Service)
+### 🏗️ Infrastructure & DevOps
 
-**Functional Requirements:**
-
-- User registration with email verification
-- JWT-based authentication with refresh tokens
-- Role-based access control (Customer, Vendor, Admin)
-- Password reset functionality
-- Social login (Google, GitHub) - optional
-- Session management and logout
-
-**User Stories:**
-
-- As a customer, I want to register an account so I can place orders
-- As a user, I want to securely log in to access my account
-- As a customer, I want to reset my password if I forget it
-
-#### 🛍️ Product Management (Product Service)
-
-**Functional Requirements:**
-
-- Product CRUD operations (Admin/Vendor)
-- Multi-category product organization
-- Product variants (size, color, etc.)
-- Image upload and management
-- Inventory tracking with stock levels
-- Product search and filtering (name, category, price range)
-- Product recommendations (related/similar items)
-- Product reviews and ratings
-
-**Business Rules:**
-
-- Products with zero stock should be marked as "Out of Stock"
-- Products can have multiple images (max 5)
-- Product prices must be positive values
-- Inventory should be decremented on order placement
-- Inventory should be reserved during checkout process
-
-**User Stories:**
-
-- As a customer, I want to browse products by category
-- As a customer, I want to search for products by name or description
-- As an admin, I want to add new products to the catalog
-- As a customer, I want to see product ratings before purchasing
-
-#### 🛒 Shopping Cart & Checkout (Order Service)
-
-**Functional Requirements:**
-
-- Add/remove items from cart
-- Update item quantities
-- Apply discount codes/coupons
-- Calculate totals (subtotal, tax, shipping, discounts)
-- Save cart for later (persistent cart)
-- Guest checkout option
-- Multiple shipping addresses
-- Order summary before payment
-
-**Business Rules:**
-
-- Cart items must have available inventory
-- Discounts cannot reduce total below zero
-- Minimum order value requirements
-- Maximum cart item quantity limits
-
-**User Stories:**
-
-- As a customer, I want to add multiple items to my cart
-- As a customer, I want to apply a promo code for discounts
-- As a customer, I want to save my cart and return later
-- As a customer, I want to review my order before payment
-
-#### 📦 Order Processing (Order Service)
-
-**Functional Requirements:**
-
-- Create orders from cart
-- Order status tracking (Pending → Confirmed → Processing → Shipped → Delivered → Completed)
-- Order history and details
-- Order cancellation (before shipping)
-- Return/refund requests
-- Order invoice generation
-- Payment integration (Stripe/PayPal)
-
-**Events Published:**
-
-- `order.created` → Triggers inventory deduction, payment processing
-- `order.confirmed` → Triggers shipping preparation
-- `order.shipped` → Sends tracking notification
-- `order.delivered` → Requests product review
-- `order.cancelled` → Restores inventory, processes refund
-
-**Business Rules:**
-
-- Orders can only be cancelled before shipping
-- Payment must be successful before order confirmation
-- Inventory must be available for all items
-- Failed payments should release inventory
-- Order total must match cart calculation
-
-**User Stories:**
-
-- As a customer, I want to track my order status in real-time
-- As a customer, I want to cancel an order if it hasn't shipped yet
-- As an admin, I want to update order status as it progresses
-- As a customer, I want to receive an invoice for my purchase
-
-#### 🔔 Notifications (Notification Service)
-
-**Functional Requirements:**
-
-- Email notifications (order confirmation, shipping, delivery)
-- SMS notifications for critical updates
-- In-app notifications
-- Notification preferences management
-- Notification history/archive
-- Template-based messaging
-
-**Triggered By:**
-
-- User registration → Welcome email
-- Order placed → Order confirmation email
-- Payment received → Payment receipt
-- Order shipped → Shipping notification with tracking
-- Order delivered → Delivery confirmation
-- Password reset → Reset link email
-
-**User Stories:**
-
-- As a customer, I want to receive email confirmation when I place an order
-- As a customer, I want SMS notifications when my order ships
-- As a customer, I want to manage my notification preferences
-
-#### 💳 Payment Processing (Future - Payment Service)
-
-**Functional Requirements:**
-
-- Multiple payment methods (Credit Card, Debit Card, Digital Wallets)
-- Payment gateway integration (Stripe/Razorpay)
-- Secure payment processing (PCI compliance)
-- Payment status tracking
-- Refund processing
-- Payment history
-
-**Business Rules:**
-
-- All transactions must be encrypted
-- Failed payments should be retried (max 3 attempts)
-- Refunds processed within 5-7 business days
-
-### Non-Functional Requirements
-
-#### Performance
-
-- API response time < 200ms for 95% of requests
-- Support 1000+ concurrent users
-- Database queries optimized with indexing
-- Redis caching for frequently accessed data
-
-#### Security
-
-- JWT tokens with expiration
-- Rate limiting on API endpoints
-- Input validation and sanitization
-- SQL injection prevention
-- XSS protection
-- CORS configuration
-- Environment-based secrets management
-
-#### Scalability
-
-- Horizontal scaling of microservices
-- Database connection pooling
-- Message queue for async processing
-- CDN for static assets (images)
-- Load balancing at Gateway level
-
-#### Reliability
-
-- 99.9% uptime target
-- Graceful error handling
-- Retry mechanisms for failed operations
-- Database backups (daily)
-- Transaction rollback on failures
-
-#### Observability
-
-- Centralized logging (Winston/Pino)
-- Request tracing with correlation IDs
-- Health check endpoints
-- Performance monitoring
-- Error tracking and alerting
-
-### Current Scope (Foundation)
-
-1. **Service Architecture**
-   - ✅ Microservices foundation with service isolation
-   - ✅ API Gateway for unified entry point
-   - ✅ Event-driven communication infrastructure
-   - ✅ Environment-based configuration management
-
-2. **Development Infrastructure**
-   - ✅ Monorepo structure with Turborepo
-   - ✅ Shared packages for common utilities
-   - ✅ Centralized configuration (TypeScript, ESLint, Prettier)
-   - ✅ Docker containerization for all services
-   - ✅ Multi-environment support (dev, prod, infra)
-
-3. **Data Layer**
-   - ✅ Database-per-service pattern
-   - ✅ MongoDB integration with authentication
-   - ✅ Redis caching infrastructure
-   - ✅ Data persistence with Docker volumes
-
-### Planned Features (Roadmap)
-
-#### Phase 1: Core E-Commerce Functionality ✅
-
-- [x] User registration and authentication (JWT-based)
-- [x] Product CRUD operations with search/filtering
-- [x] Shopping cart management
-- [x] Order placement and tracking
-- [x] Basic notification system (order confirmations)
-
-#### Phase 2: Advanced Features
-
-- [ ] Payment gateway integration
-- [ ] Inventory management with stock tracking (decrement on order)
-- [x] Order status workflows (pending → confirmed → processing → shipped → delivered → completed)
-- [x] User profile management (`GET /api/auth/profile`)
-- [ ] Product reviews and ratings
-
-#### Phase 3: Enterprise Features
-
-- [ ] API documentation (Swagger/OpenAPI)
-- [ ] Comprehensive logging and monitoring (ELK/Prometheus)
-- [ ] Distributed tracing (Jaeger/Zipkin)
-- [ ] Rate limiting and API throttling
-- [ ] GraphQL gateway option
-- [ ] Kubernetes deployment manifests
-- [ ] CI/CD pipelines (GitHub Actions)
-
-#### Phase 4: Business Intelligence
-
-- [ ] Analytics and reporting
-- [ ] Recommendation engine
-- [ ] Admin dashboard
-- [ ] Customer support integration
-- [ ] Multi-tenant support
+- **Gateway**: HTTP proxy to services; health checks; rate limiting (100 req/15min); Swagger UI at `/api-docs`
+- **Monorepo**: Turborepo, pnpm workspaces, shared `@vortex/common`
+- **Docker**: Compose for infra (MongoDB, RabbitMQ, Redis, Mongo Express) and all services
+- **CI**: GitHub Actions—lint, format, typecheck, build on push/PR
+- **Release**: Automated versioning and Docker image push via GitHub Actions
 
 ## 🛠️ Tech Stack
 
@@ -383,7 +141,8 @@ vortex/
 │   ├── auth-service/          # Authentication & Authorization (port 3001)
 │   ├── product-service/       # Product Catalog Management (port 3002)
 │   ├── order-service/         # Order Processing + Cart (port 3003)
-│   └── notification-service/  # Event-driven Notifications (port 3004)
+│   ├── notification-service/  # Event-driven Notifications (port 3004)
+│   └── payment-service/       # Checkout & Stripe (port 3005)
 ├── compose.infra.yaml         # MongoDB, RabbitMQ, Redis, Mongo Express
 ├── compose.yaml               # Application services
 ├── ecosystem.config.mjs       # PM2 process definitions
@@ -412,8 +171,9 @@ vortex/
 2. **Configure environment variables**
 
    ```bash
-   cp .env.production .env.local
-   # Edit .env.local with your credentials
+   cp .env.example .env
+   # Fill in: JWT_SECRET, INTERNAL_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+   # All other values have sensible defaults for local development
    ```
 
 3. **Install dependencies (for local development)**
@@ -456,6 +216,7 @@ make up-auth          # Auth service only
 make up-product       # Product service only
 make up-order         # Order service only
 make up-notification  # Notification service only
+make up-payment       # Payment service only
 make up-gateway       # Gateway only
 ```
 
@@ -489,12 +250,14 @@ make dev-auth
 make dev-order
 make dev-product
 make dev-notification
+make dev-payment
 
 # Or use pnpm directly
 pnpm auth:dev
 pnpm product:dev
 pnpm order:dev
 pnpm notification:dev
+pnpm payment:dev
 pnpm gateway:dev
 ```
 
@@ -514,14 +277,15 @@ make pm2-stop       # Stop all
 
 ### pnpm / Make Commands
 
-| Command                           | Description             |
-| --------------------------------- | ----------------------- |
-| `make install`                    | Install dependencies    |
-| `make build-js`                   | Build all packages      |
-| `make typecheck`                  | Type-check all packages |
-| `make lint` / `make lint-fix`     | Lint and fix            |
-| `make format` / `make format-fix` | Format code             |
-| `make ci-fix`                     | Lint + format fix       |
+| Command                           | Description                           |
+| --------------------------------- | ------------------------------------- |
+| `make install`                    | Install dependencies                  |
+| `make build-js`                   | Build all packages                    |
+| `make typecheck`                  | Type-check all packages               |
+| `make lint` / `make lint-fix`     | Lint and fix                          |
+| `make format` / `make format-fix` | Format code                           |
+| `make ci-check`                   | Lint + format + typecheck (read-only) |
+| `make ci-fix`                     | Lint + format fix                     |
 
 ### Build All Services
 
@@ -561,13 +325,14 @@ make pull          # Pull all images from registry
 
 All routes go through the Gateway at `http://localhost:3000`.
 
-| Service               | Base Path         | Endpoints                                                                                                                                     |
-| --------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Auth**              | `/api/auth`       | `POST /register`, `POST /login`, `POST /refresh-token`, `GET /profile`, `POST /logout`                                                        |
-| **Auth (Superadmin)** | `/api/auth/admin` | `POST /` (create admin), `GET /` (list admins), `DELETE /:id` (delete admin), `POST /reset-password` (superadmin: change any user's password) |
-| **Products**          | `/api/products`   | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                             |
-| **Orders**            | `/api/orders`     | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `PUT /:id/status`                                                                         |
-| **Cart**              | `/api/cart`       | `GET /`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                                     |
+| Service               | Base Path         | Endpoints                                                                                                                                                                    |
+| --------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Auth**              | `/api/auth`       | `POST /register`, `POST /login`, `POST /refresh-token`, `GET /profile`, `PATCH /profile`, `PATCH /password`, `POST /logout`, `POST /forgot-password`, `POST /reset-password` |
+| **Auth (Superadmin)** | `/api/auth/admin` | `POST /` (create admin), `GET /` (list admins), `DELETE /:id` (delete admin), `POST /reset-password` (superadmin: change any user's password)                                |
+| **Products**          | `/api/products`   | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id` (query: `?q=`, `?category=`, `?minPrice=`, `?maxPrice=`)                                                            |
+| **Checkout**          | `/api/checkout`   | `POST /` (from cart → `{ orderId, clientSecret }`)                                                                                                                           |
+| **Orders**            | `/api/orders`     | `GET /`, `GET /:id`, `GET /user/:userId`, `PUT /:id/status`                                                                                                                  |
+| **Cart**              | `/api/cart`       | `GET /`, `POST /`, `PUT /:productId`, `DELETE /:productId`, `POST /clear`                                                                                                    |
 
 ### API Authentication
 
@@ -575,16 +340,19 @@ Protected endpoints require the `Authorization: Bearer <token>` header with a va
 
 | Area         | Auth Required | Notes                                                                                                                                                       |
 | ------------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Checkout** | Yes           | Requires authentication. Returns Stripe clientSecret for frontend payment.                                                                                  |
 | **Cart**     | Yes           | All cart endpoints require authentication. User is inferred from JWT.                                                                                       |
-| **Orders**   | Yes           | All order endpoints require authentication. User/ownership from JWT.                                                                                        |
+| **Orders**   | Yes           | All order endpoints require authentication. User/ownership from JWT. Orders created via checkout only.                                                      |
 | **Products** | Partial       | `GET /` and `GET /:id` are public. `POST /`, `PUT /:id`, `DELETE /:id` require admin or vendor role (`PRODUCT_CREATE`, `PRODUCT_UPDATE`, `PRODUCT_DELETE`). |
 
-## 📊 Service Health Checks
+## 📊 Service Health Checks & API Docs
 
 - Gateway: http://localhost:3000/health
+- API Docs (Swagger): http://localhost:3000/api-docs
 - Auth: http://localhost:3001/health
 - Product: http://localhost:3002/health
 - Order: http://localhost:3003/health
+- Payment: http://localhost:3005/health
 - Notification: http://localhost:3004/health
 
 ## 🔐 Admin Interfaces
@@ -599,17 +367,23 @@ Protected endpoints require the `Authorization: Bearer <token>` header with a va
 
 ## 📝 Configuration
 
-All services use environment-based configuration via the `@vortex/common` package:
+Each service loads its own environment variables via `dotenv` with a `config.ts` file. All values have sensible defaults so the project runs locally with no `.env` required — only secrets need to be set.
 
 ```typescript
-import { createConfig, AuthEnv } from '@vortex/common';
+// services/<name>/src/config/config.ts
+import dotenv from 'dotenv';
+dotenv.config();
 
-export const config = createConfig(AuthEnv);
-
-// Access configuration
-const port = config.PORT;
-const mongoUri = config.MONGODB_URI;
+export const config = {
+  PORT: Number(process.env.PORT) || 3001,
+  MONGODB_URI:
+    process.env.MONGODB_URI ?? 'mongodb://localhost:27017/vortex-auth',
+  JWT_SECRET: process.env.JWT_SECRET ?? '',
+  RABBITMQ_URL: process.env.RABBITMQ_URL ?? 'amqp://127.0.0.1:5672',
+};
 ```
+
+A single root `.env` file is used for all services. Copy `.env.example` to `.env` and set the required secrets.
 
 ## 🎯 Design Principles
 
@@ -655,10 +429,15 @@ This is a **portfolio project** designed to showcase:
 
 ## 📜 License
 
-ISC
+This project is licensed under the **ISC License**. See the [LICENSE](./LICENSE) file for details.
+
+## 📋 Community
+
+- [Code of Conduct](./CODE_OF_CONDUCT.md) – Our standards for community participation
+- [Security Policy](./SECURITY.md) – How to report security vulnerabilities
 
 ---
 
-**Status**: ✅ Phase 1 Complete - Core E-Commerce Features Implemented
+**Status**: Full e-commerce flow: auth, products, cart, checkout (Stripe), orders, inventory decrement, email notifications, password reset, API docs, rate limiting.
 
-**Purpose**: Portfolio & Learning Demonstration of Modern Microservices Architecture
+**Purpose**: Portfolio demonstration of event-driven microservices architecture.

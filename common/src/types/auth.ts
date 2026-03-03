@@ -1,3 +1,5 @@
+import type { Request } from 'express';
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -8,6 +10,10 @@ export interface JWTPayload {
   userId: string;
   email: string;
   role: string;
+}
+
+export interface AuthRequest extends Request {
+  user?: AuthUser;
 }
 
 declare global {

@@ -1,4 +1,9 @@
-import { protect, requireUser, validateRequest } from '@vortex/common';
+import {
+  asyncHandler,
+  protect,
+  requireUser,
+  validateRequest,
+} from '@vortex/common';
 import { Router } from 'express';
 
 import { config } from '../config/config';
@@ -13,18 +18,22 @@ const router: Router = Router();
 
 router.use(protect(config.JWT_SECRET), requireUser);
 
-router.get('/', cartController.getCart);
-router.post('/', validateRequest(addCartItemSchema), cartController.addItem);
+router.get('/', asyncHandler(cartController.getCart));
+router.post(
+  '/',
+  validateRequest(addCartItemSchema),
+  asyncHandler(cartController.addItem),
+);
 router.put(
   '/:productId',
   validateRequest(updateCartItemSchema),
-  cartController.updateItem,
+  asyncHandler(cartController.updateItem),
 );
 router.delete(
   '/:productId',
   validateRequest(removeCartItemSchema),
-  cartController.removeItem,
+  asyncHandler(cartController.removeItem),
 );
-router.post('/clear', cartController.clearCart);
+router.post('/clear', asyncHandler(cartController.clearCart));
 
 export default router;

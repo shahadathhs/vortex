@@ -1,4 +1,5 @@
 import {
+  asyncHandler,
   checkPermission,
   Permission,
   protect,
@@ -7,8 +8,9 @@ import {
 } from '@vortex/common';
 import { Router } from 'express';
 
-import { config } from '../config/config';
 import { authController } from '../controllers/auth.controller';
+import { authService } from '../services/auth.service';
+import { config } from '../config/config';
 import {
   adminIdParamSchema,
   adminResetPasswordSchema,
@@ -17,34 +19,39 @@ import {
 
 const router: Router = Router();
 
-const auth = [protect(config.JWT_SECRET), requireUser];
+const auth = [
+  protect(config.JWT_SECRET, {
+    fetchUser: authService.fetchUserForAuth,
+  }),
+  requireUser,
+];
 
 router.post(
   '/',
   ...auth,
   checkPermission(Permission.ADMIN_CREATE),
   validateRequest(createAdminSchema),
-  authController.createAdmin,
+  asyncHandler(authController.createAdmin),
 );
 router.get(
   '/',
   ...auth,
   checkPermission(Permission.ADMIN_LIST),
-  authController.listAdmins,
+  asyncHandler(authController.listAdmins),
 );
 router.delete(
   '/:id',
   ...auth,
   checkPermission(Permission.ADMIN_DELETE),
   validateRequest(adminIdParamSchema),
-  authController.deleteAdmin,
+  asyncHandler(authController.deleteAdmin),
 );
 router.post(
   '/reset-password',
   ...auth,
   checkPermission(Permission.ADMIN_RESET_PASSWORD),
   validateRequest(adminResetPasswordSchema),
-  authController.resetUserPassword,
+  asyncHandler(authController.resetUserPassword),
 );
 
 export default router;

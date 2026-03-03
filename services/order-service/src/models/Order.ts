@@ -24,6 +24,7 @@ const ORDER_STATUSES = [
 const orderSchema = new Schema<IOrder>(
   {
     userId: { type: String, required: true },
+    userEmail: { type: String },
     items: {
       type: [orderItemSchema],
       required: true,

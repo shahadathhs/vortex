@@ -17,13 +17,16 @@
   },
   "dependencies": {
     "@vortex/common": "workspace:*",
+    "amqplib": "catalog:",
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
     "mongoose": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "dotenv": "catalog:"
   },
   "devDependencies": {
+    "@types/amqplib": "catalog:",
     "@types/cors": "catalog:",
     "@types/express": "catalog:",
     "rimraf": "catalog:",

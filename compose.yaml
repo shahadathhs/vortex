@@ -17,6 +17,7 @@ services:
       - PRODUCT_SERVICE_URL=http://product-service:3002
       - ORDER_SERVICE_URL=http://order-service:3003
       - NOTIFICATION_SERVICE_URL=http://notification-service:3004
+      - PAYMENT_SERVICE_URL=http://payment-service:3005
     depends_on:
       - mongodb
       - rabbitmq
@@ -88,9 +89,36 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}_order?authSource=admin
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - INTERNAL_SECRET=${INTERNAL_SECRET}
     depends_on:
       - mongodb
       - rabbitmq
+    networks:
+      - network
+
+  # Payment Service
+  payment-service:
+    image: ${DOCKER_REGISTRY}/${PACKAGE_NAME}-payment-service:${VERSION:-latest}
+    container_name: ${PACKAGE_NAME}_payment_service
+    restart: unless-stopped
+    ports:
+      - '3005:3005'
+    profiles:
+      - dev
+      - prod
+      - payment
+    environment:
+      - PORT=3005
+      - NODE_ENV=production
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - ORDER_SERVICE_URL=http://order-service:3003
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_SECRET=${INTERNAL_SECRET}
+    depends_on:
+      - order-service
+      - product-service
     networks:
       - network
 
@@ -109,8 +137,13 @@ services:
       - PORT=3004
       - NODE_ENV=production
       - RABBITMQ_URL=amqp://rabbitmq:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - FROM_EMAIL=${FROM_EMAIL:-noreply@vortex.local}
+      - APP_URL=${APP_URL:-http://localhost:3000}
     depends_on:
-      - mongodb
       - rabbitmq
     networks:
       - network

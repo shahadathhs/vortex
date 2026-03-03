@@ -17,12 +17,17 @@
   },
   "dependencies": {
     "@vortex/common": "workspace:*",
+    "amqplib": "catalog:",
     "cors": "catalog:",
     "express": "catalog:",
-    "helmet": "catalog:"
+    "helmet": "catalog:",
+    "nodemailer": "catalog:",
+    "dotenv": "catalog:"
   },
   "devDependencies": {
+    "@types/amqplib": "catalog:",
     "@types/cors": "catalog:",
+    "@types/nodemailer": "catalog:",
     "@types/express": "catalog:",
     "rimraf": "catalog:",
     "ts-node-dev": "catalog:",
