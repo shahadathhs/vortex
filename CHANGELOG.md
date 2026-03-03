@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/shahadathhs/vortex/compare/v1.3.0...v1.4.0) (2026-03-03)
+
+### Features
+
+- add payment service and integrate Stripe for checkout ([2defd3d](https://github.com/shahadathhs/vortex/commit/2defd3d96f96ad348153f8412d47cd1cdb84d5c8))
+- enhance event and queue management with new event types and routing keys ([5fd55fc](https://github.com/shahadathhs/vortex/commit/5fd55fc514aa9a58f1c6f09d2f1622caa2186131))
+
 # [1.3.0](https://github.com/shahadathhs/vortex/compare/v1.2.1...v1.3.0) (2026-02-28)
 
 ### Features
