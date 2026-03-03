@@ -29,8 +29,8 @@ help:
 	@echo "  make lint-fix         Lint and fix all packages"
 	@echo "  make format           Check formatting"
 	@echo "  make format-fix       Format all packages"
-	@echo "  make ci-check        Lint + format + typecheck (read-only CI check)
-  make ci-fix          Lint + format fix (auto-fix)"
+	@echo "  make ci-check        Lint + format + typecheck (read-only CI check)"
+	@echo "  make ci-fix          Lint + format fix (auto-fix)"
 	@echo "  make clean-pkg       Clean build artifacts and node_modules"
 	@echo "  make deploy-<svc>   Deploy package to ./dist/deploy/<svc> (gateway, auth, order, product, notification)"
 	@echo ""
