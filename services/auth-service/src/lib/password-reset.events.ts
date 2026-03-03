@@ -1,6 +1,12 @@
 import type { ConfirmChannel } from 'amqplib';
 
-import { logger, RabbitMQManager } from '@vortex/common';
+import {
+  EXCHANGE,
+  EXCHANGE_TYPE,
+  EventName,
+  logger,
+  RabbitMQManager,
+} from '@vortex/common';
 
 export async function publishPasswordResetRequested(
   rabbitUrl: string,
@@ -11,16 +17,21 @@ export async function publishPasswordResetRequested(
     const channelWrapper = rabbitMQ.createChannel({
       json: true,
       setup: async (channel: ConfirmChannel) => {
-        await channel.assertExchange('vortex', 'topic', { durable: true });
+        await channel.assertExchange(EXCHANGE, EXCHANGE_TYPE, {
+          durable: true,
+        });
       },
     });
-    await channelWrapper.publish('vortex', 'password.reset.requested', {
-      event: 'password.reset.requested',
+    await channelWrapper.publish(EXCHANGE, EventName.PASSWORD_RESET_REQUESTED, {
+      event: EventName.PASSWORD_RESET_REQUESTED,
       timestamp: new Date(),
       data,
     });
-    logger.info('Published password.reset.requested');
+    logger.info(`📤 Published ${EventName.PASSWORD_RESET_REQUESTED}`);
   } catch (error) {
-    logger.error('Failed to publish password.reset.requested:', error);
+    logger.error(
+      `Failed to publish ${EventName.PASSWORD_RESET_REQUESTED}:`,
+      error,
+    );
   }
 }

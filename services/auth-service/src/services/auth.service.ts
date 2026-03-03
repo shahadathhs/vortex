@@ -5,6 +5,9 @@ import type { ConfirmChannel } from 'amqplib';
 import {
   BadRequestError,
   ConflictError,
+  EXCHANGE,
+  EXCHANGE_TYPE,
+  EventName,
   generateToken,
   logger,
   NotFoundError,
@@ -40,12 +43,14 @@ async function publishUserCreatedEvent(user: IUser) {
     const channelWrapper = rabbitMQ.createChannel({
       json: true,
       setup: async (channel: ConfirmChannel) => {
-        await channel.assertExchange('vortex', 'topic', { durable: true });
+        await channel.assertExchange(EXCHANGE, EXCHANGE_TYPE, {
+          durable: true,
+        });
       },
     });
 
     const payload = {
-      event: 'user.created',
+      event: EventName.USER_CREATED,
       timestamp: new Date(),
       data: {
         userId: String(user._id),
@@ -55,9 +60,9 @@ async function publishUserCreatedEvent(user: IUser) {
       },
     };
 
-    await channelWrapper.publish('vortex', 'user.created', payload);
+    await channelWrapper.publish(EXCHANGE, EventName.USER_CREATED, payload);
 
-    logger.info('📤 Published user.created event');
+    logger.info(`📤 Published ${EventName.USER_CREATED} event`);
   } catch (error) {
     logger.error('Failed to publish user.created event:', error);
   }

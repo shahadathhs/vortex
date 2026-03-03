@@ -1,6 +1,8 @@
 import type { ConfirmChannel } from 'amqplib';
 
 import {
+  EXCHANGE,
+  EXCHANGE_TYPE,
   EventName,
   logger,
   NotFoundError,
@@ -18,11 +20,13 @@ async function publishEvent(eventName: EventName, product: IProduct) {
     const channelWrapper = rabbitMQ.createChannel({
       json: true,
       setup: async (channel: ConfirmChannel) => {
-        await channel.assertExchange('vortex', 'topic', { durable: true });
+        await channel.assertExchange(EXCHANGE, EXCHANGE_TYPE, {
+          durable: true,
+        });
       },
     });
 
-    await channelWrapper.publish('vortex', eventName, {
+    await channelWrapper.publish(EXCHANGE, eventName, {
       event: eventName,
       timestamp: new Date(),
       data: {

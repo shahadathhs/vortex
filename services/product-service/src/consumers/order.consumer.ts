@@ -1,6 +1,14 @@
 import type { Channel, ConsumeMessage } from 'amqplib';
 
-import { logger, QueueName, RabbitMQManager } from '@vortex/common';
+import {
+  EXCHANGE,
+  EXCHANGE_TYPE,
+  EventName,
+  logger,
+  QueueName,
+  RabbitMQManager,
+  RoutingKey,
+} from '@vortex/common';
 import { config } from '../config/config';
 import { Product } from '../models/Product';
 
@@ -47,30 +55,37 @@ async function restoreStock(productId: string, quantity: number) {
 
 function handleMessage(content: string) {
   const payload: OrderPayload = JSON.parse(content);
-  const event = String(payload.event ?? '');
+  const event = (payload.event ?? '') as EventName;
   const data = payload.data ?? {};
 
-  if (event === 'order.created') {
-    const items = parseItems(data);
-    for (const item of items) {
-      if (item.productId && item.quantity) {
-        decrementStock(item.productId, item.quantity).catch((err) =>
-          logger.error('Stock decrement failed:', err),
-        );
-      }
-    }
-  } else if (event === 'order.updated') {
-    const status = String(data.status ?? '');
-    if (status === 'cancelled') {
+  switch (event) {
+    case EventName.ORDER_CREATED: {
       const items = parseItems(data);
       for (const item of items) {
         if (item.productId && item.quantity) {
-          restoreStock(item.productId, item.quantity).catch((err) =>
-            logger.error('Stock restore failed:', err),
+          decrementStock(item.productId, item.quantity).catch((err) =>
+            logger.error('Stock decrement failed:', err),
           );
         }
       }
+      break;
     }
+    case EventName.ORDER_UPDATED: {
+      const status = String(data.status ?? '');
+      if (status === 'cancelled') {
+        const items = parseItems(data);
+        for (const item of items) {
+          if (item.productId && item.quantity) {
+            restoreStock(item.productId, item.quantity).catch((err) =>
+              logger.error('Stock restore failed:', err),
+            );
+          }
+        }
+      }
+      break;
+    }
+    default:
+      break;
   }
 }
 
@@ -79,9 +94,13 @@ export function startOrderConsumer() {
 
   connection.createChannel({
     setup: async (channel: Channel) => {
-      await channel.assertExchange('vortex', 'topic', { durable: true });
+      await channel.assertExchange(EXCHANGE, EXCHANGE_TYPE, { durable: true });
       await channel.assertQueue(QueueName.INVENTORY_QUEUE, { durable: true });
-      await channel.bindQueue(QueueName.INVENTORY_QUEUE, 'vortex', 'order.#');
+      await channel.bindQueue(
+        QueueName.INVENTORY_QUEUE,
+        EXCHANGE,
+        RoutingKey.ALL_ORDER_EVENTS,
+      );
       await channel.consume(
         QueueName.INVENTORY_QUEUE,
         (msg: ConsumeMessage | null) => {

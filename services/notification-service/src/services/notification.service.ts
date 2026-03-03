@@ -1,46 +1,59 @@
-import type { Channel, ConsumeMessage } from 'amqplib';
+import type { Channel } from 'amqplib';
 
-import { logger, QueueName, RabbitMQManager } from '@vortex/common';
+import {
+  EXCHANGE,
+  EXCHANGE_TYPE,
+  EventName,
+  logger,
+  QueueName,
+  RabbitMQManager,
+  RoutingKey,
+} from '@vortex/common';
 
+import { config } from '../config/config';
 import {
   handleOrderCreated,
   handleOrderUpdated,
 } from '../handlers/order.handlers';
 import { handlePasswordResetRequested } from '../handlers/password.handlers';
 import { handleUserCreated } from '../handlers/user.handlers';
-import { config } from '../config/config';
 
 interface NotificationPayload {
-  event?: string;
+  event: EventName;
   timestamp?: string;
   data?: Record<string, unknown>;
 }
 
 async function handleMessage(content: string) {
   const payload: NotificationPayload = JSON.parse(content);
-  const event = String(payload.event ?? 'unknown');
+  const event = payload.event;
   const data = payload.data ?? {};
 
   try {
-    if (event === 'order.created') {
-      await handleOrderCreated(data);
-    } else if (event === 'order.updated') {
-      await handleOrderUpdated(data);
-    } else if (event === 'user.created') {
-      await handleUserCreated(data);
-    } else if (event === 'password.reset.requested') {
-      await handlePasswordResetRequested(data);
-    } else if (
-      event === 'product.created' ||
-      event === 'product.updated' ||
-      event === 'product.deleted'
-    ) {
-      const productId =
-        typeof data.productId === 'string' ? data.productId : '';
-      const name = typeof data.name === 'string' ? data.name : '';
-      logger.info(`[Product ${event}] ${name} (${productId})`);
-    } else {
-      logger.info('Received event:', event, data);
+    switch (event) {
+      case EventName.ORDER_CREATED:
+        await handleOrderCreated(data);
+        break;
+      case EventName.ORDER_UPDATED:
+        await handleOrderUpdated(data);
+        break;
+      case EventName.USER_CREATED:
+        await handleUserCreated(data);
+        break;
+      case EventName.PASSWORD_RESET_REQUESTED:
+        await handlePasswordResetRequested(data);
+        break;
+      case EventName.PRODUCT_CREATED:
+      case EventName.PRODUCT_UPDATED:
+      case EventName.PRODUCT_DELETED: {
+        const productId =
+          typeof data.productId === 'string' ? data.productId : '';
+        const name = typeof data.name === 'string' ? data.name : '';
+        logger.info(`[Product ${event}] ${name} (${productId})`);
+        break;
+      }
+      default:
+        logger.info('Received unhandled event:', event, data);
     }
   } catch (error) {
     logger.error('Failed to handle notification:', error);
@@ -52,21 +65,22 @@ function startConsumer() {
 
   connection.createChannel({
     setup: async (channel: Channel) => {
-      await channel.assertExchange('vortex', 'topic', { durable: true });
+      await channel.assertExchange(EXCHANGE, EXCHANGE_TYPE, { durable: true });
       await channel.assertQueue(QueueName.NOTIFICATION_QUEUE, {
         durable: true,
       });
-      await channel.bindQueue(QueueName.NOTIFICATION_QUEUE, 'vortex', '#');
-      await channel.consume(
+      await channel.bindQueue(
         QueueName.NOTIFICATION_QUEUE,
-        (msg: ConsumeMessage | null) => {
-          if (msg) {
-            void handleMessage(msg.content.toString()).finally(() =>
-              channel.ack(msg),
-            );
-          }
-        },
+        EXCHANGE,
+        RoutingKey.ALL_EVENTS,
       );
+      await channel.consume(QueueName.NOTIFICATION_QUEUE, (msg) => {
+        if (msg) {
+          void handleMessage(msg.content.toString()).finally(() => {
+            channel.ack(msg);
+          });
+        }
+      });
     },
   });
 
