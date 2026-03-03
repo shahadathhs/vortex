@@ -3,6 +3,8 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 
+import notificationRoutes from './routes/notification.routes';
+
 const app: express.Application = express();
 
 app.use(helmet());
@@ -13,8 +15,7 @@ app.use(apiInfoLogger);
 app.get('/', (req, res) => {
   res.json({
     service: 'notification-service',
-    note: 'internal event consumer — no public API',
-    routes: { health: '/health' },
+    routes: { notifications: '/api/notifications', health: '/health' },
   });
 });
 
@@ -25,6 +26,8 @@ app.get('/health', (req, res) => {
     timestamp: new Date(),
   });
 });
+
+app.use('/api/notifications', notificationRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

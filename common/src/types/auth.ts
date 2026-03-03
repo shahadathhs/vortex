@@ -1,9 +1,11 @@
 import type { Request } from 'express';
 
+export type UserRole = 'system' | 'seller' | 'buyer';
+
 export interface AuthUser {
   id: string;
   email: string;
-  role: 'superadmin' | 'admin' | 'vendor' | 'customer';
+  role: UserRole;
 }
 
 export interface JWTPayload {

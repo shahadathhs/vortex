@@ -84,7 +84,7 @@ async function register(data: RegisterInput) {
     password,
     firstName,
     lastName,
-    role: 'customer',
+    role: 'buyer',
   });
 
   await publishUserCreatedEvent(user);
@@ -231,7 +231,7 @@ async function fetchUserForAuth(
   return { isActive: user.isActive };
 }
 
-async function createAdmin(data: {
+async function createSeller(data: {
   email: string;
   password: string;
   firstName: string;
@@ -247,13 +247,13 @@ async function createAdmin(data: {
 
   const user = await User.create({
     ...data,
-    role: 'admin',
+    role: 'seller',
   });
 
-  logger.info(`Admin created: ${user.email} by superadmin`);
+  logger.info(`Seller created: ${user.email} by system`);
 
   return {
-    message: 'Admin created successfully',
+    message: 'Seller created successfully',
     user: {
       id: String(user._id),
       email: user.email,
@@ -264,31 +264,31 @@ async function createAdmin(data: {
   };
 }
 
-async function deleteAdmin(adminId: string) {
+async function deleteSeller(sellerId: string) {
   const user = await User.findOne({
-    _id: adminId,
+    _id: sellerId,
     isDeleted: { $ne: true },
   });
   if (!user) {
     throw new NotFoundError('User not found');
   }
-  if (user.role !== 'admin') {
-    throw new BadRequestError('Can only delete users with admin role');
+  if (user.role !== 'seller') {
+    throw new BadRequestError('Can only delete users with seller role');
   }
 
   user.isDeleted = true;
   user.isActive = false;
   user.refreshToken = undefined;
   await user.save();
-  logger.info(`Admin deleted: ${user.email} by superadmin`);
-  return { message: 'Admin deleted successfully' };
+  logger.info(`Seller deleted: ${user.email} by system`);
+  return { message: 'Seller deleted successfully' };
 }
 
-async function listAdmins() {
-  const admins = await User.find({ role: 'admin', isDeleted: { $ne: true } })
+async function listSellers() {
+  const sellers = await User.find({ role: 'seller', isDeleted: { $ne: true } })
     .select('-password -refreshToken -passwordResetToken -passwordResetExpires')
     .sort({ createdAt: -1 });
-  return { admins };
+  return { sellers };
 }
 
 async function forgotPassword(email: string): Promise<{ message: string }> {
@@ -350,7 +350,7 @@ async function resetUserPassword(
   user.refreshToken = undefined;
   await user.save();
 
-  logger.info(`Password reset for ${user.email} by superadmin`);
+  logger.info(`Password reset for ${user.email} by system`);
 
   return { message: 'Password reset successfully' };
 }
@@ -366,8 +366,8 @@ export const authService = {
   forgotPassword,
   resetPasswordWithToken,
   fetchUserForAuth,
-  createAdmin,
-  deleteAdmin,
-  listAdmins,
+  createSeller,
+  deleteSeller,
+  listSellers,
   resetUserPassword,
 };

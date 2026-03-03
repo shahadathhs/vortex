@@ -19,7 +19,7 @@ import {
   updateProfileSchema,
 } from '../schemas/auth.schema';
 
-import adminRoutes from './admin.routes';
+import sellerRoutes from './seller.routes';
 
 const router: Router = Router();
 
@@ -30,8 +30,8 @@ const auth = [
   requireUser,
 ];
 
-// Superadmin/Admin management (protected)
-router.use('/admin', adminRoutes);
+// System: seller management (protected)
+router.use('/sellers', sellerRoutes);
 
 // Public routes
 router.post(

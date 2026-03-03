@@ -4,6 +4,24 @@ import { verifyToken } from '../core/jwt';
 import { UnauthorizedError } from '../errors/api-errors';
 import { AuthUser } from '../types/auth';
 
+/** Optionally sets req.user if valid token present. Does not fail if no token. */
+export const optionalProtect = (secret: string) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    let token: string | undefined;
+    if (req.headers.authorization?.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    if (!token) return next();
+    try {
+      const decoded = verifyToken(token, secret);
+      req.user = decoded as AuthUser;
+    } catch {
+      // Ignore invalid token
+    }
+    next();
+  };
+};
+
 /** Asserts req.user exists (use after protect). */
 export const requireUser = (
   req: Request,

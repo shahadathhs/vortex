@@ -9,6 +9,7 @@ const productSchema = new Schema<IProduct>(
     price: { type: Number, required: true },
     stock: { type: Number, required: true, default: 0 },
     category: { type: String, default: '' },
+    sellerId: { type: String, default: null },
   },
   {
     toJSON: {
@@ -23,5 +24,6 @@ const productSchema = new Schema<IProduct>(
 
 // For text search logic
 productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ sellerId: 1 });
 
 export const Product = model<IProduct>('Product', productSchema);

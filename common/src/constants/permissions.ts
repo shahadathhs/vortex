@@ -4,11 +4,11 @@ export enum Permission {
   USER_UPDATE = 'USER_UPDATE',
   USER_DELETE = 'USER_DELETE',
 
-  // Admin management (superadmin only)
-  ADMIN_CREATE = 'ADMIN_CREATE',
-  ADMIN_DELETE = 'ADMIN_DELETE',
-  ADMIN_RESET_PASSWORD = 'ADMIN_RESET_PASSWORD',
-  ADMIN_LIST = 'ADMIN_LIST',
+  // Seller management (system only)
+  SELLER_CREATE = 'SELLER_CREATE',
+  SELLER_DELETE = 'SELLER_DELETE',
+  SELLER_RESET_PASSWORD = 'SELLER_RESET_PASSWORD',
+  SELLER_LIST = 'SELLER_LIST',
 
   // Product permissions
   PRODUCT_CREATE = 'PRODUCT_CREATE',
@@ -21,44 +21,44 @@ export enum Permission {
   ORDER_CANCEL = 'ORDER_CANCEL',
   ORDER_VIEW_OWN = 'ORDER_VIEW_OWN',
   ORDER_MANAGE_ALL = 'ORDER_MANAGE_ALL',
+
+  // Analytics & activity (role-specific dashboards)
+  ANALYTICS_SYSTEM = 'ANALYTICS_SYSTEM',
+  ANALYTICS_SELLER = 'ANALYTICS_SELLER',
+  ANALYTICS_BUYER = 'ANALYTICS_BUYER',
+  ACTIVITY_VIEW_ALL = 'ACTIVITY_VIEW_ALL',
 }
 
 export enum Role {
-  SUPERADMIN = 'superadmin',
-  ADMIN = 'admin',
-  VENDOR = 'vendor',
-  CUSTOMER = 'customer',
+  SYSTEM = 'system',
+  SELLER = 'seller',
+  BUYER = 'buyer',
 }
 
-const superadminPermissions = [
-  ...Object.values(Permission),
-  Permission.ADMIN_CREATE,
-  Permission.ADMIN_DELETE,
-  Permission.ADMIN_RESET_PASSWORD,
-  Permission.ADMIN_LIST,
-];
-
 export const RolePermissions: Record<Role, Permission[]> = {
-  [Role.SUPERADMIN]: superadminPermissions,
-  [Role.ADMIN]: Object.values(Permission).filter(
-    (p) =>
-      ![
-        Permission.ADMIN_CREATE,
-        Permission.ADMIN_DELETE,
-        Permission.ADMIN_RESET_PASSWORD,
-        Permission.ADMIN_LIST,
-      ].includes(p),
-  ),
-  [Role.VENDOR]: [
+  [Role.SYSTEM]: [
+    ...Object.values(Permission),
+    Permission.SELLER_CREATE,
+    Permission.SELLER_DELETE,
+    Permission.SELLER_RESET_PASSWORD,
+    Permission.SELLER_LIST,
+    Permission.ANALYTICS_SYSTEM,
+    Permission.ACTIVITY_VIEW_ALL,
+  ],
+  [Role.SELLER]: [
+    Permission.USER_READ,
+    Permission.USER_UPDATE,
     Permission.PRODUCT_CREATE,
     Permission.PRODUCT_UPDATE,
     Permission.PRODUCT_DELETE,
     Permission.PRODUCT_READ,
     Permission.ORDER_VIEW_OWN,
+    Permission.ANALYTICS_SELLER,
   ],
-  [Role.CUSTOMER]: [
+  [Role.BUYER]: [
     Permission.PRODUCT_READ,
     Permission.ORDER_CREATE,
     Permission.ORDER_VIEW_OWN,
+    Permission.ANALYTICS_BUYER,
   ],
 };

@@ -25,6 +25,7 @@ export * from './middleware/rbac';
 export * from './middleware/validate-request';
 
 // Utils
+export * from './utils/activity-publisher';
 export * from './utils/async-handler';
 export * from './utils/logger';
 export * from './utils/response';

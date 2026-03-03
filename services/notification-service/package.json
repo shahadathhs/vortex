@@ -21,6 +21,7 @@
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
+    "mongoose": "catalog:",
     "nodemailer": "catalog:",
     "dotenv": "catalog:"
   },

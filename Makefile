@@ -11,7 +11,7 @@ COMPOSE_CMD := docker compose $(COMPOSE_FILE_ARGS) $(COMPOSE_ENV_ARGS)
 COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 
 # Services List
-SERVICES := gateway auth product order payment notification
+SERVICES := gateway auth product order payment notification activity analytics
 
 .PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-check ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
 
@@ -22,7 +22,7 @@ help:
 	@echo "pnpm / Development:"
 	@echo "  make install          Install dependencies"
 	@echo "  make dev              Run all services in dev (turbo)"
-	@echo "  make dev-<service>    Run specific service (gateway, auth, order, product, payment, notification)"
+	@echo "  make dev-<service>    Run specific service (gateway, auth, order, product, payment, notification, activity)"
 	@echo "  make build-js         Build all packages (pnpm)"
 	@echo "  make typecheck        Type-check all packages"
 	@echo "  make lint             Lint all packages"
@@ -46,7 +46,7 @@ help:
 	@echo "Docker / Environment:"
 	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
 	@echo "  make up               Start all services"
-	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, payment, notification)"
+	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, payment, notification, activity)"
 	@echo "  make tools           Start dev tools (Mongo Express)"
 	@echo "  make down            Stop all containers"
 	@echo ""
@@ -83,6 +83,12 @@ dev-product:
 
 dev-notification:
 	pnpm --filter=notification-service dev
+
+dev-activity:
+	pnpm --filter=activity-service dev
+
+dev-analytics:
+	pnpm --filter=analytics-service dev
 
 dev-payment:
 	pnpm --filter=payment-service dev
@@ -130,6 +136,12 @@ deploy-product:
 deploy-notification:
 	pnpm deploy --filter=notification-service dist/deploy/notification-service
 
+deploy-activity:
+	pnpm deploy --filter=activity-service dist/deploy/activity-service
+
+deploy-analytics:
+	pnpm deploy --filter=analytics-service dist/deploy/analytics-service
+
 deploy-payment:
 	pnpm deploy --filter=payment-service dist/deploy/payment-service
 
@@ -167,6 +179,12 @@ pm2-logs-product:
 
 pm2-logs-notification:
 	pm2 logs vortex-notification-service
+
+pm2-logs-activity:
+	pm2 logs vortex-activity-service
+
+pm2-logs-analytics:
+	pm2 logs vortex-analytics-service
 
 pm2-logs-payment:
 	pm2 logs vortex-payment-service

@@ -52,6 +52,30 @@ async function handleMessage(content: string) {
         logger.info(`[Product ${event}] ${name} (${productId})`);
         break;
       }
+      case EventName.PRODUCT_LOW_STOCK:
+      case EventName.PRODUCT_OUT_OF_STOCK: {
+        const productId =
+          typeof data.productId === 'string' ? data.productId : '';
+        const name = typeof data.name === 'string' ? data.name : '';
+        const stock = typeof data.stock === 'number' ? data.stock : 0;
+        const sellerId =
+          typeof data.sellerId === 'string' ? data.sellerId : null;
+        const message =
+          event === EventName.PRODUCT_OUT_OF_STOCK
+            ? `${name} is out of stock`
+            : `${name} is low on stock (${stock} left)`;
+        const payload = { productId, name, stock, sellerId, message };
+        const { storeNotification } = await import('../lib/store-notification');
+        if (sellerId) {
+          await storeNotification(event, payload, {
+            recipientId: sellerId,
+            recipientRole: 'seller',
+          });
+        }
+        await storeNotification(event, payload, { recipientRole: 'system' });
+        logger.info(`[${event}] ${name} (${productId}) stock: ${stock}`);
+        break;
+      }
       default:
         logger.info('Received unhandled event:', event, data);
     }

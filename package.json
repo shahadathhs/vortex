@@ -28,10 +28,14 @@
     "product:build": "pnpm --filter=product-service... build",
     "notification:dev": "pnpm --filter=notification-service dev",
     "notification:build": "pnpm --filter=notification-service... build",
+    "activity:dev": "pnpm --filter=activity-service dev",
+    "activity:build": "pnpm --filter=activity-service... build",
     "payment:dev": "pnpm --filter=payment-service dev",
     "payment:build": "pnpm --filter=payment-service... build",
     "gateway:dev": "pnpm --filter=gateway dev",
     "gateway:build": "pnpm --filter=gateway... build",
+    "analytics:dev": "pnpm --filter=analytics-service dev",
+    "analytics:build": "pnpm --filter=analytics-service... build",
     "release": "semantic-release"
   },
   "workspaces": [

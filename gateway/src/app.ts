@@ -50,6 +50,11 @@ app.get('/', (req, res) => {
         name: 'notification-service',
         note: 'internal event consumer — no public API',
       },
+      {
+        name: 'activity-service',
+        api: `${base}/api/activities`,
+        health: `${base}/api/activities/health`,
+      },
     ],
   });
 });

@@ -1,0 +1,9 @@
+node_modules
+dist
+.turbo
+.next
+.cache
+coverage
+package-lock.json
+pnpm-lock.yaml
+Dockerfile

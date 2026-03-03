@@ -6,4 +6,5 @@ export interface IProduct extends Document {
   price: number;
   stock: number;
   category?: string;
+  sellerId?: string;
 }

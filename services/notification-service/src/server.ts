@@ -2,6 +2,7 @@ import { logger } from '@vortex/common';
 
 import app from './app';
 import { config, getSmtpConfig } from './config/config';
+import { connectDB } from './config/db';
 import { initEmailTransport } from './lib/email';
 import { notificationService } from './services/notification.service';
 
@@ -15,8 +16,10 @@ process.on('unhandledRejection', (reason: unknown) => {
   process.exit(1);
 });
 
-const start = () => {
+const start = async () => {
   try {
+    await connectDB(config.MONGODB_URI);
+
     const smtp = getSmtpConfig();
     initEmailTransport(
       smtp.host,
@@ -41,4 +44,4 @@ const start = () => {
   }
 };
 
-start();
+void start();

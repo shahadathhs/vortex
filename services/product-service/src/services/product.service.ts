@@ -35,6 +35,7 @@ async function publishEvent(eventName: EventName, product: IProduct) {
         price: product.price,
         stock: product.stock,
         category: product.category,
+        sellerId: product.sellerId ?? null,
       },
     });
 
@@ -44,45 +45,77 @@ async function publishEvent(eventName: EventName, product: IProduct) {
   }
 }
 
-async function createProduct(data: Partial<IProduct>) {
-  const { name, description, price, stock, category } = data;
+async function createProduct(
+  data: Partial<IProduct>,
+  actor?: { userId: string; role: string },
+) {
+  const { name, description, price, stock, category, sellerId } = data;
+  const resolvedSellerId: string | undefined =
+    actor?.role === 'seller' ? actor.userId : (sellerId ?? undefined);
   const product = await Product.create({
     name,
     description: description ?? '',
     price,
     stock,
     category: category ?? '',
+    ...(resolvedSellerId && { sellerId: resolvedSellerId }),
   });
   await publishEvent(EventName.PRODUCT_CREATED, product);
   return product;
 }
 
-async function updateProduct(id: string, data: Partial<IProduct>) {
-  const product = await Product.findByIdAndUpdate(
+async function updateProduct(
+  id: string,
+  data: Partial<IProduct>,
+  actor?: { userId: string; role: string },
+) {
+  const product = await Product.findById(id);
+  if (!product) {
+    throw new NotFoundError('Product not found');
+  }
+  if (actor?.role === 'seller' && product.sellerId !== actor.userId) {
+    throw new NotFoundError('Product not found');
+  }
+  const updateData = { ...data };
+  if (actor?.role === 'seller') {
+    delete (updateData as Record<string, unknown>).sellerId;
+  }
+  const updated = await Product.findByIdAndUpdate(
     id,
-    { $set: data },
+    { $set: updateData },
     { new: true },
   );
-  if (!product) {
-    throw new NotFoundError('Product not found');
-  }
-  await publishEvent(EventName.PRODUCT_UPDATED, product);
-  return product;
+  if (!updated) throw new NotFoundError('Product not found');
+  await publishEvent(EventName.PRODUCT_UPDATED, updated);
+  return updated;
 }
 
-async function deleteProduct(id: string) {
-  const product = await Product.findByIdAndDelete(id);
+async function deleteProduct(
+  id: string,
+  actor?: { userId: string; role: string },
+) {
+  const product = await Product.findById(id);
   if (!product) {
     throw new NotFoundError('Product not found');
   }
+  if (actor?.role === 'seller' && product.sellerId !== actor.userId) {
+    throw new NotFoundError('Product not found');
+  }
+  await Product.findByIdAndDelete(id);
   await publishEvent(EventName.PRODUCT_DELETED, product);
   return { message: 'Product deleted successfully' };
 }
 
-async function getProducts(query: Record<string, unknown>) {
+async function getProducts(
+  query: Record<string, unknown>,
+  actor?: { userId: string; role: string },
+) {
   const { q, category, minPrice, maxPrice } = query;
   const dbQuery: Record<string, unknown> = {};
 
+  if (actor?.role === 'seller') {
+    dbQuery.sellerId = actor.userId;
+  }
   if (q) {
     dbQuery.$text = { $search: q as string };
   }

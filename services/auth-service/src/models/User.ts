@@ -17,8 +17,8 @@ const userSchema = new Schema<IUser>(
     lastName: { type: String, required: true },
     role: {
       type: String,
-      enum: ['superadmin', 'admin', 'vendor', 'customer'],
-      default: 'customer',
+      enum: ['system', 'seller', 'buyer'],
+      default: 'buyer',
     },
     isEmailVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
@@ -67,8 +67,8 @@ userSchema.methods.toProfileJSON = function () {
   };
 };
 
-userSchema.methods.isAdmin = function () {
-  return this.role === 'admin' || this.role === 'superadmin';
+userSchema.methods.isSystem = function () {
+  return this.role === 'system';
 };
 
 export const User = model<IUser>('User', userSchema);

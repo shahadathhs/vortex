@@ -1,12 +1,14 @@
 import {
   ForbiddenError,
   Permission,
+  publishActivity,
   Role,
   RolePermissions,
   successResponse,
 } from '@vortex/common';
 import { Request, Response } from 'express';
 
+import { config } from '../config/config';
 import { orderService } from '../services/order.service';
 import { IOrder, OrderStatus } from '../types/order.interface';
 
@@ -16,12 +18,29 @@ function canManageAllOrders(role: string): boolean {
   );
 }
 
+function getReqMeta(req: Request) {
+  return {
+    ip: req.ip ?? req.socket?.remoteAddress,
+    userAgent: req.get('user-agent'),
+  };
+}
+
 async function createOrder(req: Request, res: Response) {
   const body = req.body as Partial<IOrder>;
   const order = await orderService.createOrder({
     ...body,
     userId: req.user!.id,
     userEmail: req.user!.email,
+  });
+  await publishActivity(config.RABBITMQ_URL, {
+    actorId: req.user!.id,
+    actorRole: req.user!.role,
+    actorEmail: req.user!.email,
+    action: 'order.created',
+    resource: 'order',
+    resourceId: String(order._id),
+    metadata: { totalPrice: order.totalPrice, status: order.status },
+    ...getReqMeta(req),
   });
   res.status(201).json(successResponse(order, 'Order created successfully'));
 }
@@ -62,11 +81,21 @@ async function getOrdersByUser(req: Request, res: Response) {
 
 async function updateOrderStatus(req: Request, res: Response) {
   if (!canManageAllOrders(req.user?.role ?? '')) {
-    throw new ForbiddenError('Only admins can update order status');
+    throw new ForbiddenError('Only system can update order status');
   }
   const id = String(req.params.id ?? '');
   const { status } = req.body;
   const order = await orderService.updateOrderStatus(id, status);
+  await publishActivity(config.RABBITMQ_URL, {
+    actorId: req.user!.id,
+    actorRole: req.user!.role,
+    actorEmail: req.user!.email,
+    action: 'order.status_updated',
+    resource: 'order',
+    resourceId: id,
+    metadata: { status },
+    ...getReqMeta(req),
+  });
   res.json(successResponse(order, 'Order status updated'));
 }
 
