@@ -1,4 +1,6 @@
-import { ConfirmChannel, logger, RabbitMQManager } from '@vortex/common';
+import type { ConfirmChannel } from 'amqplib';
+
+import { logger, RabbitMQManager } from '@vortex/common';
 
 export async function publishPasswordResetRequested(
   rabbitUrl: string,

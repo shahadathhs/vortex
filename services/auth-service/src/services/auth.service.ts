@@ -1,8 +1,9 @@
 import crypto from 'crypto';
 
+import type { ConfirmChannel } from 'amqplib';
+
 import {
   BadRequestError,
-  ConfirmChannel,
   ConflictError,
   generateToken,
   logger,

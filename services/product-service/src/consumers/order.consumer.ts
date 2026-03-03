@@ -1,10 +1,6 @@
-import {
-  Channel,
-  ConsumeMessage,
-  logger,
-  QueueName,
-  RabbitMQManager,
-} from '@vortex/common';
+import type { Channel, ConsumeMessage } from 'amqplib';
+
+import { logger, QueueName, RabbitMQManager } from '@vortex/common';
 import { config } from '../config/config';
 import { Product } from '../models/Product';
 

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@vortex/common": "workspace:*",
+    "amqplib": "catalog:",
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
@@ -24,6 +25,7 @@
     "dotenv": "catalog:"
   },
   "devDependencies": {
+    "@types/amqplib": "catalog:",
     "@types/cors": "catalog:",
     "@types/nodemailer": "catalog:",
     "@types/express": "catalog:",

@@ -1,5 +1,6 @@
+import type { ConfirmChannel } from 'amqplib';
+
 import {
-  ConfirmChannel,
   EventName,
   logger,
   NotFoundError,

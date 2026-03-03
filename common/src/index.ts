@@ -1,22 +1,21 @@
 /**
- * @vortex/common
- *
- * Shared utilities, core logic, and middlewares for the Vortex microservices platform
+ * @vortex/common — shared utilities, middleware, and core logic
  */
 
-// Constants & Enums
-export * from './constants';
+// Constants
+export * from './constants/events';
+export * from './constants/http-status';
+export * from './constants/permissions';
+export * from './constants/queues';
 
-// Core Logic (Messaging, JWT)
+// Core
 export * from './core/jwt';
 export * from './core/rabbit-mq-manager';
 
-// Error Handling
+// Errors
 export * from './errors/api-errors';
 export * from './errors/error-handler';
-export * from './errors/error-types';
 export * from './errors/mongoose-error-parser';
-export { simplifyError } from './errors/simplify-error';
 
 // Middleware
 export * from './middleware/api-info-logger';
@@ -25,14 +24,10 @@ export * from './middleware/not-found';
 export * from './middleware/rbac';
 export * from './middleware/validate-request';
 
-// Utilities
+// Utils
 export * from './utils/async-handler';
 export * from './utils/logger';
 export * from './utils/response';
 
-// Schemas
-export * from './schemas/pagination';
-
-// Type definitions
-export * from './types/amqplib';
+// Types
 export * from './types/auth';
