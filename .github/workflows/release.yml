@@ -71,6 +71,7 @@ jobs:
           - service: order
           - service: payment
           - service: notification
+          - service: web
 
     steps:
       - name: Checkout code
@@ -95,6 +96,9 @@ jobs:
           if [ "${{ matrix.service }}" = "gateway" ]; then
             DOCKERFILE="gateway/Dockerfile"
             IMAGE="$DOCKER_REGISTRY/${PACKAGE_NAME}-gateway"
+          elif [ "${{ matrix.service }}" = "web" ]; then
+            DOCKERFILE="web/Dockerfile"
+            IMAGE="$DOCKER_REGISTRY/${PACKAGE_NAME}-web"
           else
             DOCKERFILE="services/${{ matrix.service }}-service/Dockerfile"
             IMAGE="$DOCKER_REGISTRY/${PACKAGE_NAME}-${{ matrix.service }}-service"

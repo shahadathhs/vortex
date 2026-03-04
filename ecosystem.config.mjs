@@ -64,5 +64,15 @@ export default {
         PORT: 3007,
       },
     },
+    {
+      name: 'vortex-web',
+      cwd: './web',
+      script: 'node_modules/.bin/next',
+      args: 'start',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3008,
+      },
+    },
   ],
 };

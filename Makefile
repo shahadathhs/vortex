@@ -11,7 +11,7 @@ COMPOSE_CMD := docker compose $(COMPOSE_FILE_ARGS) $(COMPOSE_ENV_ARGS)
 COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 
 # Services List
-SERVICES := gateway auth product order payment notification activity analytics
+SERVICES := gateway auth product order payment notification activity analytics web
 
 .PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-check ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
 
@@ -22,7 +22,7 @@ help:
 	@echo "pnpm / Development:"
 	@echo "  make install          Install dependencies"
 	@echo "  make dev              Run all services in dev (turbo)"
-	@echo "  make dev-<service>    Run specific service (gateway, auth, order, product, payment, notification, activity)"
+	@echo "  make dev-<service>    Run specific service (gateway, auth, order, product, payment, notification, activity, web)"
 	@echo "  make build-js         Build all packages (pnpm)"
 	@echo "  make typecheck        Type-check all packages"
 	@echo "  make lint             Lint all packages"
@@ -32,7 +32,7 @@ help:
 	@echo "  make ci-check        Lint + format + typecheck (read-only CI check)"
 	@echo "  make ci-fix          Lint + format fix (auto-fix)"
 	@echo "  make clean-pkg       Clean build artifacts and node_modules"
-	@echo "  make deploy-<svc>   Deploy package to ./dist/deploy/<svc> (gateway, auth, order, product, notification)"
+	@echo "  make deploy-<svc>   Deploy package to ./dist/deploy/<svc> (gateway, auth, order, product, notification, web)"
 	@echo ""
 	@echo "PM2 (production):"
 	@echo "  make pm2-start      Build and start all services via PM2"
@@ -41,12 +41,12 @@ help:
 	@echo "  make pm2-delete     Delete all PM2 processes"
 	@echo "  make pm2-status     Show PM2 process list"
 	@echo "  make pm2-logs       Tail PM2 logs (all apps)"
-	@echo "  make pm2-logs-<svc> Tail logs for specific app (gateway, auth, order, product, payment, notification)"
+	@echo "  make pm2-logs-<svc> Tail logs for specific app (gateway, auth, order, product, payment, notification, web)"
 	@echo ""
 	@echo "Docker / Environment:"
 	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
 	@echo "  make up               Start all services"
-	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, payment, notification, activity)"
+	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, payment, notification, activity, web)"
 	@echo "  make tools           Start dev tools (Mongo Express)"
 	@echo "  make down            Stop all containers"
 	@echo ""
@@ -92,6 +92,9 @@ dev-analytics:
 
 dev-payment:
 	pnpm --filter=payment-service dev
+
+dev-web:
+	pnpm --filter=@vortex/web dev
 
 build-js:
 	pnpm build
@@ -145,6 +148,9 @@ deploy-analytics:
 deploy-payment:
 	pnpm deploy --filter=payment-service dist/deploy/payment-service
 
+deploy-web:
+	pnpm deploy --filter=@vortex/web dist/deploy/web
+
 # --- PM2 (production) ---
 
 pm2-start: build-js
@@ -189,6 +195,9 @@ pm2-logs-analytics:
 pm2-logs-payment:
 	pm2 logs vortex-payment-service
 
+pm2-logs-web:
+	pm2 logs vortex-web
+
 # --- Docker / Environment ---
 
 infra:
@@ -208,13 +217,16 @@ up-%:
 	$(COMPOSE_CMD) --profile $* up -d
 
 down:
-	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools down --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools --profile web down --remove-orphans
 
 # --- Build / Push / Pull patterns ---
 
 # Build
 build-gateway:
 	docker build -f gateway/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-gateway:$(VERSION) .
+
+build-web:
+	docker build -f web/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-web:$(VERSION) .
 
 build-%:
 	docker build -f services/$*-service/Dockerfile -t $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-$*-service:$(VERSION) .
@@ -225,6 +237,9 @@ build: $(addprefix build-, $(SERVICES))
 push-gateway:
 	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-gateway:$(VERSION)
 
+push-web:
+	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-web:$(VERSION)
+
 push-%:
 	docker push $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-$*-service:$(VERSION)
 
@@ -234,6 +249,9 @@ push: $(addprefix push-, $(SERVICES))
 pull-gateway:
 	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-gateway:$(VERSION)
 
+pull-web:
+	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-web:$(VERSION)
+
 pull-%:
 	docker pull $(DOCKER_REGISTRY)/$(PACKAGE_NAME)-$*-service:$(VERSION)
 
@@ -242,10 +260,10 @@ pull: $(addprefix pull-, $(SERVICES))
 # --- Maintenance ---
 
 clean:
-	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools down --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools --profile web down --remove-orphans
 
 clean-all:
-	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools down -v --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools --profile web down -v --remove-orphans
 	docker system prune -f
 	docker volume prune -f
 

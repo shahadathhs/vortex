@@ -6,6 +6,33 @@ settings:
 
 catalogs:
   default:
+    '@semantic-release/changelog':
+      specifier: ^6.0.3
+      version: 6.0.3
+    '@semantic-release/commit-analyzer':
+      specifier: ^13.0.1
+      version: 13.0.1
+    '@semantic-release/git':
+      specifier: ^10.0.1
+      version: 10.0.1
+    '@semantic-release/github':
+      specifier: ^12.0.6
+      version: 12.0.6
+    '@semantic-release/npm':
+      specifier: ^13.1.5
+      version: 13.1.5
+    '@semantic-release/release-notes-generator':
+      specifier: ^14.1.0
+      version: 14.1.0
+    '@systemix/eslint':
+      specifier: ^0.4.0
+      version: 0.4.0
+    '@systemix/typescript':
+      specifier: ^0.4.0
+      version: 0.4.0
+    '@tailwindcss/postcss':
+      specifier: ^4.2.1
+      version: 4.2.1
     '@types/amqplib':
       specifier: ^0.10.8
       version: 0.10.8
@@ -15,27 +42,51 @@ catalogs:
     '@types/express':
       specifier: ^5.0.6
       version: 5.0.6
+    '@types/jsonwebtoken':
+      specifier: ^9.0.10
+      version: 9.0.10
     '@types/node':
       specifier: ^25.3.3
       version: 25.3.3
     '@types/nodemailer':
       specifier: ^7.0.11
       version: 7.0.11
+    '@types/react':
+      specifier: ^19.2.14
+      version: 19.2.14
+    '@types/react-dom':
+      specifier: ^19.2.3
+      version: 19.2.3
     '@types/swagger-ui-express':
       specifier: ^4.1.8
       version: 4.1.8
+    amqp-connection-manager:
+      specifier: ^5.0.0
+      version: 5.0.0
     amqplib:
       specifier: ^0.10.9
       version: 0.10.9
     bcryptjs:
       specifier: ^3.0.3
       version: 3.0.3
+    commitizen:
+      specifier: ^4.3.1
+      version: 4.3.1
     cors:
       specifier: ^2.8.6
       version: 2.8.6
+    cz-git:
+      specifier: ^1.12.0
+      version: 1.12.0
     dotenv:
       specifier: ^17.3.1
       version: 17.3.1
+    eslint:
+      specifier: ^10.0.2
+      version: 10.0.2
+    eslint-config-next:
+      specifier: 16.1.6
+      version: 16.1.6
     express:
       specifier: ^5.2.1
       version: 5.2.1
@@ -45,15 +96,42 @@ catalogs:
     helmet:
       specifier: ^8.1.0
       version: 8.1.0
+    http-proxy-middleware:
+      specifier: ^3.0.5
+      version: 3.0.5
+    husky:
+      specifier: ^9.1.7
+      version: 9.1.7
+    jsonwebtoken:
+      specifier: ^9.0.3
+      version: 9.0.3
+    lint-staged:
+      specifier: ^16.3.2
+      version: 16.3.2
     mongoose:
       specifier: ^9.2.4
       version: 9.2.4
+    next:
+      specifier: 16.1.6
+      version: 16.1.6
     nodemailer:
       specifier: ^8.0.1
       version: 8.0.1
+    prettier:
+      specifier: ^3.8.1
+      version: 3.8.1
+    react:
+      specifier: 19.2.4
+      version: 19.2.4
+    react-dom:
+      specifier: 19.2.4
+      version: 19.2.4
     rimraf:
       specifier: ^6.1.3
       version: 6.1.3
+    semantic-release:
+      specifier: ^25.0.3
+      version: 25.0.3
     socket.io:
       specifier: ^4.8.3
       version: 4.8.3
@@ -63,12 +141,33 @@ catalogs:
     swagger-ui-express:
       specifier: ^5.0.1
       version: 5.0.1
+    tailwindcss:
+      specifier: ^4.2.1
+      version: 4.2.1
+    ts-node:
+      specifier: ^10.9.2
+      version: 10.9.2
     ts-node-dev:
       specifier: ^2.0.0
       version: 2.0.0
+    tsconfig-paths:
+      specifier: ^4.2.0
+      version: 4.2.0
+    tsup:
+      specifier: ^8.5.1
+      version: 8.5.1
+    turbo:
+      specifier: ^2.8.13
+      version: 2.8.13
     typescript:
       specifier: ^5.9.3
       version: 5.9.3
+    winston:
+      specifier: ^3.19.0
+      version: 3.19.0
+    winston-daily-rotate-file:
+      specifier: ^5.0.0
+      version: 5.0.0
     zod:
       specifier: ^4.3.6
       version: 4.3.6
@@ -78,61 +177,61 @@ importers:
   .:
     devDependencies:
       '@semantic-release/changelog':
-        specifier: ^6.0.3
+        specifier: 'catalog:'
         version: 6.0.3(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/commit-analyzer':
-        specifier: ^13.0.1
+        specifier: 'catalog:'
         version: 13.0.1(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/git':
-        specifier: ^10.0.1
+        specifier: 'catalog:'
         version: 10.0.1(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/github':
-        specifier: ^12.0.6
+        specifier: 'catalog:'
         version: 12.0.6(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/npm':
-        specifier: ^13.1.5
+        specifier: 'catalog:'
         version: 13.1.5(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/release-notes-generator':
-        specifier: ^14.1.0
+        specifier: 'catalog:'
         version: 14.1.0(semantic-release@25.0.3(typescript@5.9.3))
       '@systemix/eslint':
-        specifier: ^0.4.0
+        specifier: 'catalog:'
         version: 0.4.0(eslint@10.0.2(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.13)(typescript@5.9.3)
       '@systemix/typescript':
-        specifier: ^0.4.0
+        specifier: 'catalog:'
         version: 0.4.0
       commitizen:
-        specifier: ^4.3.1
+        specifier: 'catalog:'
         version: 4.3.1(@types/node@25.3.3)(typescript@5.9.3)
       cz-git:
-        specifier: ^1.12.0
+        specifier: 'catalog:'
         version: 1.12.0
       eslint:
-        specifier: ^10.0.2
+        specifier: 'catalog:'
         version: 10.0.2(jiti@2.6.1)
       husky:
-        specifier: ^9.1.7
+        specifier: 'catalog:'
         version: 9.1.7
       lint-staged:
-        specifier: ^16.3.2
+        specifier: 'catalog:'
         version: 16.3.2
       prettier:
-        specifier: ^3.8.1
+        specifier: 'catalog:'
         version: 3.8.1
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3
       semantic-release:
-        specifier: ^25.0.3
+        specifier: 'catalog:'
         version: 25.0.3(typescript@5.9.3)
       ts-node:
-        specifier: ^10.9.2
+        specifier: 'catalog:'
         version: 10.9.2(@types/node@25.3.3)(typescript@5.9.3)
       tsconfig-paths:
-        specifier: ^4.2.0
+        specifier: 'catalog:'
         version: 4.2.0
       turbo:
-        specifier: ^2.8.13
+        specifier: 'catalog:'
         version: 2.8.13
       typescript:
         specifier: 'catalog:'
@@ -141,7 +240,7 @@ importers:
   common:
     dependencies:
       amqp-connection-manager:
-        specifier: ^5.0.0
+        specifier: 'catalog:'
         version: 5.0.0(amqplib@0.10.9)
       amqplib:
         specifier: 'catalog:'
@@ -150,13 +249,13 @@ importers:
         specifier: 'catalog:'
         version: 5.2.1
       jsonwebtoken:
-        specifier: ^9.0.3
+        specifier: 'catalog:'
         version: 9.0.3
       winston:
-        specifier: ^3.19.0
+        specifier: 'catalog:'
         version: 3.19.0
       winston-daily-rotate-file:
-        specifier: ^5.0.0
+        specifier: 'catalog:'
         version: 5.0.0(winston@3.19.0)
       zod:
         specifier: 'catalog:'
@@ -169,7 +268,7 @@ importers:
         specifier: 'catalog:'
         version: 5.0.6
       '@types/jsonwebtoken':
-        specifier: ^9.0.10
+        specifier: 'catalog:'
         version: 9.0.10
       '@types/node':
         specifier: 'catalog:'
@@ -178,7 +277,7 @@ importers:
         specifier: 'catalog:'
         version: 6.1.3
       tsup:
-        specifier: ^8.5.1
+        specifier: 'catalog:'
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(typescript@5.9.3)(yaml@2.8.2)
       typescript:
         specifier: 'catalog:'
@@ -205,7 +304,7 @@ importers:
         specifier: 'catalog:'
         version: 8.1.0
       http-proxy-middleware:
-        specifier: ^3.0.5
+        specifier: 'catalog:'
         version: 3.0.5
       swagger-ui-express:
         specifier: 'catalog:'
@@ -558,47 +657,47 @@ importers:
   web:
     dependencies:
       next:
-        specifier: 16.1.6
+        specifier: 'catalog:'
         version: 16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
-        specifier: 19.2.4
+        specifier: 'catalog:'
         version: 19.2.4
       react-dom:
-        specifier: 19.2.4
+        specifier: 'catalog:'
         version: 19.2.4(react@19.2.4)
     devDependencies:
       '@systemix/eslint':
-        specifier: ^0.4.0
+        specifier: 'catalog:'
         version: 0.4.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.13)(typescript@5.9.3)
       '@systemix/typescript':
-        specifier: ^0.4.0
+        specifier: 'catalog:'
         version: 0.4.0
       '@tailwindcss/postcss':
-        specifier: ^4.2.1
+        specifier: 'catalog:'
         version: 4.2.1
       '@types/node':
-        specifier: ^25.3.3
+        specifier: 'catalog:'
         version: 25.3.3
       '@types/react':
-        specifier: ^19.2.14
+        specifier: 'catalog:'
         version: 19.2.14
       '@types/react-dom':
-        specifier: ^19.2.3
+        specifier: 'catalog:'
         version: 19.2.3(@types/react@19.2.14)
       eslint:
-        specifier: ^10.0.2
+        specifier: 'catalog:'
         version: 10.0.2(jiti@2.6.1)
       eslint-config-next:
-        specifier: 16.1.6
+        specifier: 'catalog:'
         version: 16.1.6(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3)
       prettier:
-        specifier: ^3.8.1
+        specifier: 'catalog:'
         version: 3.8.1
       rimraf:
         specifier: 'catalog:'
         version: 6.1.3
       tailwindcss:
-        specifier: ^4.2.1
+        specifier: 'catalog:'
         version: 4.2.1
       typescript:
         specifier: 'catalog:'
