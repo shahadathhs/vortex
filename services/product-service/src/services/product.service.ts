@@ -110,14 +110,21 @@ async function getProducts(
   query: Record<string, unknown>,
   actor?: { userId: string; role: string },
 ) {
-  const { q, category, minPrice, maxPrice } = query;
+  const { q, category, minPrice, maxPrice, sortBy, sortOrder, skip, limit } =
+    query;
   const dbQuery: Record<string, unknown> = {};
 
   if (actor?.role === 'seller') {
     dbQuery.sellerId = actor.userId;
   }
-  if (q) {
-    dbQuery.$text = { $search: q as string };
+
+  const qStr = typeof q === 'string' ? q : '';
+  if (qStr.trim()) {
+    const { buildSearchOr } = await import('@vortex/common');
+    const searchOr = buildSearchOr(['name', 'description', 'category'], qStr);
+    if (searchOr) {
+      Object.assign(dbQuery, searchOr);
+    }
   }
   if (category) {
     dbQuery.category = category;
@@ -132,8 +139,27 @@ async function getProducts(
     }
   }
 
-  const products = await Product.find(dbQuery);
-  return products;
+  const sortByStr = typeof sortBy === 'string' ? sortBy : '';
+  const sortField =
+    sortByStr && ['name', 'price', 'createdAt', 'stock'].includes(sortByStr)
+      ? sortByStr
+      : 'createdAt';
+  const sortDir = sortOrder === 'asc' ? 1 : -1;
+
+  const skipNum = Number(skip) || 0;
+  const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
+
+  const [products, total] = await Promise.all([
+    Product.find(dbQuery)
+      .select('-__v')
+      .sort({ [sortField]: sortDir } as Record<string, 1 | -1>)
+      .skip(skipNum)
+      .limit(limitNum)
+      .lean(),
+    Product.countDocuments(dbQuery),
+  ]);
+
+  return { products, total };
 }
 
 async function getProductById(id: string) {

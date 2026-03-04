@@ -26,7 +26,16 @@ const activitySchema = new Schema<IActivity>(
     userAgent: { type: String },
     timestamp: { type: Date, required: true, default: Date.now, index: true },
   },
-  { timestamps: false },
+  {
+    timestamps: false,
+    toJSON: {
+      transform(_doc, ret: Record<string, unknown>) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
 );
 
 activitySchema.index({ actorId: 1, timestamp: -1 });

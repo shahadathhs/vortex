@@ -76,3 +76,32 @@ export const successPaginatedResponse = <T>(
     totalPage: Math.ceil(metadata.total / metadata.limit),
   },
 });
+
+export interface TErrorResponse<T = unknown> {
+  success: false;
+  message: string;
+  data?: T;
+}
+
+/** Consistent error payload shape */
+export const errorResponse = <T>(
+  message: string,
+  data?: T,
+): TErrorResponse<T> => ({
+  success: false,
+  message,
+  ...(data !== undefined && { data }),
+});
+
+/** Send paginated response and set status */
+export const sendPaginatedResponse = <T>(
+  res: Response,
+  data: T[],
+  metadata: { page: number; limit: number; total: number },
+  message = 'Request successful',
+  statusCode = 200,
+) => {
+  res
+    .status(statusCode)
+    .json(successPaginatedResponse(data, metadata, message));
+};

@@ -250,6 +250,9 @@ importers:
       mongoose:
         specifier: 'catalog:'
         version: 9.2.3
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
     devDependencies:
       '@types/amqplib':
         specifier: 'catalog:'
@@ -287,6 +290,9 @@ importers:
       helmet:
         specifier: 'catalog:'
         version: 8.1.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
     devDependencies:
       '@types/cors':
         specifier: 'catalog:'
@@ -382,6 +388,9 @@ importers:
       nodemailer:
         specifier: 'catalog:'
         version: 6.10.1
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
     devDependencies:
       '@types/amqplib':
         specifier: 'catalog:'
@@ -468,9 +477,15 @@ importers:
       helmet:
         specifier: 'catalog:'
         version: 8.1.0
+      mongoose:
+        specifier: 'catalog:'
+        version: 9.2.3
       stripe:
         specifier: 'catalog:'
         version: 17.7.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
     devDependencies:
       '@types/cors':
         specifier: 'catalog:'

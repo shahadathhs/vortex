@@ -4,6 +4,7 @@ import express from 'express';
 import helmet from 'helmet';
 
 import authRoutes from './routes/auth.routes';
+import internalRoutes from './routes/internal.routes';
 
 const app: express.Application = express();
 
@@ -30,6 +31,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/internal', internalRoutes);
 
 // 404 handler
 app.use(notFound);

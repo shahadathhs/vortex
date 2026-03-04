@@ -4,10 +4,13 @@ import {
   clearCartInternal,
   createOrder,
   getCart,
+  getOrder,
   getProduct,
   updateOrderStatus,
 } from '../lib/http-client';
+import { getPaymentSettings } from './payment-settings.service';
 import { createPaymentIntent } from './stripe.service';
+import { createTransactionsForOrder } from './transaction.service';
 
 interface CartItem {
   productId: string;
@@ -18,6 +21,7 @@ interface OrderItem {
   productId: string;
   quantity: number;
   price: number;
+  sellerId?: string;
 }
 
 export async function checkout(
@@ -39,8 +43,11 @@ export async function checkout(
   for (const item of items) {
     const productRes = await getProduct(item.productId);
     const product =
-      (productRes as { data?: { price?: number; stock?: number } })?.data ??
-      productRes;
+      (
+        productRes as {
+          data?: { price?: number; stock?: number; sellerId?: string };
+        }
+      )?.data ?? productRes;
 
     if (!product) {
       throw new BadRequestError(`Product ${item.productId} not found`);
@@ -48,6 +55,7 @@ export async function checkout(
 
     const price = (product as { price?: number }).price ?? 0;
     const stock = (product as { stock?: number }).stock ?? 0;
+    const sellerId = (product as { sellerId?: string }).sellerId;
 
     if (stock < item.quantity) {
       throw new BadRequestError(
@@ -59,6 +67,7 @@ export async function checkout(
       productId: item.productId,
       quantity: item.quantity,
       price,
+      ...(sellerId && { sellerId }),
     });
     totalPrice += price * item.quantity;
   }
@@ -90,16 +99,42 @@ export async function checkout(
 }
 
 export async function handlePaymentSucceeded(orderId: string) {
-  const { getOrder } = await import('../lib/http-client');
   const orderRes = await getOrder(orderId);
-  const order = (orderRes as { data?: { userId?: string } })?.data ?? orderRes;
+  const order =
+    (
+      orderRes as {
+        data?: {
+          userId?: string;
+          items?: {
+            productId: string;
+            quantity: number;
+            price: number;
+            sellerId?: string;
+          }[];
+        };
+      }
+    )?.data ?? orderRes;
   const userId = (order as { userId?: string })?.userId;
+  const items =
+    (
+      order as {
+        items?: {
+          productId: string;
+          quantity: number;
+          price: number;
+          sellerId?: string;
+        }[];
+      }
+    )?.items ?? [];
 
   await updateOrderStatus(orderId, 'confirmed');
 
   if (userId) {
     await clearCartInternal(userId);
   }
+
+  const settings = await getPaymentSettings();
+  await createTransactionsForOrder(orderId, items, settings.platformFeePercent);
 }
 
 export async function handlePaymentFailed(orderId: string) {

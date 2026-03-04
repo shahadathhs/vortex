@@ -1,7 +1,9 @@
 import {
   AuthRequest,
+  getPagination,
   HttpStatusCode,
   publishActivity,
+  successPaginatedResponse,
   successResponse,
 } from '@vortex/common';
 import { Request, Response } from 'express';
@@ -81,11 +83,23 @@ async function deleteProduct(req: AuthRequest, res: Response) {
 }
 
 async function getProducts(req: Request, res: Response) {
-  const products = await productService.getProducts(
-    req.query as Record<string, unknown>,
+  const { page, limit, skip } = getPagination(req.query);
+  const query = {
+    ...(req.query as Record<string, unknown>),
+    skip,
+    limit,
+  };
+  const { products, total } = await productService.getProducts(
+    query,
     getActor(req),
   );
-  res.json(successResponse(products, 'Products retrieved'));
+  res.json(
+    successPaginatedResponse(
+      products,
+      { page, limit, total },
+      'Products retrieved',
+    ),
+  );
 }
 
 async function getProductById(req: Request, res: Response) {

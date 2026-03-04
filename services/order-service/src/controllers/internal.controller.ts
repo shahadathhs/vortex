@@ -26,15 +26,31 @@ async function getOrder(req: Request, res: Response) {
 }
 
 async function listOrders(req: Request, res: Response) {
-  const { status, limit } = req.query;
-  const orders = await orderService.getOrders({
-    status: status as OrderStatus | undefined,
-  });
-  const capped =
+  const { status, limit, page } = req.query;
+  const hasPagination = typeof page === 'string' || typeof limit === 'string';
+  const limitNum =
     typeof limit === 'string'
-      ? orders.slice(0, Math.min(1000, parseInt(limit, 10) || 100))
-      : orders;
-  res.json(successResponse(capped, 'Orders retrieved'));
+      ? Math.min(1000, parseInt(limit, 10) || 100)
+      : hasPagination
+        ? 100
+        : 10000;
+  const pageNum =
+    typeof page === 'string' ? Math.max(1, parseInt(page, 10) || 1) : 1;
+  const skip = (pageNum - 1) * limitNum;
+  const { orders, total } = await orderService.getOrders({
+    status: status as OrderStatus | undefined,
+    limit: limitNum,
+    skip,
+  });
+  if (hasPagination) {
+    return res.json(
+      successResponse(
+        { data: orders, pagination: { page: pageNum, limit: limitNum, total } },
+        'Orders retrieved',
+      ),
+    );
+  }
+  res.json(successResponse(orders, 'Orders retrieved'));
 }
 
 async function clearCart(req: Request, res: Response) {

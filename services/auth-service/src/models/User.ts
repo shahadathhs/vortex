@@ -20,6 +20,8 @@ const userSchema = new Schema<IUser>(
       enum: ['system', 'seller', 'buyer'],
       default: 'buyer',
     },
+    stripeAccountId: { type: String },
+    stripeOnboardingComplete: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
@@ -29,7 +31,20 @@ const userSchema = new Schema<IUser>(
     passwordResetExpires: { type: Date },
     refreshToken: { type: String },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform(_doc, ret: Record<string, unknown>) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        delete ret.password;
+        delete ret.refreshToken;
+        delete ret.passwordResetToken;
+        delete ret.passwordResetExpires;
+      },
+    },
+  },
 );
 
 // Index for performance
@@ -60,6 +75,8 @@ userSchema.methods.toProfileJSON = function () {
     firstName: this.firstName,
     lastName: this.lastName,
     role: this.role,
+    stripeAccountId: this.stripeAccountId,
+    stripeOnboardingComplete: this.stripeOnboardingComplete,
     isEmailVerified: this.isEmailVerified,
     isActive: this.isActive,
     createdAt: this.createdAt,

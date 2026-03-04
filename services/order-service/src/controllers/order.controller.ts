@@ -1,9 +1,12 @@
 import {
   ForbiddenError,
+  getDateRangeFromPreset,
+  getPagination,
   Permission,
   publishActivity,
   Role,
   RolePermissions,
+  successPaginatedResponse,
   successResponse,
 } from '@vortex/common';
 import { Request, Response } from 'express';
@@ -46,11 +49,29 @@ async function createOrder(req: Request, res: Response) {
 }
 
 async function getOrders(req: Request, res: Response) {
-  const { userId: queryUserId, status } = req.query as {
+  const {
+    userId: queryUserId,
+    status,
+    dateFilter,
+    search,
+  } = req.query as {
     userId?: string;
     status?: OrderStatus;
+    dateFilter?: string;
+    search?: string;
   };
-  const filter: { userId?: string; status?: OrderStatus } = {};
+  const { page, limit, skip } = getPagination(req.query);
+
+  const filter: {
+    userId?: string;
+    status?: OrderStatus;
+    from?: Date;
+    to?: Date;
+    search?: string;
+    skip?: number;
+    limit?: number;
+  } = { skip, limit };
+
   if (canManageAllOrders(req.user!.role)) {
     if (queryUserId) filter.userId = queryUserId;
     if (status) filter.status = status;
@@ -58,8 +79,22 @@ async function getOrders(req: Request, res: Response) {
     filter.userId = req.user!.id;
     if (status) filter.status = status;
   }
-  const orders = await orderService.getOrders(filter);
-  res.json(successResponse(orders, 'Orders retrieved'));
+
+  const dateRange = dateFilter ? getDateRangeFromPreset(dateFilter) : null;
+  if (dateRange) {
+    filter.from = dateRange.from;
+    filter.to = dateRange.to;
+  }
+  if (search) filter.search = search;
+
+  const { orders, total } = await orderService.getOrders(filter);
+  res.json(
+    successPaginatedResponse(
+      orders,
+      { page, limit, total },
+      'Orders retrieved',
+    ),
+  );
 }
 
 async function getOrderById(req: Request, res: Response) {
@@ -75,8 +110,32 @@ async function getOrdersByUser(req: Request, res: Response) {
   if (targetUserId !== req.user!.id && !canManageAllOrders(req.user!.role)) {
     throw new ForbiddenError('You do not have access to these orders');
   }
-  const orders = await orderService.getOrdersByUser(targetUserId);
-  res.json(successResponse(orders, 'Orders retrieved'));
+  const { page, limit, skip } = getPagination(req.query);
+  const { dateFilter, search } = req.query as {
+    dateFilter?: string;
+    search?: string;
+  };
+
+  const filter: Parameters<typeof orderService.getOrders>[0] = {
+    userId: targetUserId,
+    skip,
+    limit,
+  };
+  const dateRange = dateFilter ? getDateRangeFromPreset(dateFilter) : null;
+  if (dateRange) {
+    filter.from = dateRange.from;
+    filter.to = dateRange.to;
+  }
+  if (search) filter.search = search;
+
+  const { orders, total } = await orderService.getOrders(filter);
+  res.json(
+    successPaginatedResponse(
+      orders,
+      { page, limit, total },
+      'Orders retrieved',
+    ),
+  );
 }
 
 async function updateOrderStatus(req: Request, res: Response) {

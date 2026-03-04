@@ -6,6 +6,8 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   role: 'system' | 'seller' | 'buyer';
+  stripeAccountId?: string;
+  stripeOnboardingComplete?: boolean;
   isEmailVerified: boolean;
   isActive: boolean;
   isDeleted: boolean;

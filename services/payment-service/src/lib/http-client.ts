@@ -2,6 +2,7 @@ import { config } from '../config/config';
 
 const orderUrl = config.ORDER_SERVICE_URL;
 const productUrl = config.PRODUCT_SERVICE_URL;
+const authUrl = config.AUTH_SERVICE_URL;
 const internalSecret = config.INTERNAL_SECRET;
 
 export async function getCart(authHeader: string) {
@@ -75,5 +76,54 @@ export async function getProduct(productId: string) {
     if (res.status === 404) return null;
     throw new Error(`Product fetch failed: ${res.status}`);
   }
-  return res.json() as Promise<{ data?: { price?: number; stock?: number } }>;
+  return res.json() as Promise<{
+    data?: { price?: number; stock?: number; sellerId?: string };
+  }>;
+}
+
+export async function getUser(userId: string) {
+  const res = await fetch(`${authUrl}/api/internal/users/${userId}`, {
+    headers: { 'X-Internal-Secret': internalSecret },
+  });
+  if (!res.ok) {
+    if (res.status === 404) return null;
+    throw new Error(`User fetch failed: ${res.status}`);
+  }
+  return res.json() as Promise<{
+    data?: { stripeAccountId?: string; stripeOnboardingComplete?: boolean };
+  }>;
+}
+
+export async function updateUserStripeAccount(
+  userId: string,
+  data: { stripeAccountId?: string; stripeOnboardingComplete?: boolean },
+) {
+  const res = await fetch(`${authUrl}/api/internal/users/${userId}/stripe`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Internal-Secret': internalSecret,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(`User stripe update failed: ${res.status}`);
+  return res.json() as Promise<Record<string, unknown>>;
+}
+
+export async function updateUserStripeOnboardingByAccountId(accountId: string) {
+  const res = await fetch(
+    `${authUrl}/api/internal/users/by-stripe-account/${accountId}/onboarding`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Secret': internalSecret,
+      },
+    },
+  );
+  if (!res.ok) {
+    if (res.status === 404) return null;
+    throw new Error(`User onboarding update failed: ${res.status}`);
+  }
+  return res.json() as Promise<Record<string, unknown> | null>;
 }

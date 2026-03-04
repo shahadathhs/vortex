@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { paginationQuerySchema, sortQuerySchema } from '@vortex/common';
+
 export const createProductSchema = z.object({
   body: z.object({
     name: z.string().min(1, 'Name is required'),
@@ -30,7 +32,7 @@ export const updateProductSchema = z.object({
 });
 
 export const getProductsSchema = z.object({
-  query: z.object({
+  query: paginationQuerySchema.merge(sortQuerySchema).extend({
     q: z.string().optional(),
     category: z.string().optional(),
     minPrice: z.coerce.number().optional(),

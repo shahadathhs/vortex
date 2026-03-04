@@ -22,7 +22,8 @@
     "express": "catalog:",
     "helmet": "catalog:",
     "mongoose": "catalog:",
-    "dotenv": "catalog:"
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/amqplib": "catalog:",

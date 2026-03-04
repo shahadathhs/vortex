@@ -22,11 +22,26 @@ export enum Permission {
   ORDER_VIEW_OWN = 'ORDER_VIEW_OWN',
   ORDER_MANAGE_ALL = 'ORDER_MANAGE_ALL',
 
+  // Cart (buyer-only)
+  CART_READ = 'CART_READ',
+  CART_ADD = 'CART_ADD',
+  CART_UPDATE = 'CART_UPDATE',
+  CART_REMOVE = 'CART_REMOVE',
+  CART_CLEAR = 'CART_CLEAR',
+
+  // Notifications
+  NOTIFICATION_READ = 'NOTIFICATION_READ',
+  NOTIFICATION_UPDATE = 'NOTIFICATION_UPDATE',
+
   // Analytics & activity (role-specific dashboards)
   ANALYTICS_SYSTEM = 'ANALYTICS_SYSTEM',
   ANALYTICS_SELLER = 'ANALYTICS_SELLER',
   ANALYTICS_BUYER = 'ANALYTICS_BUYER',
   ACTIVITY_VIEW_ALL = 'ACTIVITY_VIEW_ALL',
+
+  // Payment & payouts (system only)
+  PAYMENT_SETTINGS_MANAGE = 'PAYMENT_SETTINGS_MANAGE',
+  PAYMENT_SETTLEMENT = 'PAYMENT_SETTLEMENT',
 }
 
 export enum Role {
@@ -38,6 +53,8 @@ export enum Role {
 export const RolePermissions: Record<Role, Permission[]> = {
   [Role.SYSTEM]: [
     ...Object.values(Permission),
+    Permission.PAYMENT_SETTINGS_MANAGE,
+    Permission.PAYMENT_SETTLEMENT,
     Permission.SELLER_CREATE,
     Permission.SELLER_DELETE,
     Permission.SELLER_RESET_PASSWORD,
@@ -53,12 +70,21 @@ export const RolePermissions: Record<Role, Permission[]> = {
     Permission.PRODUCT_DELETE,
     Permission.PRODUCT_READ,
     Permission.ORDER_VIEW_OWN,
+    Permission.NOTIFICATION_READ,
+    Permission.NOTIFICATION_UPDATE,
     Permission.ANALYTICS_SELLER,
   ],
   [Role.BUYER]: [
     Permission.PRODUCT_READ,
     Permission.ORDER_CREATE,
     Permission.ORDER_VIEW_OWN,
+    Permission.CART_READ,
+    Permission.CART_ADD,
+    Permission.CART_UPDATE,
+    Permission.CART_REMOVE,
+    Permission.CART_CLEAR,
+    Permission.NOTIFICATION_READ,
+    Permission.NOTIFICATION_UPDATE,
     Permission.ANALYTICS_BUYER,
   ],
 };

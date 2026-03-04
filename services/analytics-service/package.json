@@ -20,7 +20,8 @@
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
-    "dotenv": "catalog:"
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/cors": "catalog:",

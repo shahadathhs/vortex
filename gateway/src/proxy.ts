@@ -11,6 +11,7 @@ const services = [
   { path: '/api/orders', url: config.ORDER_SERVICE_URL },
   { path: '/api/cart', url: config.ORDER_SERVICE_URL },
   { path: '/api/checkout', url: config.PAYMENT_SERVICE_URL },
+  { path: '/api/payment', url: config.PAYMENT_SERVICE_URL },
   { path: '/api/webhooks', url: config.PAYMENT_SERVICE_URL },
   { path: '/api/activities', url: config.ACTIVITY_SERVICE_URL },
   { path: '/api/notifications', url: config.NOTIFICATION_SERVICE_URL },

@@ -23,7 +23,7 @@ import { IUser } from '../types/user.interface';
 
 const rabbitMQ = RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
-function generateAccessToken(user: IUser) {
+function generateAccessToken(user: IUser): string {
   return generateToken(
     {
       id: String(user._id),
@@ -284,6 +284,45 @@ async function deleteSeller(sellerId: string) {
   return { message: 'Seller deleted successfully' };
 }
 
+async function getUserById(userId: string) {
+  const user = await User.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+  })
+    .select('-password -refreshToken')
+    .lean();
+  if (!user) return null;
+  return user;
+}
+
+async function updateStripeAccount(
+  userId: string,
+  data: { stripeAccountId?: string; stripeOnboardingComplete?: boolean },
+) {
+  const user = await User.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+  });
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+  if (data.stripeAccountId !== undefined)
+    user.stripeAccountId = data.stripeAccountId;
+  if (data.stripeOnboardingComplete !== undefined)
+    user.stripeOnboardingComplete = data.stripeOnboardingComplete;
+  await user.save();
+  return user;
+}
+
+async function updateStripeOnboardingByAccountId(stripeAccountId: string) {
+  const user = await User.findOneAndUpdate(
+    { stripeAccountId, isDeleted: { $ne: true } },
+    { $set: { stripeOnboardingComplete: true } },
+    { new: true },
+  );
+  return user;
+}
+
 async function listSellers() {
   const sellers = await User.find({ role: 'seller', isDeleted: { $ne: true } })
     .select('-password -refreshToken -passwordResetToken -passwordResetExpires')
@@ -366,6 +405,9 @@ export const authService = {
   forgotPassword,
   resetPasswordWithToken,
   fetchUserForAuth,
+  getUserById,
+  updateStripeAccount,
+  updateStripeOnboardingByAccountId,
   createSeller,
   deleteSeller,
   listSellers,

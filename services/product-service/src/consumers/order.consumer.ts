@@ -35,7 +35,7 @@ function parseItems(data: Record<string, unknown>): OrderItem[] {
 
 async function publishInventoryAlert(
   productId: string,
-  event: EventName.PRODUCT_LOW_STOCK | EventName.PRODUCT_OUT_OF_STOCK,
+  event: string,
   product: { name: string; stock: number; sellerId?: string },
 ) {
   try {
@@ -107,9 +107,9 @@ function handleMessage(content: string) {
       const items = parseItems(data);
       for (const item of items) {
         if (item.productId && item.quantity) {
-          decrementStock(item.productId, item.quantity).catch((err) =>
-            logger.error('Stock decrement failed:', err),
-          );
+          void decrementStock(item.productId, item.quantity).catch((err) => {
+            logger.error('Stock decrement failed:', err);
+          });
         }
       }
       break;
@@ -120,9 +120,9 @@ function handleMessage(content: string) {
         const items = parseItems(data);
         for (const item of items) {
           if (item.productId && item.quantity) {
-            restoreStock(item.productId, item.quantity).catch((err) =>
-              logger.error('Stock restore failed:', err),
-            );
+            void restoreStock(item.productId, item.quantity).catch((err) => {
+              logger.error('Stock restore failed:', err);
+            });
           }
         }
       }

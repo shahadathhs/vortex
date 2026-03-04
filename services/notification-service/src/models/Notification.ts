@@ -17,7 +17,16 @@ const notificationSchema = new Schema<INotification>(
     payload: { type: Schema.Types.Mixed, required: true },
     read: { type: Boolean, default: false },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform(_doc, ret: Record<string, unknown>) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  },
 );
 
 notificationSchema.index({ recipientId: 1, createdAt: -1 });

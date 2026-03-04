@@ -1,4 +1,13 @@
-import { AuthRequest, successResponse } from '@vortex/common';
+import {
+  AuthRequest,
+  buildSearchOr,
+  ForbiddenError,
+  getDateRangeFromPreset,
+  getPagination,
+  NotFoundError,
+  successPaginatedResponse,
+  successResponse,
+} from '@vortex/common';
 import { Response } from 'express';
 
 import { Notification } from '../models/Notification';
@@ -6,10 +15,11 @@ import { Notification } from '../models/Notification';
 export const notificationController = {
   async getNotifications(req: AuthRequest, res: Response) {
     const user = req.user!;
-    const page = Math.max(1, Number(req.query.page) || 1);
-    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = getPagination(req.query);
     const unreadOnly = req.query.unreadOnly === 'true';
+    const type = req.query.type as string | undefined;
+    const search = req.query.search as string | undefined;
+    const dateFilter = req.query.dateFilter as string | undefined;
 
     const filter: Record<string, unknown> = {};
 
@@ -23,9 +33,24 @@ export const notificationController = {
     }
 
     if (unreadOnly) filter.read = false;
+    if (type) filter.type = type;
+
+    const dateRange = dateFilter ? getDateRangeFromPreset(dateFilter) : null;
+    if (dateRange) {
+      filter.createdAt = {
+        $gte: dateRange.from,
+        $lte: dateRange.to,
+      };
+    }
+
+    if (search?.trim()) {
+      const searchOr = buildSearchOr(['type'], search);
+      if (searchOr) Object.assign(filter, searchOr);
+    }
 
     const [notifications, total] = await Promise.all([
       Notification.find(filter)
+        .select('-__v')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -34,16 +59,9 @@ export const notificationController = {
     ]);
 
     res.json(
-      successResponse(
-        {
-          data: notifications,
-          pagination: {
-            page,
-            limit,
-            total,
-            totalPages: Math.ceil(total / limit),
-          },
-        },
+      successPaginatedResponse(
+        notifications,
+        { page, limit, total },
         'Notifications retrieved',
       ),
     );
@@ -55,12 +73,12 @@ export const notificationController = {
 
     const notification = await Notification.findById(id);
     if (!notification) {
-      return res.status(404).json({ message: 'Notification not found' });
+      throw new NotFoundError('Notification not found');
     }
 
     if (user.role !== 'system') {
       if (notification.recipientId !== user.id) {
-        return res.status(403).json({ message: 'Forbidden' });
+        throw new ForbiddenError('Forbidden');
       }
     }
 

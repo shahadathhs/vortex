@@ -23,7 +23,8 @@
     "helmet": "catalog:",
     "mongoose": "catalog:",
     "nodemailer": "catalog:",
-    "dotenv": "catalog:"
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/amqplib": "catalog:",
