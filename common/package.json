@@ -58,21 +58,21 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "amqp-connection-manager": "^5.0.0",
-    "amqplib": "^0.10.9",
+    "amqp-connection-manager": "catalog:",
+    "amqplib": "catalog:",
     "express": "catalog:",
-    "jsonwebtoken": "^9.0.0",
-    "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0",
+    "jsonwebtoken": "catalog:",
+    "winston": "catalog:",
+    "winston-daily-rotate-file": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.10.8",
+    "@types/amqplib": "catalog:",
     "@types/express": "catalog:",
-    "@types/jsonwebtoken": "^9.0.0",
+    "@types/jsonwebtoken": "catalog:",
     "@types/node": "catalog:",
     "rimraf": "catalog:",
-    "tsup": "^8.5.1",
+    "tsup": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {

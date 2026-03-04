@@ -104,6 +104,9 @@ temp
 *.sln
 *.sw?
 
+# Systemix (external reference, not needed in images)
+systemix
+
 # Docker
 Dockerfile*
 docker-compose*

@@ -15,22 +15,22 @@
     "clean:turbo": "rimraf .turbo .next node_modules"
   },
   "dependencies": {
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@systemix/eslint": "^0.4.0",
-    "@systemix/typescript": "^0.4.0",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^10.0.2",
-    "eslint-config-next": "16.1.6",
-    "prettier": "^3.8.1",
-    "rimraf": "^6.1.3",
-    "tailwindcss": "^4",
-    "typescript": "^5.9.3"
+    "@systemix/eslint": "catalog:",
+    "@systemix/typescript": "catalog:",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "prettier": "catalog:",
+    "rimraf": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
   }
 }
