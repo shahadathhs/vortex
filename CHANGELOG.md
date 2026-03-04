@@ -1,3 +1,12 @@
+# [1.5.0](https://github.com/shahadathhs/vortex/compare/v1.4.0...v1.5.0) (2026-03-04)
+
+### Features
+
+- add activity and analytics services with environment configurations ([3a35173](https://github.com/shahadathhs/vortex/commit/3a35173c6c9b63580578c427e92cdc5958f5a811))
+- add Next.js web application with initial configuration and components ([ea72501](https://github.com/shahadathhs/vortex/commit/ea7250162adb963e2baa81c76470dd70a8589e6c))
+- enhance services with new features and configurations ([9ef01e8](https://github.com/shahadathhs/vortex/commit/9ef01e81e9b6f5133ea41608ee2398c9cfe2f750))
+- implement two-factor authentication (TFA) features in auth service ([4dd809f](https://github.com/shahadathhs/vortex/commit/4dd809fd0884105d73411768a176b97374eaaf80))
+
 # [1.4.0](https://github.com/shahadathhs/vortex/compare/v1.3.0...v1.4.0) (2026-03-03)
 
 ### Features
