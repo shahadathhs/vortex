@@ -150,6 +150,9 @@ catalogs:
     ts-node-dev:
       specifier: ^2.0.0
       version: 2.0.0
+    tsconfig-paths:
+      specifier: ^4.2.0
+      version: 4.2.0
     tsup:
       specifier: ^8.5.1
       version: 8.5.1
@@ -193,7 +196,7 @@ importers:
         version: 14.1.0(semantic-release@25.0.3(typescript@5.9.3))
       '@systemix/eslint':
         specifier: 'catalog:'
-        version: 0.4.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.13)(typescript@5.9.3)
+        version: 0.4.0(eslint@10.0.2(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.13)(typescript@5.9.3)
       '@systemix/typescript':
         specifier: 'catalog:'
         version: 0.4.0
@@ -225,7 +228,7 @@ importers:
         specifier: 'catalog:'
         version: 10.9.2(@types/node@25.3.3)(typescript@5.9.3)
       tsconfig-paths:
-        specifier: 4.2.0
+        specifier: 'catalog:'
         version: 4.2.0
       turbo:
         specifier: 'catalog:'
@@ -6029,6 +6032,30 @@ snapshots:
       - turbo
       - typescript
 
+  '@systemix/eslint@0.4.0(eslint@10.0.2(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.13)(typescript@5.9.3)':
+    dependencies:
+      '@eslint/js': 10.0.1(eslint@10.0.2(jiti@2.6.1))
+      '@next/eslint-plugin-next': 16.1.6
+      eslint-config-prettier: 10.1.8(eslint@10.0.2(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(eslint@10.0.2(jiti@2.6.1))
+      eslint-plugin-only-warn: 1.2.1
+      eslint-plugin-prettier: 5.5.5(eslint-config-prettier@10.1.8(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1))(prettier@3.8.1)
+      eslint-plugin-react: 7.37.5(eslint@10.0.2(jiti@2.6.1))
+      eslint-plugin-react-hooks: 7.0.1(eslint@10.0.2(jiti@2.6.1))
+      eslint-plugin-turbo: 2.8.13(eslint@10.0.2(jiti@2.6.1))(turbo@2.8.13)
+      globals: 17.4.0
+      typescript-eslint: 8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3)
+    transitivePeerDependencies:
+      - '@types/eslint'
+      - '@typescript-eslint/parser'
+      - eslint
+      - eslint-import-resolver-typescript
+      - eslint-import-resolver-webpack
+      - prettier
+      - supports-color
+      - turbo
+      - typescript
+
   '@systemix/typescript@0.4.0': {}
 
   '@tailwindcss/node@4.2.1':
@@ -7256,6 +7283,33 @@ snapshots:
       tsconfig-paths: 3.15.0
     optionalDependencies:
       '@typescript-eslint/parser': 8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3)
+    transitivePeerDependencies:
+      - eslint-import-resolver-typescript
+      - eslint-import-resolver-webpack
+      - supports-color
+
+  eslint-plugin-import@2.32.0(eslint@10.0.2(jiti@2.6.1)):
+    dependencies:
+      '@rtsao/scc': 1.1.0
+      array-includes: 3.1.9
+      array.prototype.findlastindex: 1.2.6
+      array.prototype.flat: 1.3.3
+      array.prototype.flatmap: 1.3.3
+      debug: 3.2.7
+      doctrine: 2.1.0
+      eslint: 10.0.2(jiti@2.6.1)
+      eslint-import-resolver-node: 0.3.9
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1))
+      hasown: 2.0.2
+      is-core-module: 2.16.1
+      is-glob: 4.0.3
+      minimatch: 3.1.5
+      object.fromentries: 2.0.8
+      object.groupby: 1.0.3
+      object.values: 1.2.1
+      semver: 6.3.1
+      string.prototype.trimend: 1.0.9
+      tsconfig-paths: 3.15.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
