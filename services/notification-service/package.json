@@ -21,8 +21,11 @@
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
+    "mongoose": "catalog:",
     "nodemailer": "catalog:",
-    "dotenv": "catalog:"
+    "socket.io": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/amqplib": "catalog:",

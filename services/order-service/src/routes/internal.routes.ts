@@ -7,6 +7,7 @@ const router: Router = Router();
 
 router.use(requireInternalSecret);
 
+router.get('/orders', internalController.listOrders);
 router.get('/orders/:id', internalController.getOrder);
 router.post('/orders', internalController.createOrder);
 router.post('/cart/clear', internalController.clearCart);

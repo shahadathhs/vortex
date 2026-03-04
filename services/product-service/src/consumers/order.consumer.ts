@@ -12,6 +12,8 @@ import {
 import { config } from '../config/config';
 import { Product } from '../models/Product';
 
+const LOW_STOCK_THRESHOLD = Number(process.env.LOW_STOCK_THRESHOLD) || 5;
+
 interface OrderItem {
   productId?: string;
   quantity?: number;
@@ -31,6 +33,35 @@ function parseItems(data: Record<string, unknown>): OrderItem[] {
   }));
 }
 
+async function publishInventoryAlert(
+  productId: string,
+  event: string,
+  product: { name: string; stock: number; sellerId?: string },
+) {
+  try {
+    const connection = RabbitMQManager.getConnection(config.RABBITMQ_URL);
+    const channelWrapper = connection.createChannel({
+      json: true,
+      setup: async (ch: Channel) => {
+        await ch.assertExchange(EXCHANGE, EXCHANGE_TYPE, { durable: true });
+      },
+    });
+    await channelWrapper.publish(EXCHANGE, event, {
+      event,
+      timestamp: new Date(),
+      data: {
+        productId,
+        name: product.name,
+        stock: product.stock,
+        sellerId: product.sellerId ?? null,
+      },
+    });
+    logger.info(`Published ${event} for product ${productId}`);
+  } catch (err) {
+    logger.error(`Failed to publish ${event}:`, err);
+  }
+}
+
 async function decrementStock(productId: string, quantity: number) {
   if (!productId || quantity <= 0) return;
   const result = await Product.findByIdAndUpdate(
@@ -40,6 +71,19 @@ async function decrementStock(productId: string, quantity: number) {
   );
   if (result) {
     logger.info(`Decremented stock for ${productId} by ${quantity}`);
+    if (result.stock <= 0) {
+      await publishInventoryAlert(
+        productId,
+        EventName.PRODUCT_OUT_OF_STOCK,
+        result,
+      );
+    } else if (result.stock < LOW_STOCK_THRESHOLD) {
+      await publishInventoryAlert(
+        productId,
+        EventName.PRODUCT_LOW_STOCK,
+        result,
+      );
+    }
   } else {
     logger.warn(`Product ${productId} not found for stock decrement`);
   }
@@ -63,9 +107,9 @@ function handleMessage(content: string) {
       const items = parseItems(data);
       for (const item of items) {
         if (item.productId && item.quantity) {
-          decrementStock(item.productId, item.quantity).catch((err) =>
-            logger.error('Stock decrement failed:', err),
-          );
+          void decrementStock(item.productId, item.quantity).catch((err) => {
+            logger.error('Stock decrement failed:', err);
+          });
         }
       }
       break;
@@ -76,9 +120,9 @@ function handleMessage(content: string) {
         const items = parseItems(data);
         for (const item of items) {
           if (item.productId && item.quantity) {
-            restoreStock(item.productId, item.quantity).catch((err) =>
-              logger.error('Stock restore failed:', err),
-            );
+            void restoreStock(item.productId, item.quantity).catch((err) => {
+              logger.error('Stock restore failed:', err);
+            });
           }
         }
       }

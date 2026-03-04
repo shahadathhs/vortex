@@ -1,0 +1,36 @@
+{
+  "name": "activity-service",
+  "version": "1.0.0",
+  "description": "Activity Logging Service for Vortex",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
+    "build": "rimraf dist && tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check . --ignore-path .prettierignore",
+    "format:fix": "prettier --write . --ignore-path .prettierignore",
+    "clean": "rimraf dist node_modules",
+    "clean:turbo": "rimraf .turbo dist node_modules"
+  },
+  "dependencies": {
+    "@vortex/common": "workspace:*",
+    "amqplib": "catalog:",
+    "cors": "catalog:",
+    "express": "catalog:",
+    "helmet": "catalog:",
+    "mongoose": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/amqplib": "catalog:",
+    "@types/cors": "catalog:",
+    "@types/express": "catalog:",
+    "rimraf": "catalog:",
+    "ts-node-dev": "catalog:",
+    "typescript": "catalog:"
+  }
+}

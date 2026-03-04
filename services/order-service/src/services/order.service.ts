@@ -60,11 +60,49 @@ async function createOrder(data: Partial<IOrder>) {
   return order;
 }
 
-async function getOrders(query: { userId?: string; status?: OrderStatus }) {
+async function getOrders(query: {
+  userId?: string;
+  status?: OrderStatus;
+  from?: Date;
+  to?: Date;
+  search?: string;
+  skip?: number;
+  limit?: number;
+}) {
   const filter: Record<string, unknown> = {};
   if (query.userId) filter.userId = query.userId;
   if (query.status) filter.status = query.status;
-  return Order.find(filter).sort({ createdAt: -1 });
+
+  if (query.from || query.to) {
+    filter.createdAt = {};
+    if (query.from)
+      (filter.createdAt as Record<string, Date>).$gte = query.from;
+    if (query.to) (filter.createdAt as Record<string, Date>).$lte = query.to;
+  }
+
+  if (query.search?.trim()) {
+    const { buildSearchOr } = await import('@vortex/common');
+    const searchOr = buildSearchOr(['userEmail'], query.search);
+    if (searchOr) {
+      filter.$and = filter.$and ?? [];
+      (filter.$and as Record<string, unknown>[]).push(searchOr);
+    }
+  }
+
+  const skip = query.skip ?? 0;
+  const limit = query.limit ?? 20;
+
+  const [orders, total] = await Promise.all([
+    Order.find(filter)
+      .select('-__v')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Order.countDocuments(filter),
+  ]);
+
+  return { orders, total };
 }
 
 async function getOrderById(id: string) {

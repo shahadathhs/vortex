@@ -17,9 +17,11 @@ const userSchema = new Schema<IUser>(
     lastName: { type: String, required: true },
     role: {
       type: String,
-      enum: ['superadmin', 'admin', 'vendor', 'customer'],
-      default: 'customer',
+      enum: ['system', 'seller', 'buyer'],
+      default: 'buyer',
     },
+    stripeAccountId: { type: String },
+    stripeOnboardingComplete: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
@@ -28,8 +30,26 @@ const userSchema = new Schema<IUser>(
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
     refreshToken: { type: String },
+    tfaEnabled: { type: Boolean, default: false },
+    tfaOtpHash: { type: String },
+    tfaOtpExpires: { type: Date },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform(_doc, ret: Record<string, unknown>) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        delete ret.password;
+        delete ret.refreshToken;
+        delete ret.passwordResetToken;
+        delete ret.passwordResetExpires;
+        delete ret.tfaOtpHash;
+        delete ret.tfaOtpExpires;
+      },
+    },
+  },
 );
 
 // Index for performance
@@ -60,6 +80,9 @@ userSchema.methods.toProfileJSON = function () {
     firstName: this.firstName,
     lastName: this.lastName,
     role: this.role,
+    stripeAccountId: this.stripeAccountId,
+    stripeOnboardingComplete: this.stripeOnboardingComplete,
+    tfaEnabled: this.tfaEnabled,
     isEmailVerified: this.isEmailVerified,
     isActive: this.isActive,
     createdAt: this.createdAt,
@@ -67,8 +90,8 @@ userSchema.methods.toProfileJSON = function () {
   };
 };
 
-userSchema.methods.isAdmin = function () {
-  return this.role === 'admin' || this.role === 'superadmin';
+userSchema.methods.isSystem = function () {
+  return this.role === 'system';
 };
 
 export const User = model<IUser>('User', userSchema);

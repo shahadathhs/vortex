@@ -1,5 +1,5 @@
 /**
- * Seeds a superadmin user. Runs on auth-service startup when SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD are set.
+ * Seeds a system user. Runs on auth-service startup when SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD are set.
  * Can also run standalone: pnpm auth:seed
  */
 import { logger } from '@vortex/common';
@@ -7,34 +7,34 @@ import { logger } from '@vortex/common';
 import { config } from '../config/config';
 import { User } from '../models/User';
 
-export async function seedSuperadmin(): Promise<void> {
+export async function seedSystemUser(): Promise<void> {
   const email = config.SUPERADMIN_EMAIL.trim();
   const password = config.SUPERADMIN_PASSWORD;
 
   if (!email || !password) {
     logger.info(
-      'Skipping superadmin seed: SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD must be set',
+      'Skipping system user seed: SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD must be set',
     );
     return;
   }
 
   if (password.length < 8) {
     logger.warn(
-      'Skipping superadmin seed: SUPERADMIN_PASSWORD must be at least 8 characters',
+      'Skipping system user seed: SUPERADMIN_PASSWORD must be at least 8 characters',
     );
     return;
   }
 
   const existing = await User.findOne({
-    $or: [{ email: email.toLowerCase() }, { role: 'superadmin' }],
+    $or: [{ email: email.toLowerCase() }, { role: 'system' }],
   });
 
   if (existing) {
-    if (existing.role === 'superadmin') {
-      logger.info(`Superadmin already exists: ${existing.email}`);
+    if (existing.role === 'system') {
+      logger.info(`System user already exists: ${existing.email}`);
     } else {
       logger.warn(
-        `User ${email} exists with role ${existing.role}. Cannot seed superadmin.`,
+        `User ${email} exists with role ${existing.role}. Cannot seed system user.`,
       );
     }
     return;
@@ -43,16 +43,19 @@ export async function seedSuperadmin(): Promise<void> {
   const [firstName, ...lastParts] = email.split('@')[0].split(/[._-]/);
   const lastName = lastParts.join(' ') || 'Admin';
 
-  const superadmin = await User.create({
+  const systemUser = await User.create({
     email: email.toLowerCase(),
     password,
     firstName: firstName.charAt(0).toUpperCase() + firstName.slice(1),
     lastName: lastName.charAt(0).toUpperCase() + lastName.slice(1),
-    role: 'superadmin',
+    role: 'system',
   });
 
-  logger.info(`Superadmin created: ${superadmin.email}`);
+  logger.info(`System user created: ${systemUser.email}`);
 }
+
+/** @deprecated Use seedSystemUser */
+export const seedSuperadmin = seedSystemUser;
 
 /**
  * Standalone entry point for pnpm auth:seed
@@ -77,7 +80,7 @@ async function runStandalone() {
 
   try {
     await mongoose.default.connect(mongoUri);
-    await seedSuperadmin();
+    await seedSystemUser();
   } catch (error) {
     console.error('Seed failed:', error);
     process.exit(1);

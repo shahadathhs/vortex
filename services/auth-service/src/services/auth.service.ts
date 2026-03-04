@@ -9,21 +9,25 @@ import {
   EXCHANGE_TYPE,
   EventName,
   generateToken,
+  generateTokenWithExpiry,
   logger,
   NotFoundError,
   RabbitMQManager,
   UnauthorizedError,
+  verifyToken,
 } from '@vortex/common';
+import bcrypt from 'bcryptjs';
 
 import { config } from '../config/config';
 import { publishPasswordResetRequested } from '../lib/password-reset.events';
+import { publishTfaOtpRequested } from '../lib/tfa.events';
 import { User } from '../models/User';
 import { LoginInput, RegisterInput } from '../schemas/auth.schema';
 import { IUser } from '../types/user.interface';
 
 const rabbitMQ = RabbitMQManager.getConnection(config.RABBITMQ_URL);
 
-function generateAccessToken(user: IUser) {
+function generateAccessToken(user: IUser): string {
   return generateToken(
     {
       id: String(user._id),
@@ -84,7 +88,7 @@ async function register(data: RegisterInput) {
     password,
     firstName,
     lastName,
-    role: 'customer',
+    role: 'buyer',
   });
 
   await publishUserCreatedEvent(user);
@@ -119,6 +123,31 @@ async function login(data: LoginInput) {
 
   if (!user.isActive) {
     throw new UnauthorizedError('Account is inactive');
+  }
+
+  if (user.tfaEnabled) {
+    const otp = crypto.randomInt(100000, 999999).toString();
+    user.tfaOtpHash = await bcrypt.hash(otp, 10);
+    user.tfaOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    await publishTfaOtpRequested(config.RABBITMQ_URL, {
+      email: user.email,
+      otp,
+      purpose: 'login',
+    });
+
+    const tfaToken = generateTokenWithExpiry(
+      { id: String(user._id), purpose: 'tfa_pending' },
+      config.JWT_SECRET,
+      '5m',
+    );
+
+    return {
+      requiresTfa: true,
+      tfaToken,
+      message: 'OTP sent to your email. Verify to complete login.',
+    };
   }
 
   const token = generateAccessToken(user);
@@ -231,7 +260,7 @@ async function fetchUserForAuth(
   return { isActive: user.isActive };
 }
 
-async function createAdmin(data: {
+async function createSeller(data: {
   email: string;
   password: string;
   firstName: string;
@@ -247,13 +276,13 @@ async function createAdmin(data: {
 
   const user = await User.create({
     ...data,
-    role: 'admin',
+    role: 'seller',
   });
 
-  logger.info(`Admin created: ${user.email} by superadmin`);
+  logger.info(`Seller created: ${user.email} by system`);
 
   return {
-    message: 'Admin created successfully',
+    message: 'Seller created successfully',
     user: {
       id: String(user._id),
       email: user.email,
@@ -264,31 +293,70 @@ async function createAdmin(data: {
   };
 }
 
-async function deleteAdmin(adminId: string) {
+async function deleteSeller(sellerId: string) {
   const user = await User.findOne({
-    _id: adminId,
+    _id: sellerId,
     isDeleted: { $ne: true },
   });
   if (!user) {
     throw new NotFoundError('User not found');
   }
-  if (user.role !== 'admin') {
-    throw new BadRequestError('Can only delete users with admin role');
+  if (user.role !== 'seller') {
+    throw new BadRequestError('Can only delete users with seller role');
   }
 
   user.isDeleted = true;
   user.isActive = false;
   user.refreshToken = undefined;
   await user.save();
-  logger.info(`Admin deleted: ${user.email} by superadmin`);
-  return { message: 'Admin deleted successfully' };
+  logger.info(`Seller deleted: ${user.email} by system`);
+  return { message: 'Seller deleted successfully' };
 }
 
-async function listAdmins() {
-  const admins = await User.find({ role: 'admin', isDeleted: { $ne: true } })
+async function getUserById(userId: string) {
+  const user = await User.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+  })
+    .select('-password -refreshToken')
+    .lean();
+  if (!user) return null;
+  return user;
+}
+
+async function updateStripeAccount(
+  userId: string,
+  data: { stripeAccountId?: string; stripeOnboardingComplete?: boolean },
+) {
+  const user = await User.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+  });
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+  if (data.stripeAccountId !== undefined)
+    user.stripeAccountId = data.stripeAccountId;
+  if (data.stripeOnboardingComplete !== undefined)
+    user.stripeOnboardingComplete = data.stripeOnboardingComplete;
+  await user.save();
+  return user;
+}
+
+async function updateStripeOnboardingByAccountId(stripeAccountId: string) {
+  const user = await User.findOneAndUpdate(
+    { stripeAccountId, isDeleted: { $ne: true } },
+    { $set: { stripeOnboardingComplete: true } },
+    { new: true },
+  );
+  return user;
+}
+
+async function listSellers() {
+  const sellers = await User.find({ role: 'seller', isDeleted: { $ne: true } })
     .select('-password -refreshToken -passwordResetToken -passwordResetExpires')
     .sort({ createdAt: -1 });
-  return { admins };
+  return { sellers };
 }
 
 async function forgotPassword(email: string): Promise<{ message: string }> {
@@ -332,6 +400,128 @@ async function resetPasswordWithToken(
   return { message: 'Password reset successfully' };
 }
 
+async function enableTfa(userId: string) {
+  const user = await User.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+  });
+  if (!user) throw new NotFoundError('User not found');
+  if (user.tfaEnabled) throw new BadRequestError('TFA is already enabled');
+
+  const otp = crypto.randomInt(100000, 999999).toString();
+  user.tfaOtpHash = await bcrypt.hash(otp, 10);
+  user.tfaOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
+  await user.save();
+
+  await publishTfaOtpRequested(config.RABBITMQ_URL, {
+    email: user.email,
+    otp,
+    purpose: 'enable',
+  });
+
+  return { message: 'OTP sent to your email. Verify to enable TFA.' };
+}
+
+async function verifyTfaEnable(userId: string, otp: string) {
+  const user = await User.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+  });
+  if (!user) throw new NotFoundError('User not found');
+  if (user.tfaEnabled) throw new BadRequestError('TFA is already enabled');
+  if (!user.tfaOtpHash || !user.tfaOtpExpires) {
+    throw new BadRequestError('No pending OTP. Request a new one.');
+  }
+  if (user.tfaOtpExpires < new Date()) {
+    user.tfaOtpHash = undefined;
+    user.tfaOtpExpires = undefined;
+    await user.save();
+    throw new BadRequestError('OTP expired. Request a new one.');
+  }
+
+  const valid = await bcrypt.compare(otp, user.tfaOtpHash);
+  if (!valid) throw new UnauthorizedError('Invalid OTP');
+
+  user.tfaEnabled = true;
+  user.tfaOtpHash = undefined;
+  user.tfaOtpExpires = undefined;
+  await user.save();
+
+  return { message: 'TFA enabled successfully' };
+}
+
+async function verifyTfaLogin(tfaToken: string, otp: string) {
+  let decoded: { id?: string; purpose?: string };
+  try {
+    decoded = verifyToken(tfaToken, config.JWT_SECRET) as {
+      id?: string;
+      purpose?: string;
+    };
+  } catch {
+    throw new UnauthorizedError('Invalid or expired TFA token');
+  }
+  if (decoded.purpose !== 'tfa_pending' || !decoded.id) {
+    throw new UnauthorizedError('Invalid TFA token');
+  }
+
+  const user = await User.findOne({
+    _id: decoded.id,
+    isDeleted: { $ne: true },
+  });
+  if (!user) throw new NotFoundError('User not found');
+  if (!user.tfaEnabled) throw new BadRequestError('TFA is not enabled');
+  if (!user.tfaOtpHash || !user.tfaOtpExpires) {
+    throw new BadRequestError('OTP expired. Please login again.');
+  }
+  if (user.tfaOtpExpires < new Date()) {
+    user.tfaOtpHash = undefined;
+    user.tfaOtpExpires = undefined;
+    await user.save();
+    throw new BadRequestError('OTP expired. Please login again.');
+  }
+
+  const valid = await bcrypt.compare(otp, user.tfaOtpHash);
+  if (!valid) throw new UnauthorizedError('Invalid OTP');
+
+  user.tfaOtpHash = undefined;
+  user.tfaOtpExpires = undefined;
+  const token = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  user.refreshToken = refreshToken;
+  await user.save();
+
+  return {
+    token,
+    refreshToken,
+    user: {
+      id: String(user._id),
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+    },
+  };
+}
+
+async function disableTfa(userId: string, password: string) {
+  const user = await User.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+  });
+  if (!user) throw new NotFoundError('User not found');
+  if (!user.tfaEnabled) throw new BadRequestError('TFA is not enabled');
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) throw new UnauthorizedError('Password is incorrect');
+
+  user.tfaEnabled = false;
+  user.tfaOtpHash = undefined;
+  user.tfaOtpExpires = undefined;
+  await user.save();
+
+  return { message: 'TFA disabled successfully' };
+}
+
 async function resetUserPassword(
   targetUserId: string,
   newPassword: string,
@@ -350,7 +540,7 @@ async function resetUserPassword(
   user.refreshToken = undefined;
   await user.save();
 
-  logger.info(`Password reset for ${user.email} by superadmin`);
+  logger.info(`Password reset for ${user.email} by system`);
 
   return { message: 'Password reset successfully' };
 }
@@ -365,9 +555,16 @@ export const authService = {
   logout,
   forgotPassword,
   resetPasswordWithToken,
+  enableTfa,
+  verifyTfaEnable,
+  verifyTfaLogin,
+  disableTfa,
   fetchUserForAuth,
-  createAdmin,
-  deleteAdmin,
-  listAdmins,
+  getUserById,
+  updateStripeAccount,
+  updateStripeOnboardingByAccountId,
+  createSeller,
+  deleteSeller,
+  listSellers,
   resetUserPassword,
 };

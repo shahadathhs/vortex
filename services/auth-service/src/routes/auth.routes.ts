@@ -15,11 +15,14 @@ import {
   refreshTokenSchema,
   registerSchema,
   resetPasswordSchema,
+  tfaDisableSchema,
+  tfaOtpSchema,
+  tfaVerifyLoginSchema,
   updatePasswordSchema,
   updateProfileSchema,
 } from '../schemas/auth.schema';
 
-import adminRoutes from './admin.routes';
+import sellerRoutes from './seller.routes';
 
 const router: Router = Router();
 
@@ -30,8 +33,8 @@ const auth = [
   requireUser,
 ];
 
-// Superadmin/Admin management (protected)
-router.use('/admin', adminRoutes);
+// System: seller management (protected)
+router.use('/sellers', sellerRoutes);
 
 // Public routes
 router.post(
@@ -59,6 +62,11 @@ router.post(
   validateRequest(resetPasswordSchema),
   asyncHandler(authController.resetPassword),
 );
+router.post(
+  '/tfa/verify-login',
+  validateRequest(tfaVerifyLoginSchema),
+  asyncHandler(authController.verifyTfaLogin),
+);
 // Protected routes
 router.get('/profile', ...auth, asyncHandler(authController.getProfile));
 router.patch(
@@ -74,5 +82,19 @@ router.patch(
   asyncHandler(authController.updatePassword),
 );
 router.post('/logout', ...auth, asyncHandler(authController.logout));
+
+router.post('/tfa/enable', ...auth, asyncHandler(authController.enableTfa));
+router.post(
+  '/tfa/verify-enable',
+  ...auth,
+  validateRequest(tfaOtpSchema),
+  asyncHandler(authController.verifyTfaEnable),
+);
+router.post(
+  '/tfa/disable',
+  ...auth,
+  validateRequest(tfaDisableSchema),
+  asyncHandler(authController.disableTfa),
+);
 
 export default router;

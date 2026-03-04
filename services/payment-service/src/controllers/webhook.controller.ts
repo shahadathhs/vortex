@@ -6,6 +6,8 @@ import {
   handlePaymentSucceeded,
 } from '../services/checkout.service';
 import { constructWebhookEvent } from '../services/stripe.service';
+import { config } from '../config/config';
+import { updateUserStripeOnboardingByAccountId } from '../lib/http-client';
 
 async function handleStripe(req: Request, res: Response) {
   const signature = req.headers['stripe-signature'] as string;
@@ -55,6 +57,50 @@ async function handleStripe(req: Request, res: Response) {
   }
 }
 
+async function handleStripeConnect(req: Request, res: Response) {
+  if (!config.STRIPE_CONNECT_WEBHOOK_SECRET) {
+    res.status(503).send('Connect webhook not configured');
+    return;
+  }
+
+  const signature = req.headers['stripe-signature'] as string;
+  if (!signature) {
+    res.status(400).send('Missing stripe-signature header');
+    return;
+  }
+
+  const rawBody = req.body;
+  if (!rawBody) {
+    res.status(400).send('Missing body');
+    return;
+  }
+
+  let event;
+  try {
+    event = constructWebhookEvent(
+      rawBody,
+      signature,
+      config.STRIPE_CONNECT_WEBHOOK_SECRET,
+    );
+  } catch (err) {
+    logger.error('Connect webhook signature verification failed:', err);
+    res.status(400).send('Invalid signature');
+    return;
+  }
+
+  try {
+    if (event.type === 'account.updated') {
+      const accountId = event.data.object.id;
+      await updateUserStripeOnboardingByAccountId(accountId);
+    }
+    res.status(200).json({ received: true });
+  } catch (err) {
+    logger.error('Connect webhook handler error:', err);
+    res.status(500).send('Webhook handler failed');
+  }
+}
+
 export const webhookController = {
   handleStripe,
+  handleStripeConnect,
 };

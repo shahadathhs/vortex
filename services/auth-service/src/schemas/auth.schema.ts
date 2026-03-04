@@ -81,6 +81,25 @@ export const resetPasswordSchema = z.object({
   }),
 });
 
+export const tfaOtpSchema = z.object({
+  body: z.object({
+    otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/),
+  }),
+});
+
+export const tfaVerifyLoginSchema = z.object({
+  body: z.object({
+    tfaToken: z.string().min(1, 'TFA token is required'),
+    otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/),
+  }),
+});
+
+export const tfaDisableSchema = z.object({
+  body: z.object({
+    password: z.string().min(1, 'Password is required'),
+  }),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>['body'];
 export type LoginInput = z.infer<typeof loginSchema>['body'];
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>['body'];

@@ -4,7 +4,10 @@ dotenv.config({ path: '.env' });
 
 export const config = {
   PORT: Number(process.env.PORT) || 3004,
+  MONGODB_URI:
+    process.env.MONGODB_URI ?? 'mongodb://localhost:27017/vortex_notification',
   RABBITMQ_URL: process.env.RABBITMQ_URL ?? 'amqp://127.0.0.1:5672',
+  JWT_SECRET: process.env.JWT_SECRET ?? '',
   SMTP_HOST: process.env.SMTP_HOST ?? '',
   SMTP_PORT: Number(process.env.SMTP_PORT) || 587,
   SMTP_USER: process.env.SMTP_USER ?? '',

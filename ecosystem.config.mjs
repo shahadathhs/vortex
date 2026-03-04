@@ -48,5 +48,21 @@ export default {
         PORT: 3004,
       },
     },
+    {
+      name: 'vortex-activity-service',
+      script: './services/activity-service/dist/server.js',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3006,
+      },
+    },
+    {
+      name: 'vortex-analytics-service',
+      script: './services/analytics-service/dist/server.js',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3007,
+      },
+    },
   ],
 };

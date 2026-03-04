@@ -29,27 +29,27 @@ const auth = [
 router.post(
   '/',
   ...auth,
-  checkPermission(Permission.ADMIN_CREATE),
+  checkPermission(Permission.SELLER_CREATE),
   validateRequest(createAdminSchema),
-  asyncHandler(authController.createAdmin),
+  asyncHandler(authController.createSeller),
 );
 router.get(
   '/',
   ...auth,
-  checkPermission(Permission.ADMIN_LIST),
-  asyncHandler(authController.listAdmins),
+  checkPermission(Permission.SELLER_LIST),
+  asyncHandler(authController.listSellers),
 );
 router.delete(
   '/:id',
   ...auth,
-  checkPermission(Permission.ADMIN_DELETE),
+  checkPermission(Permission.SELLER_DELETE),
   validateRequest(adminIdParamSchema),
-  asyncHandler(authController.deleteAdmin),
+  asyncHandler(authController.deleteSeller),
 );
 router.post(
   '/reset-password',
   ...auth,
-  checkPermission(Permission.ADMIN_RESET_PASSWORD),
+  checkPermission(Permission.SELLER_RESET_PASSWORD),
   validateRequest(adminResetPasswordSchema),
   asyncHandler(authController.resetUserPassword),
 );

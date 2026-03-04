@@ -28,8 +28,9 @@ export async function createPaymentIntent(
 export function constructWebhookEvent(
   payload: string | Buffer,
   signature: string,
+  secret?: string,
 ): Stripe.Event {
-  const webhookSecret = config.STRIPE_WEBHOOK_SECRET;
+  const webhookSecret = secret ?? config.STRIPE_WEBHOOK_SECRET;
   if (!stripe || !webhookSecret) {
     throw new Error('Stripe webhook not configured');
   }

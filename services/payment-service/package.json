@@ -20,7 +20,9 @@
     "cors": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
+    "mongoose": "catalog:",
     "stripe": "catalog:",
+    "zod": "catalog:",
     "dotenv": "catalog:"
   },
   "devDependencies": {

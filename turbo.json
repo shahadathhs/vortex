@@ -15,9 +15,13 @@
     "ORDER_SERVICE_URL",
     "NOTIFICATION_SERVICE_URL",
     "PAYMENT_SERVICE_URL",
+    "ACTIVITY_SERVICE_URL",
+    "ANALYTICS_SERVICE_URL",
+    "LOW_STOCK_THRESHOLD",
     "INTERNAL_SECRET",
     "STRIPE_SECRET_KEY",
     "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_CONNECT_WEBHOOK_SECRET",
     "FROM_EMAIL",
     "SMTP_HOST",
     "SMTP_PORT",
@@ -30,6 +34,9 @@
       "inputs": ["src/**", "package.json", "tsconfig.json"],
       "outputs": ["dist/**"],
       "cache": false
+    },
+    "@vortex/web#build": {
+      "outputs": [".next/**"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],

@@ -1,6 +1,7 @@
 export enum QueueName {
   NOTIFICATION_QUEUE = 'notification_queue',
   INVENTORY_QUEUE = 'inventory_queue',
+  ACTIVITY_QUEUE = 'activity_queue',
 }
 
 export const EXCHANGE = 'vortex';
@@ -15,4 +16,5 @@ export const RoutingKey = {
   ALL_PRODUCT_EVENTS: 'product.#',
   ALL_ORDER_EVENTS: 'order.#',
   ALL_PAYMENT_EVENTS: 'payment.#',
+  ALL_ACTIVITY_EVENTS: 'activity.#',
 } as const;

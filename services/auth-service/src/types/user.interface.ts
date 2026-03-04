@@ -5,7 +5,9 @@ export interface IUser extends Document {
   password: string;
   firstName: string;
   lastName: string;
-  role: 'superadmin' | 'admin' | 'vendor' | 'customer';
+  role: 'system' | 'seller' | 'buyer';
+  stripeAccountId?: string;
+  stripeOnboardingComplete?: boolean;
   isEmailVerified: boolean;
   isActive: boolean;
   isDeleted: boolean;
@@ -14,6 +16,9 @@ export interface IUser extends Document {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   refreshToken?: string;
+  tfaEnabled?: boolean;
+  tfaOtpHash?: string;
+  tfaOtpExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;

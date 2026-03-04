@@ -6,6 +6,7 @@ jspm_packages/
 dist/
 build/
 out/
+.next/
 *.tsbuildinfo
 
 # Environment variables — keep all .env files out of git

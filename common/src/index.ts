@@ -9,7 +9,12 @@ export * from './constants/permissions';
 export * from './constants/queues';
 
 // Core
-export * from './core/jwt';
+export {
+  generateToken,
+  generateTokenWithExpiry,
+  verifyToken,
+  type TokenPayload,
+} from './core/jwt';
 export * from './core/rabbit-mq-manager';
 
 // Errors
@@ -25,9 +30,18 @@ export * from './middleware/rbac';
 export * from './middleware/validate-request';
 
 // Utils
+export * from './utils/activity-publisher';
 export * from './utils/async-handler';
+export * from './utils/date-filters';
 export * from './utils/logger';
+export * from './utils/pagination';
 export * from './utils/response';
+export * from './utils/sanitize';
+export * from './utils/search';
+
+// Schemas
+export * from './schemas/date-filter.schema';
+export * from './schemas/pagination.schema';
 
 // Types
 export * from './types/auth';

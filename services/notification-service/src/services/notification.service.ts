@@ -16,6 +16,7 @@ import {
   handleOrderUpdated,
 } from '../handlers/order.handlers';
 import { handlePasswordResetRequested } from '../handlers/password.handlers';
+import { handleTfaOtpRequested } from '../handlers/tfa.handlers';
 import { handleUserCreated } from '../handlers/user.handlers';
 
 interface NotificationPayload {
@@ -43,6 +44,9 @@ async function handleMessage(content: string) {
       case EventName.PASSWORD_RESET_REQUESTED:
         await handlePasswordResetRequested(data);
         break;
+      case EventName.TFA_OTP_REQUESTED:
+        await handleTfaOtpRequested(data);
+        break;
       case EventName.PRODUCT_CREATED:
       case EventName.PRODUCT_UPDATED:
       case EventName.PRODUCT_DELETED: {
@@ -50,6 +54,33 @@ async function handleMessage(content: string) {
           typeof data.productId === 'string' ? data.productId : '';
         const name = typeof data.name === 'string' ? data.name : '';
         logger.info(`[Product ${event}] ${name} (${productId})`);
+        break;
+      }
+      case EventName.PRODUCT_LOW_STOCK:
+      case EventName.PRODUCT_OUT_OF_STOCK: {
+        const productId =
+          typeof data.productId === 'string' ? data.productId : '';
+        const name = typeof data.name === 'string' ? data.name : '';
+        const stock = typeof data.stock === 'number' ? data.stock : 0;
+        const sellerId =
+          typeof data.sellerId === 'string' ? data.sellerId : null;
+        const message =
+          event === EventName.PRODUCT_OUT_OF_STOCK
+            ? `${name} is out of stock`
+            : `${name} is low on stock (${stock} left)`;
+        const payload = { productId, name, stock, sellerId, message };
+        const { storeNotification } = await import('../lib/store-notification');
+        const { deliverSocketRealtime } =
+          await import('../lib/deliver-realtime');
+        if (sellerId) {
+          await storeNotification(event, payload, {
+            recipientId: sellerId,
+            recipientRole: 'seller',
+          });
+          await deliverSocketRealtime(sellerId, event, payload);
+        }
+        await storeNotification(event, payload, { recipientRole: 'system' });
+        logger.info(`[${event}] ${name} (${productId}) stock: ${stock}`);
         break;
       }
       default:

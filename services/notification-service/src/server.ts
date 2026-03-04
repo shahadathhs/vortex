@@ -2,7 +2,9 @@ import { logger } from '@vortex/common';
 
 import app from './app';
 import { config, getSmtpConfig } from './config/config';
+import { connectDB } from './config/db';
 import { initEmailTransport } from './lib/email';
+import { initSocket } from './lib/socket';
 import { notificationService } from './services/notification.service';
 
 process.on('uncaughtException', (err: Error) => {
@@ -15,8 +17,10 @@ process.on('unhandledRejection', (reason: unknown) => {
   process.exit(1);
 });
 
-const start = () => {
+const start = async () => {
   try {
+    await connectDB(config.MONGODB_URI);
+
     const smtp = getSmtpConfig();
     initEmailTransport(
       smtp.host,
@@ -31,6 +35,8 @@ const start = () => {
       logger.info(`Notification Service listening on port ${config.PORT}`);
     });
 
+    initSocket(server);
+
     process.on('SIGTERM', () => {
       logger.info('SIGTERM received. Shutting down gracefully');
       server.close(() => process.exit(0));
@@ -41,4 +47,4 @@ const start = () => {
   }
 };
 
-start();
+void start();
