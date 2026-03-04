@@ -4,6 +4,7 @@ import app from './app';
 import { config, getSmtpConfig } from './config/config';
 import { connectDB } from './config/db';
 import { initEmailTransport } from './lib/email';
+import { initSocket } from './lib/socket';
 import { notificationService } from './services/notification.service';
 
 process.on('uncaughtException', (err: Error) => {
@@ -33,6 +34,8 @@ const start = async () => {
     const server = app.listen(config.PORT, () => {
       logger.info(`Notification Service listening on port ${config.PORT}`);
     });
+
+    initSocket(server);
 
     process.on('SIGTERM', () => {
       logger.info('SIGTERM received. Shutting down gracefully');

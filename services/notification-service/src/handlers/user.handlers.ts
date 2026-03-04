@@ -1,6 +1,9 @@
 import { logger } from '@vortex/common';
 
-import { sendEmail } from '../lib/email';
+import {
+  deliverEmailRealtime,
+  deliverSocketRealtime,
+} from '../lib/deliver-realtime';
 import { storeNotification } from '../lib/store-notification';
 
 function safeStr(v: unknown): string {
@@ -16,16 +19,30 @@ export async function handleUserCreated(data: Record<string, unknown>) {
 
   logger.info(`[Welcome Email] Sending to ${email} (${firstName})`);
 
-  await storeNotification(
-    'user.created',
-    {
+  const buyerPayload = {
+    userId,
+    email,
+    firstName,
+    message: `Welcome, ${firstName}!`,
+  };
+
+  await storeNotification('user.created', buyerPayload, {
+    recipientId: userId,
+    recipientRole: 'buyer',
+  });
+
+  if (userId) {
+    await deliverSocketRealtime(userId, 'user.created', buyerPayload);
+  }
+  if (userId && email) {
+    await deliverEmailRealtime(
       userId,
+      'user.created',
       email,
-      firstName,
-      message: `Welcome, ${firstName}!`,
-    },
-    { recipientId: userId, recipientRole: 'buyer' },
-  );
+      'Welcome to Vortex',
+      `<h1>Welcome, ${firstName}!</h1><p>Thanks for signing up. Start browsing our catalog.</p>`,
+    );
+  }
 
   await storeNotification(
     'user.created',
@@ -36,11 +53,5 @@ export async function handleUserCreated(data: Record<string, unknown>) {
       message: `New user registered: ${email}`,
     },
     { recipientRole: 'system' },
-  );
-
-  await sendEmail(
-    email,
-    'Welcome to Vortex',
-    `<h1>Welcome, ${firstName}!</h1><p>Thanks for signing up. Start browsing our catalog.</p>`,
   );
 }

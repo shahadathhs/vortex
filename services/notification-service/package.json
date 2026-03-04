@@ -23,6 +23,7 @@
     "helmet": "catalog:",
     "mongoose": "catalog:",
     "nodemailer": "catalog:",
+    "socket.io": "catalog:",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },

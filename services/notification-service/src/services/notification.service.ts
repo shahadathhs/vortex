@@ -16,6 +16,7 @@ import {
   handleOrderUpdated,
 } from '../handlers/order.handlers';
 import { handlePasswordResetRequested } from '../handlers/password.handlers';
+import { handleTfaOtpRequested } from '../handlers/tfa.handlers';
 import { handleUserCreated } from '../handlers/user.handlers';
 
 interface NotificationPayload {
@@ -43,6 +44,9 @@ async function handleMessage(content: string) {
       case EventName.PASSWORD_RESET_REQUESTED:
         await handlePasswordResetRequested(data);
         break;
+      case EventName.TFA_OTP_REQUESTED:
+        await handleTfaOtpRequested(data);
+        break;
       case EventName.PRODUCT_CREATED:
       case EventName.PRODUCT_UPDATED:
       case EventName.PRODUCT_DELETED: {
@@ -66,11 +70,14 @@ async function handleMessage(content: string) {
             : `${name} is low on stock (${stock} left)`;
         const payload = { productId, name, stock, sellerId, message };
         const { storeNotification } = await import('../lib/store-notification');
+        const { deliverSocketRealtime } =
+          await import('../lib/deliver-realtime');
         if (sellerId) {
           await storeNotification(event, payload, {
             recipientId: sellerId,
             recipientRole: 'seller',
           });
+          await deliverSocketRealtime(sellerId, event, payload);
         }
         await storeNotification(event, payload, { recipientRole: 'system' });
         logger.info(`[${event}] ${name} (${productId}) stock: ${stock}`);

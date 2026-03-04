@@ -16,6 +16,9 @@ export interface IUser extends Document {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   refreshToken?: string;
+  tfaEnabled?: boolean;
+  tfaOtpHash?: string;
+  tfaOtpExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;

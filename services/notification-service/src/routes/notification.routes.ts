@@ -10,14 +10,35 @@ import { Router } from 'express';
 
 import { config } from '../config/config';
 import { notificationController } from '../controllers/notification.controller';
+import { notificationSettingsController } from '../controllers/notification-settings.controller';
 import {
   getNotificationsSchema,
   notificationIdParamSchema,
 } from '../schemas/notification.schema';
+import { updateNotificationSettingsSchema } from '../schemas/notification-settings.schema';
 
 const router: Router = Router();
 
 const auth = [protect(config.JWT_SECRET), requireUser];
+
+router.get(
+  '/settings',
+  ...auth,
+  checkPermission(Permission.NOTIFICATION_READ),
+  asyncHandler((req, res) =>
+    notificationSettingsController.getSettings(req, res),
+  ),
+);
+
+router.patch(
+  '/settings',
+  ...auth,
+  checkPermission(Permission.NOTIFICATION_UPDATE),
+  validateRequest(updateNotificationSettingsSchema),
+  asyncHandler((req, res) =>
+    notificationSettingsController.updateSettings(req, res),
+  ),
+);
 
 router.get(
   '/',

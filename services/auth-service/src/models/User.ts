@@ -30,6 +30,9 @@ const userSchema = new Schema<IUser>(
     passwordResetToken: { type: String },
     passwordResetExpires: { type: Date },
     refreshToken: { type: String },
+    tfaEnabled: { type: Boolean, default: false },
+    tfaOtpHash: { type: String },
+    tfaOtpExpires: { type: Date },
   },
   {
     timestamps: true,
@@ -42,6 +45,8 @@ const userSchema = new Schema<IUser>(
         delete ret.refreshToken;
         delete ret.passwordResetToken;
         delete ret.passwordResetExpires;
+        delete ret.tfaOtpHash;
+        delete ret.tfaOtpExpires;
       },
     },
   },
@@ -77,6 +82,7 @@ userSchema.methods.toProfileJSON = function () {
     role: this.role,
     stripeAccountId: this.stripeAccountId,
     stripeOnboardingComplete: this.stripeOnboardingComplete,
+    tfaEnabled: this.tfaEnabled,
     isEmailVerified: this.isEmailVerified,
     isActive: this.isActive,
     createdAt: this.createdAt,

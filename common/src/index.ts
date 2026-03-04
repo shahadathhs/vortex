@@ -9,7 +9,12 @@ export * from './constants/permissions';
 export * from './constants/queues';
 
 // Core
-export * from './core/jwt';
+export {
+  generateToken,
+  generateTokenWithExpiry,
+  verifyToken,
+  type TokenPayload,
+} from './core/jwt';
 export * from './core/rabbit-mq-manager';
 
 // Errors

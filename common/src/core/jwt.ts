@@ -15,6 +15,14 @@ export const generateToken = (
   return jwt.sign(payload, secret, { expiresIn: '1d' });
 };
 
+export const generateTokenWithExpiry = (
+  payload: Record<string, unknown>,
+  secret: string,
+  expiresIn: string | number,
+): string => {
+  return jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions);
+};
+
 export const verifyToken = (token: string, secret: string): TokenPayload => {
   try {
     return jwt.verify(token, secret) as TokenPayload;

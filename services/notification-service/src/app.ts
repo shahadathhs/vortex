@@ -15,7 +15,11 @@ app.use(apiInfoLogger);
 app.get('/', (req, res) => {
   res.json({
     service: 'notification-service',
-    routes: { notifications: '/api/notifications', health: '/health' },
+    routes: {
+      notifications: '/api/notifications',
+      settings: '/api/notifications/settings',
+      health: '/health',
+    },
   });
 });
 

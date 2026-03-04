@@ -1,6 +1,9 @@
 import { logger } from '@vortex/common';
 
-import { sendEmail } from '../lib/email';
+import {
+  deliverEmailRealtime,
+  deliverSocketRealtime,
+} from '../lib/deliver-realtime';
 import { storeNotification } from '../lib/store-notification';
 
 function safeStr(v: unknown): string {
@@ -20,18 +23,32 @@ export async function handleOrderCreated(data: Record<string, unknown>) {
     `[Order Confirmation] Order ${orderId} by user ${userId}. Total: $${totalPrice}`,
   );
 
-  await storeNotification(
-    'order.created',
-    {
-      orderId,
+  const buyerPayload = {
+    orderId,
+    userId,
+    totalPrice,
+    userEmail,
+    items,
+    message: `Order #${orderId} placed. Total: $${totalPrice}`,
+  };
+
+  await storeNotification('order.created', buyerPayload, {
+    recipientId: userId,
+    recipientRole: 'buyer',
+  });
+
+  if (userId) {
+    await deliverSocketRealtime(userId, 'order.created', buyerPayload);
+  }
+  if (userId && userEmail) {
+    await deliverEmailRealtime(
       userId,
-      totalPrice,
+      'order.created',
       userEmail,
-      items,
-      message: `Order #${orderId} placed. Total: $${totalPrice}`,
-    },
-    { recipientId: userId, recipientRole: 'buyer' },
-  );
+      `Order Confirmation #${orderId}`,
+      `<h1>Order Confirmed</h1><p>Order #${orderId} placed successfully. Total: $${totalPrice}</p>`,
+    );
+  }
 
   await storeNotification(
     'order.created',
@@ -45,14 +62,6 @@ export async function handleOrderCreated(data: Record<string, unknown>) {
     },
     { recipientRole: 'system' },
   );
-
-  if (userEmail) {
-    await sendEmail(
-      userEmail,
-      `Order Confirmation #${orderId}`,
-      `<h1>Order Confirmed</h1><p>Order #${orderId} placed successfully. Total: $${totalPrice}</p>`,
-    );
-  }
 }
 
 export async function handleOrderUpdated(data: Record<string, unknown>) {
@@ -65,16 +74,30 @@ export async function handleOrderUpdated(data: Record<string, unknown>) {
     `[Order Update] Order ${orderId} (user ${userId}) status: ${status}`,
   );
 
-  await storeNotification(
-    'order.updated',
-    {
-      orderId,
+  const buyerPayload = {
+    orderId,
+    userId,
+    status,
+    message: `Order #${orderId} is now ${status}`,
+  };
+
+  await storeNotification('order.updated', buyerPayload, {
+    recipientId: userId,
+    recipientRole: 'buyer',
+  });
+
+  if (userId) {
+    await deliverSocketRealtime(userId, 'order.updated', buyerPayload);
+  }
+  if (userId && userEmail && ['shipped', 'delivered'].includes(status)) {
+    await deliverEmailRealtime(
       userId,
-      status,
-      message: `Order #${orderId} is now ${status}`,
-    },
-    { recipientId: userId, recipientRole: 'buyer' },
-  );
+      'order.updated',
+      userEmail,
+      `Order #${orderId} - ${status}`,
+      `<h1>Order ${status}</h1><p>Your order #${orderId} is now ${status}.</p>`,
+    );
+  }
 
   await storeNotification(
     'order.updated',
@@ -87,12 +110,4 @@ export async function handleOrderUpdated(data: Record<string, unknown>) {
     },
     { recipientRole: 'system' },
   );
-
-  if (userEmail && ['shipped', 'delivered'].includes(status)) {
-    await sendEmail(
-      userEmail,
-      `Order #${orderId} - ${status}`,
-      `<h1>Order ${status}</h1><p>Your order #${orderId} is now ${status}.</p>`,
-    );
-  }
 }
