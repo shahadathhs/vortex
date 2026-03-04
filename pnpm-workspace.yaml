@@ -2,6 +2,12 @@ packages:
   - common
   - gateway
   - services/*
+  - web
+
+# Used by web (Next.js) to avoid building optional native deps on Vercel
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
 
 catalog:
   # Runtime - shared across packages

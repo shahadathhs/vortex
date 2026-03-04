@@ -36,12 +36,16 @@
     "gateway:build": "pnpm --filter=gateway... build",
     "analytics:dev": "pnpm --filter=analytics-service dev",
     "analytics:build": "pnpm --filter=analytics-service... build",
+    "web:dev": "pnpm --filter=@vortex/web dev",
+    "web:build": "pnpm --filter=@vortex/web build",
+    "web:preview": "pnpm --filter=@vortex/web preview",
     "release": "semantic-release"
   },
   "workspaces": [
     "common",
     "services/*",
-    "gateway"
+    "gateway",
+    "web"
   ],
   "config": {
     "commitizen": {

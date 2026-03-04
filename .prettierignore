@@ -16,4 +16,4 @@ dist/
 common
 services
 gateway
-apps
+web

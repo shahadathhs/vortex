@@ -35,6 +35,9 @@
       "outputs": ["dist/**"],
       "cache": false
     },
+    "@vortex/web#build": {
+      "outputs": [".next/**"]
+    },
     "typecheck": {
       "dependsOn": ["^typecheck"],
       "cache": false
