@@ -1,3 +1,9 @@
+# [1.6.0](https://github.com/shahadathhs/vortex/compare/v1.5.0...v1.6.0) (2026-03-04)
+
+### Features
+
+- add web service and update configurations ([04e6566](https://github.com/shahadathhs/vortex/commit/04e65665c52e3a86afeb10d7a5e16db2f59e21d2))
+
 # [1.5.0](https://github.com/shahadathhs/vortex/compare/v1.4.0...v1.5.0) (2026-03-04)
 
 ### Features
