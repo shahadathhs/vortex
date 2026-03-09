@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/shahadathhs/vortex/compare/v1.6.0...v1.6.1) (2026-03-09)
+
+### Bug Fixes
+
+- update README to correct image alt text formatting ([715719a](https://github.com/shahadathhs/vortex/commit/715719aa4950d96aad110e0c3e104c85ea14fbc1))
+
 # [1.6.0](https://github.com/shahadathhs/vortex/compare/v1.5.0...v1.6.0) (2026-03-04)
 
 ### Features
