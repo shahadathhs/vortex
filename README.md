@@ -10,7 +10,7 @@ A **portfolio project** showcasing production-grade microservices architecture f
 > 🛠️ **Interested in contributing?** Read our [Contributing Guide](./CONTRIBUTING.md).  
 > 📜 [Code of Conduct](./CODE_OF_CONDUCT.md) · [Security Policy](./SECURITY.md)
 
-![Alt](https://repobeats.axiom.co/api/embed/9701d4fbdabe0df0d2de807ebef6135fbcd67e6b.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/9701d4fbdabe0df0d2de807ebef6135fbcd67e6b.svg 'Repobeats analytics image')
 
 ## 🎯 Project Overview
 
