@@ -23,7 +23,7 @@ FROM node:24-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=3008
+ENV PORT=4000
 ENV HOSTNAME=0.0.0.0
 
 # Copy standalone output (structure: standalone/web/server.js)
@@ -31,6 +31,6 @@ COPY --from=build /app/web/.next/standalone ./
 COPY --from=build /app/web/.next/static ./web/.next/static
 COPY --from=build /app/web/public ./web/public
 
-EXPOSE 3008
+EXPOSE 4000
 
 CMD ["node", "web/server.js"]

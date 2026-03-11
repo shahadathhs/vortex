@@ -1,3 +1,6 @@
+// All requests go to the Next.js server at the same origin (/api/*).
+// next.config.ts rewrites /api/:path* → GATEWAY_URL/:path* server-side,
+// so the browser never talks to the gateway directly (no CORS required).
 const API_BASE = '/api';
 
 function getToken(): string | null {
