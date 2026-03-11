@@ -46,7 +46,12 @@ async function apiFetch<T>(
         headers: { 'Content-Type': 'application/json' },
       });
       if (refreshRes.ok) {
-        const { accessToken } = await refreshRes.json();
+        const refreshJson = (await refreshRes.json()) as {
+          data?: { accessToken: string };
+          accessToken?: string;
+        };
+        const accessToken =
+          refreshJson?.data?.accessToken ?? refreshJson?.accessToken ?? '';
         setToken(accessToken);
         headers.Authorization = `Bearer ${accessToken}`;
         const retryRes = await fetch(`${API_BASE}${path}`, {
@@ -54,10 +59,12 @@ async function apiFetch<T>(
           headers,
         });
         if (!retryRes.ok) {
-          const err = await retryRes.json().catch(() => ({}));
+          const err = (await retryRes.json().catch(() => ({}))) as {
+            message?: string;
+          };
           throw new Error(err?.message ?? retryRes.statusText);
         }
-        return retryRes.json() as Promise<T>;
+        return unwrapEnvelope<T>(await retryRes.json());
       }
     } catch {
       // refresh failed
@@ -70,12 +77,27 @@ async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
+    const err = (await res.json().catch(() => ({}))) as { message?: string };
     throw new Error(err?.message ?? res.statusText);
   }
 
   const text = await res.text();
-  return text ? (JSON.parse(text) as T) : ({} as T);
+  if (!text) return {} as T;
+  return unwrapEnvelope<T>(JSON.parse(text));
+}
+
+// All backend responses follow { statusCode, success, message, data? }.
+// Unwrap the inner `data` when present so callers receive the payload directly.
+function unwrapEnvelope<T>(json: unknown): T {
+  if (
+    json !== null &&
+    typeof json === 'object' &&
+    'data' in json &&
+    (json as Record<string, unknown>).data !== undefined
+  ) {
+    return (json as Record<string, unknown>).data as T;
+  }
+  return json as T;
 }
 
 // Auth
@@ -121,10 +143,10 @@ export const authApi = {
       skipAuth: true,
     }),
 
-  getProfile: () => apiFetch<{ data: unknown }>('/auth/profile'),
+  getProfile: () => apiFetch<unknown>('/auth/profile'),
 
   updateProfile: (data: { firstName?: string; lastName?: string }) =>
-    apiFetch<{ data: unknown }>('/auth/profile', {
+    apiFetch<unknown>('/auth/profile', {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
@@ -153,7 +175,7 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
 
-  getSellers: () => apiFetch<{ data: unknown[] }>('/auth/sellers'),
+  getSellers: () => apiFetch<unknown[]>('/auth/sellers'),
 
   createSeller: (data: {
     email: string;
@@ -161,7 +183,7 @@ export const authApi = {
     firstName: string;
     lastName: string;
   }) =>
-    apiFetch<{ data: unknown }>('/auth/sellers', {
+    apiFetch<unknown>('/auth/sellers', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -186,12 +208,10 @@ export const productApi = {
         .filter(([, v]) => v !== undefined)
         .map(([k, v]) => [k, String(v)]),
     ).toString();
-    return apiFetch<{ data: unknown[]; total: number }>(
-      `/products${qs ? `?${qs}` : ''}`,
-    );
+    return apiFetch<unknown[]>(`/products${qs ? `?${qs}` : ''}`);
   },
 
-  get: (id: string) => apiFetch<{ data: unknown }>(`/products/${id}`),
+  get: (id: string) => apiFetch<unknown>(`/products/${id}`),
 
   create: (data: {
     name: string;
@@ -200,7 +220,7 @@ export const productApi = {
     stock: number;
     category: string;
   }) =>
-    apiFetch<{ data: unknown }>('/products', {
+    apiFetch<unknown>('/products', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -215,7 +235,7 @@ export const productApi = {
       category: string;
     }>,
   ) =>
-    apiFetch<{ data: unknown }>(`/products/${id}`, {
+    apiFetch<unknown>(`/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
@@ -226,14 +246,14 @@ export const productApi = {
 
 // Cart
 export const cartApi = {
-  get: () => apiFetch<{ data: unknown }>('/cart'),
+  get: () => apiFetch<unknown>('/cart'),
   add: (data: { productId: string; quantity: number }) =>
-    apiFetch<{ data: unknown }>('/cart', {
+    apiFetch<unknown>('/cart', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
   update: (productId: string, data: { quantity: number }) =>
-    apiFetch<{ data: unknown }>(`/cart/${productId}`, {
+    apiFetch<unknown>(`/cart/${productId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
@@ -244,8 +264,8 @@ export const cartApi = {
 
 // Orders
 export const orderApi = {
-  list: () => apiFetch<{ data: unknown[] }>('/orders'),
-  get: (id: string) => apiFetch<{ data: unknown }>(`/orders/${id}`),
+  list: () => apiFetch<unknown[]>('/orders'),
+  get: (id: string) => apiFetch<unknown>(`/orders/${id}`),
   checkout: (data: { cartId?: string }) =>
     apiFetch<{ url: string }>('/checkout', {
       method: 'POST',
@@ -255,7 +275,7 @@ export const orderApi = {
 
 // Payment / Connect
 export const paymentApi = {
-  getSettings: () => apiFetch<{ data: unknown }>('/payment/settings'),
+  getSettings: () => apiFetch<unknown>('/payment/settings'),
   updateSettings: (
     data: Partial<{
       paymentEnabled: boolean;
@@ -264,12 +284,11 @@ export const paymentApi = {
       payoutDayOfMonth: number;
     }>,
   ) =>
-    apiFetch<{ data: unknown }>('/payment/settings', {
+    apiFetch<unknown>('/payment/settings', {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
-  getConnectStatus: () =>
-    apiFetch<{ data: unknown }>('/payment/connect/status'),
+  getConnectStatus: () => apiFetch<unknown>('/payment/connect/status'),
   startOnboarding: () =>
     apiFetch<{ url: string }>('/payment/connect/onboarding', {
       method: 'POST',
@@ -286,14 +305,14 @@ export const paymentApi = {
 
 // Notifications
 export const notificationApi = {
-  list: () => apiFetch<{ data: unknown[] }>('/notifications'),
+  list: () => apiFetch<unknown[]>('/notifications'),
   markRead: (id: string) =>
-    apiFetch<{ data: unknown }>(`/notifications/${id}/read`, {
+    apiFetch<unknown>(`/notifications/${id}/read`, {
       method: 'PATCH',
     }),
-  getSettings: () => apiFetch<{ data: unknown }>('/notifications/settings'),
+  getSettings: () => apiFetch<unknown>('/notifications/settings'),
   updateSettings: (data: { emailTypes?: string[]; socketTypes?: string[] }) =>
-    apiFetch<{ data: unknown }>('/notifications/settings', {
+    apiFetch<unknown>('/notifications/settings', {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
@@ -301,9 +320,9 @@ export const notificationApi = {
 
 // Analytics
 export const analyticsApi = {
-  getDashboard: () => apiFetch<{ data: unknown }>('/analytics/dashboard'),
-  getOrders: () => apiFetch<{ data: unknown }>('/analytics/orders'),
-  getProducts: () => apiFetch<{ data: unknown }>('/analytics/products'),
+  getDashboard: () => apiFetch<unknown>('/analytics/dashboard'),
+  getOrders: () => apiFetch<unknown>('/analytics/orders'),
+  getProducts: () => apiFetch<unknown>('/analytics/products'),
 };
 
 // Activities
@@ -319,9 +338,7 @@ export const activityApi = {
         .filter(([, v]) => v !== undefined)
         .map(([k, v]) => [k, String(v)]),
     ).toString();
-    return apiFetch<{ data: unknown[]; total: number }>(
-      `/activities${qs ? `?${qs}` : ''}`,
-    );
+    return apiFetch<unknown[]>(`/activities${qs ? `?${qs}` : ''}`);
   },
 };
 

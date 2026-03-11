@@ -16,7 +16,7 @@ export default function SellerConnectPage() {
     queryKey: ['connect-status'],
     queryFn: async () => {
       const res = await paymentApi.getConnectStatus();
-      return res.data as ConnectStatus;
+      return res as ConnectStatus;
     },
   });
 

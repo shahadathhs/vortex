@@ -12,7 +12,7 @@ export default function SellerOrdersPage() {
     queryKey: ['seller-orders'],
     queryFn: async () => {
       const res = await orderApi.list();
-      return res.data as Order[];
+      return res as Order[];
     },
   });
 

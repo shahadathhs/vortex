@@ -15,7 +15,7 @@ export default function CartPage() {
     queryKey: ['cart'],
     queryFn: async () => {
       const res = await cartApi.get();
-      return res.data as Cart;
+      return res as Cart;
     },
   });
 
@@ -23,7 +23,7 @@ export default function CartPage() {
     queryKey: ['products-all'],
     queryFn: async () => {
       const res = await productApi.list();
-      return res.data as Product[];
+      return res as Product[];
     },
     enabled: !!cart?.items?.length,
   });

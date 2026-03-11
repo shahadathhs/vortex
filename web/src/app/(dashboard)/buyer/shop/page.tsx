@@ -20,7 +20,7 @@ export default function ShopPage() {
         search: search || undefined,
         category: category || undefined,
       });
-      return res.data as Product[];
+      return res as Product[];
     },
   });
 

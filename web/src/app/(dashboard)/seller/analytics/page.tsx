@@ -10,7 +10,7 @@ export default function SellerAnalyticsPage() {
     queryKey: ['analytics-dashboard'],
     queryFn: async () => {
       const res = await analyticsApi.getDashboard();
-      return res.data as Record<string, unknown>;
+      return res as Record<string, unknown>;
     },
   });
 
@@ -18,7 +18,7 @@ export default function SellerAnalyticsPage() {
     queryKey: ['analytics-orders'],
     queryFn: async () => {
       const res = await analyticsApi.getOrders();
-      return res.data as Record<string, unknown>;
+      return res as Record<string, unknown>;
     },
   });
 

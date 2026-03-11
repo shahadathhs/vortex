@@ -32,7 +32,7 @@ export default function SystemSellersPage() {
     queryKey: ['system-sellers'],
     queryFn: async () => {
       const res = await authApi.getSellers();
-      return res.data as User[];
+      return res as User[];
     },
   });
 

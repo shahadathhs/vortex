@@ -18,7 +18,7 @@ export default function ActivitiesPage() {
         resource: resource || undefined,
         action: action || undefined,
       });
-      return res.data as Activity[];
+      return res as Activity[];
     },
   });
 

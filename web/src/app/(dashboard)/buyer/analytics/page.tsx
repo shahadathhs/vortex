@@ -9,7 +9,7 @@ export default function BuyerAnalyticsPage() {
     queryKey: ['analytics-dashboard'],
     queryFn: async () => {
       const res = await analyticsApi.getDashboard();
-      return res.data as Record<string, unknown>;
+      return res as Record<string, unknown>;
     },
   });
 

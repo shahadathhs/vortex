@@ -45,7 +45,7 @@ export default function ProfilePage() {
 
   const updateProfile = async (data: ProfileData) => {
     const res = await authApi.updateProfile(data);
-    updateUser(res.data as User);
+    updateUser(res as User);
     setProfileMsg('Profile updated.');
   };
 
@@ -92,7 +92,7 @@ export default function ProfilePage() {
     queryKey: ['notification-settings'],
     queryFn: async () => {
       const res = await notificationApi.getSettings();
-      return res.data as NotificationSettings;
+      return res as NotificationSettings;
     },
   });
 

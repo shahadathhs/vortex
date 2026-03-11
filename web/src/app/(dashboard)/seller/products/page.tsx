@@ -29,7 +29,7 @@ export default function SellerProductsPage() {
     queryKey: ['seller-products'],
     queryFn: async () => {
       const res = await productApi.list();
-      return res.data as Product[];
+      return res as Product[];
     },
   });
 

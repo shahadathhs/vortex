@@ -15,7 +15,7 @@ export default function SystemPaymentPage() {
     queryKey: ['payment-settings'],
     queryFn: async () => {
       const res = await paymentApi.getSettings();
-      return res.data as PaymentSettings;
+      return res as PaymentSettings;
     },
   });
 

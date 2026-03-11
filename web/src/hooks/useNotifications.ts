@@ -14,7 +14,7 @@ export function useNotifications() {
     queryKey: ['notifications'],
     queryFn: async () => {
       const res = await notificationApi.list();
-      return res.data as Notification[];
+      return res as Notification[];
     },
   });
 
