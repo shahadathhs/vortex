@@ -31,19 +31,18 @@ export default function BuyerAnalyticsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.entries(data).map(
-            ([key, value]) =>
-              typeof value !== 'object' && (
-                <div key={key} className="bg-card border rounded-xl p-5">
-                  <p className="text-sm text-muted-foreground capitalize">
-                    {key.replace(/_/g, ' ')}
-                  </p>
-                  <p className="text-3xl font-bold mt-1">
-                    {value as string | number | boolean}
-                  </p>
-                </div>
-              ),
-          )}
+          {Object.entries(data)
+            .filter(([, value]) => typeof value !== 'object')
+            .map(([key, value]) => (
+              <div key={key} className="bg-card border rounded-xl p-5">
+                <p className="text-sm text-muted-foreground capitalize">
+                  {key.replace(/_/g, ' ')}
+                </p>
+                <p className="text-3xl font-bold mt-1">
+                  {value as string | number | boolean}
+                </p>
+              </div>
+            ))}
         </div>
       )}
     </div>

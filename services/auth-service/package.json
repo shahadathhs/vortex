@@ -2,9 +2,9 @@
   "name": "auth-service",
   "version": "1.0.0",
   "description": "Authentication Service",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/server.js",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
     "seed": "ts-node -r tsconfig-paths/register src/scripts/seed-superadmin.ts",
     "build": "rimraf dist && tsc",
