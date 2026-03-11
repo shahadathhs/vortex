@@ -16,7 +16,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @vortex/web build
 
 # --------------------
-# Runner stage (non-standalone)
+# Runner stage (standalone)
 # --------------------
 FROM node:24-slim AS runner
 
@@ -26,18 +26,11 @@ ENV NODE_ENV=production
 ENV PORT=4000
 ENV HOSTNAME=0.0.0.0
 
-# Copy workspace config
-COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
-
-# Copy web app (build output, config, public assets)
-COPY --from=build /app/web/.next ./web/.next
+# Copy standalone output (structure: standalone/web/server.js)
+COPY --from=build /app/web/.next/standalone ./
+COPY --from=build /app/web/.next/static ./web/.next/static
 COPY --from=build /app/web/public ./web/public
-COPY --from=build /app/web/next.config.ts ./web/
-COPY --from=build /app/web/package.json ./web/
-
-# Copy node_modules for next start
-COPY --from=build /app/node_modules ./node_modules
 
 EXPOSE 4000
 
-CMD ["pnpm", "--filter", "@vortex/web", "start"]
+CMD ["node", "web/server.js"]

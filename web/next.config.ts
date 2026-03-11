@@ -3,6 +3,7 @@ import type { NextConfig } from 'next';
 const GATEWAY_URL = process.env.GATEWAY_URL ?? 'http://localhost:3000';
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   rewrites() {
     return Promise.resolve([
       {
