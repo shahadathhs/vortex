@@ -39,7 +39,7 @@ export default function LoginPage() {
         router.push('/tfa');
         return;
       }
-      const { user, token, refreshToken } = res as {
+      const { user, token, refreshToken } = res as unknown as {
         user: User;
         token: string;
         refreshToken: string;

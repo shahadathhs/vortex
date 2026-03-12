@@ -36,7 +36,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       const res = await authApi.register(data);
-      const { user, token, refreshToken } = res as {
+      const { user, token, refreshToken } = res as unknown as {
         user: User;
         token: string;
         refreshToken: string;

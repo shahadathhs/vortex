@@ -39,7 +39,7 @@ export default function TfaPage() {
     setIsLoading(true);
     try {
       const res = await authApi.verifyTfaLogin({ tfaToken, otp: data.otp });
-      const { user, token, refreshToken } = res as {
+      const { user, token, refreshToken } = res as unknown as {
         user: User;
         token: string;
         refreshToken: string;
