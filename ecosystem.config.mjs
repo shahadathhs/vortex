@@ -71,7 +71,8 @@ export default {
       args: 'start',
       env: {
         NODE_ENV: 'production',
-        PORT: 3008,
+        PORT: 4000,
+        GATEWAY_URL: process.env.GATEWAY_URL ?? 'http://localhost:3000',
       },
     },
   ],

@@ -26,17 +26,15 @@
     "SMTP_HOST",
     "SMTP_PORT",
     "SMTP_USER",
-    "SMTP_PASS"
+    "SMTP_PASS",
+    "GATEWAY_URL",
+    "NEXT_PUBLIC_APP_URL"
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["src/**", "package.json", "tsconfig.json"],
-      "outputs": ["dist/**"],
+      "dependsOn": ["^build", "^lint"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "cache": false
-    },
-    "@vortex/web#build": {
-      "outputs": [".next/**"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],
@@ -63,7 +61,7 @@
       "persistent": true
     },
     "start": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "build"],
       "cache": false,
       "persistent": true
     },

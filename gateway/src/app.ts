@@ -8,6 +8,10 @@ import proxyRouter from './proxy';
 
 const app: express.Application = express();
 
+// Trust the immediate upstream proxy (Next.js rewrite / nginx / load balancer).
+// Required so express-rate-limit can read X-Forwarded-For correctly.
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(cors());
 app.use(apiRateLimiter);

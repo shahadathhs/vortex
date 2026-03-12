@@ -19,11 +19,14 @@ const services = [
 ];
 
 services.forEach(({ path, url }) => {
+  // Use pathFilter (not router.use(path, …)) so Express does NOT strip the
+  // matched prefix — the full path (e.g. /api/auth/register) is forwarded
+  // intact to the downstream service which mounts its own /api/* routes.
   router.use(
-    path,
     createProxyMiddleware({
       target: url,
       changeOrigin: true,
+      pathFilter: path,
     }),
   );
 });

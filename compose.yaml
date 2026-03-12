@@ -180,15 +180,16 @@ services:
     container_name: ${PACKAGE_NAME}_web
     restart: unless-stopped
     ports:
-      - '3008:3008'
+      - '4000:4000'
     profiles:
       - dev
       - prod
       - web
     environment:
-      - PORT=3008
+      - PORT=4000
       - HOSTNAME=0.0.0.0
       - NODE_ENV=production
+      - GATEWAY_URL=http://gateway:3000
     networks:
       - network
 
