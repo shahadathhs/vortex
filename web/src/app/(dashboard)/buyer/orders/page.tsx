@@ -1,25 +1,16 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
-import { orderApi } from '@/lib/api';
+import { apiServerFetch } from '@/lib/api-server';
 import { Order } from '@/types';
 import { formatDate, formatPrice, ORDER_STATUS_COLORS } from '@/lib/utils';
 import { Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function BuyerOrdersPage() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['buyer-orders'],
-    queryFn: async () => {
-      const res = await orderApi.list();
-      return res as Order[];
-    },
-  });
-
-  if (isLoading)
-    return (
-      <div className="text-center py-16 text-muted-foreground">Loading...</div>
-    );
+export default async function BuyerOrdersPage() {
+  let data: Order[] = [];
+  try {
+    data = (await apiServerFetch<Order[]>('/orders')) ?? [];
+  } catch {
+    // Unauthorized or error
+  }
 
   return (
     <div className="space-y-6">

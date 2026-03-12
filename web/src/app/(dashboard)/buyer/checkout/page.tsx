@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { cartApi, orderApi, productApi } from '@/lib/api';
 import { Cart, Product } from '@/types';
 import { formatPrice } from '@/lib/utils';
@@ -12,25 +11,30 @@ import { CheckCircle, XCircle } from 'lucide-react';
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const status = searchParams.get('status');
+  const [cart, setCart] = useState<Cart | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { data: cart } = useQuery({
-    queryKey: ['cart'],
-    queryFn: async () => {
-      const res = await cartApi.get();
-      return res as Cart;
-    },
-  });
+  const loadData = useCallback(async () => {
+    try {
+      const c = (await cartApi.get()) as Cart;
+      setCart(c);
+      if (c?.items?.length) {
+        const p = (await productApi.list()) as Product[];
+        setProducts(p);
+      } else {
+        setProducts([]);
+      }
+    } catch {
+      setCart(null);
+      setProducts([]);
+    }
+  }, []);
 
-  const { data: products } = useQuery({
-    queryKey: ['products-all'],
-    queryFn: async () => {
-      const res = await productApi.list();
-      return res as Product[];
-    },
-    enabled: !!cart?.items?.length,
-  });
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   if (status === 'success') {
     return (
@@ -66,7 +70,7 @@ function CheckoutContent() {
     );
   }
 
-  const productMap = new Map(products?.map((p) => [p._id, p]) ?? []);
+  const productMap = new Map(products.map((p) => [p._id, p]));
   const items = cart?.items ?? [];
   const total = items.reduce((sum, item) => {
     const p = productMap.get(item.productId);

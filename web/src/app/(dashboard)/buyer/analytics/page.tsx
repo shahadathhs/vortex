@@ -1,22 +1,15 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
-import { analyticsApi } from '@/lib/api';
+import { apiServerFetch } from '@/lib/api-server';
 import { BarChart3 } from 'lucide-react';
 
-export default function BuyerAnalyticsPage() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['analytics-dashboard'],
-    queryFn: async () => {
-      const res = await analyticsApi.getDashboard();
-      return res as Record<string, unknown>;
-    },
-  });
-
-  if (isLoading)
-    return (
-      <div className="text-center py-16 text-muted-foreground">Loading...</div>
+export default async function BuyerAnalyticsPage() {
+  let data: Record<string, unknown> | null = null;
+  try {
+    data = await apiServerFetch<Record<string, unknown>>(
+      '/analytics/dashboard',
     );
+  } catch {
+    // Unauthorized or error
+  }
 
   return (
     <div className="space-y-6">

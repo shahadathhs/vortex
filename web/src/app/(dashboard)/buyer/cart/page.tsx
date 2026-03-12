@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { cartApi, productApi } from '@/lib/api';
 import { Cart, Product } from '@/types';
 import { formatPrice } from '@/lib/utils';
@@ -8,56 +8,68 @@ import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
-  const queryClient = useQueryClient();
   const router = useRouter();
+  const [cart, setCart] = useState<Cart | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: cart, isLoading } = useQuery({
-    queryKey: ['cart'],
-    queryFn: async () => {
-      const res = await cartApi.get();
-      return res as Cart;
-    },
-  });
+  const loadCart = useCallback(async () => {
+    try {
+      const c = (await cartApi.get()) as Cart;
+      setCart(c);
+      if (c?.items?.length) {
+        const p = (await productApi.list()) as Product[];
+        setProducts(p);
+      } else {
+        setProducts([]);
+      }
+    } catch {
+      setCart(null);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const { data: products } = useQuery({
-    queryKey: ['products-all'],
-    queryFn: async () => {
-      const res = await productApi.list();
-      return res as Product[];
-    },
-    enabled: !!cart?.items?.length,
-  });
+  useEffect(() => {
+    void loadCart();
+  }, [loadCart]);
 
-  const update = useMutation({
-    mutationFn: ({
-      productId,
-      quantity,
-    }: {
-      productId: string;
-      quantity: number;
-    }) => cartApi.update(productId, { quantity }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['cart'] }),
-  });
+  const updateQty = async (productId: string, quantity: number) => {
+    try {
+      await cartApi.update(productId, { quantity });
+      await loadCart();
+    } catch {
+      // Error
+    }
+  };
 
-  const remove = useMutation({
-    mutationFn: (productId: string) => cartApi.remove(productId),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['cart'] }),
-  });
+  const remove = async (productId: string) => {
+    try {
+      await cartApi.remove(productId);
+      await loadCart();
+    } catch {
+      // Error
+    }
+  };
 
-  const clear = useMutation({
-    mutationFn: () => cartApi.clear(),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['cart'] }),
-  });
+  const clear = async () => {
+    try {
+      await cartApi.clear();
+      await loadCart();
+    } catch {
+      // Error
+    }
+  };
 
-  const productMap = new Map(products?.map((p) => [p._id, p]) ?? []);
+  const productMap = new Map(products.map((p) => [p._id, p]));
   const items = cart?.items ?? [];
-
   const total = items.reduce((sum, item) => {
     const p = productMap.get(item.productId);
     return sum + (p?.price ?? 0) * item.quantity;
   }, 0);
 
-  if (isLoading)
+  if (loading)
     return (
       <div className="text-center py-16 text-muted-foreground">Loading...</div>
     );
@@ -82,7 +94,7 @@ export default function CartPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Cart ({items.length} items)</h1>
         <button
-          onClick={() => clear.mutate()}
+          onClick={() => clear()}
           className="text-sm text-destructive hover:underline"
         >
           Clear all
@@ -114,10 +126,7 @@ export default function CartPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() =>
-                    update.mutate({
-                      productId: item.productId,
-                      quantity: Math.max(1, item.quantity - 1),
-                    })
+                    updateQty(item.productId, Math.max(1, item.quantity - 1))
                   }
                   className="w-7 h-7 rounded-md border flex items-center justify-center hover:bg-accent"
                 >
@@ -127,12 +136,7 @@ export default function CartPage() {
                   {item.quantity}
                 </span>
                 <button
-                  onClick={() =>
-                    update.mutate({
-                      productId: item.productId,
-                      quantity: item.quantity + 1,
-                    })
-                  }
+                  onClick={() => updateQty(item.productId, item.quantity + 1)}
                   className="w-7 h-7 rounded-md border flex items-center justify-center hover:bg-accent"
                 >
                   <Plus size={12} />
@@ -142,7 +146,7 @@ export default function CartPage() {
                 {product ? formatPrice(product.price * item.quantity) : '—'}
               </p>
               <button
-                onClick={() => remove.mutate(item.productId)}
+                onClick={() => remove(item.productId)}
                 className="text-muted-foreground hover:text-destructive"
               >
                 <Trash2 size={16} />

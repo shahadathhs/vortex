@@ -1,44 +1,56 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { paymentApi } from '@/lib/api';
 import { PaymentSettings } from '@/types';
 import { Zap } from 'lucide-react';
 
 export default function SystemPaymentPage() {
-  const queryClient = useQueryClient();
+  const [settings, setSettings] = useState<PaymentSettings | null>(null);
+  const [loading, setLoading] = useState(true);
   const [settleMsg, setSettleMsg] = useState('');
   const [settleError, setSettleError] = useState('');
+  const [settleLoading, setSettleLoading] = useState(false);
 
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ['payment-settings'],
-    queryFn: async () => {
-      const res = await paymentApi.getSettings();
-      return res as PaymentSettings;
-    },
-  });
+  const loadSettings = useCallback(async () => {
+    try {
+      const res = (await paymentApi.getSettings()) as PaymentSettings;
+      setSettings(res);
+    } catch {
+      setSettings(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const updateSettings = useMutation({
-    mutationFn: (patch: Partial<PaymentSettings>) =>
-      paymentApi.updateSettings(patch),
-    onSuccess: () =>
-      void queryClient.invalidateQueries({ queryKey: ['payment-settings'] }),
-  });
+  useEffect(() => {
+    void loadSettings();
+  }, [loadSettings]);
 
-  const runSettlement = useMutation({
-    mutationFn: () => paymentApi.runSettlement(),
-    onSuccess: (res) => {
+  const updateSettings = async (patch: Partial<PaymentSettings>) => {
+    try {
+      await paymentApi.updateSettings(patch);
+      await loadSettings();
+    } catch {
+      // Error
+    }
+  };
+
+  const runSettlement = async () => {
+    setSettleMsg('');
+    setSettleError('');
+    setSettleLoading(true);
+    try {
+      const res = await paymentApi.runSettlement();
       setSettleMsg(res.message);
-      setSettleError('');
-    },
-    onError: (e) => {
+    } catch (e) {
       setSettleError(e instanceof Error ? e.message : 'Failed');
-      setSettleMsg('');
-    },
-  });
+    } finally {
+      setSettleLoading(false);
+    }
+  };
 
-  if (isLoading)
+  if (loading)
     return (
       <div className="text-center py-16 text-muted-foreground">Loading...</div>
     );
@@ -50,7 +62,6 @@ export default function SystemPaymentPage() {
       <h1 className="text-2xl font-bold">Payment Settings</h1>
 
       <div className="bg-card border rounded-xl p-6 space-y-5">
-        {/* Payments enabled toggle */}
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium">Payments enabled</p>
@@ -60,7 +71,7 @@ export default function SystemPaymentPage() {
           </div>
           <button
             onClick={() =>
-              updateSettings.mutate({ paymentEnabled: !s?.paymentEnabled })
+              updateSettings({ paymentEnabled: !s?.paymentEnabled })
             }
             className={`relative w-11 h-6 rounded-full transition-colors ${s?.paymentEnabled ? 'bg-primary' : 'bg-muted'}`}
           >
@@ -70,7 +81,6 @@ export default function SystemPaymentPage() {
           </button>
         </div>
 
-        {/* Automatic payouts toggle */}
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium">Automatic payouts</p>
@@ -80,7 +90,7 @@ export default function SystemPaymentPage() {
           </div>
           <button
             onClick={() =>
-              updateSettings.mutate({
+              updateSettings({
                 automaticPayoutsEnabled: !s?.automaticPayoutsEnabled,
               })
             }
@@ -92,7 +102,6 @@ export default function SystemPaymentPage() {
           </button>
         </div>
 
-        {/* Platform fee */}
         <div>
           <label className="font-medium block mb-1">Platform fee (%)</label>
           <div className="flex gap-2">
@@ -113,7 +122,7 @@ export default function SystemPaymentPage() {
                     .value,
                 );
                 if (!isNaN(val))
-                  updateSettings.mutate({ platformFeePercent: val });
+                  void updateSettings({ platformFeePercent: val });
               }}
               className="rounded-md border px-3 py-2 text-sm hover:bg-accent"
             >
@@ -122,7 +131,6 @@ export default function SystemPaymentPage() {
           </div>
         </div>
 
-        {/* Payout day */}
         <div>
           <label className="font-medium block mb-1">Payout day of month</label>
           <div className="flex gap-2">
@@ -141,8 +149,7 @@ export default function SystemPaymentPage() {
                   (document.getElementById('day-input') as HTMLInputElement)
                     .value,
                 );
-                if (!isNaN(val))
-                  updateSettings.mutate({ payoutDayOfMonth: val });
+                if (!isNaN(val)) void updateSettings({ payoutDayOfMonth: val });
               }}
               className="rounded-md border px-3 py-2 text-sm hover:bg-accent"
             >
@@ -152,7 +159,6 @@ export default function SystemPaymentPage() {
         </div>
       </div>
 
-      {/* Manual settlement */}
       <div className="bg-card border rounded-xl p-6 space-y-3">
         <h2 className="font-semibold">Manual Settlement</h2>
         <p className="text-sm text-muted-foreground">
@@ -163,16 +169,12 @@ export default function SystemPaymentPage() {
           <p className="text-destructive text-sm">{settleError}</p>
         )}
         <button
-          onClick={() => {
-            setSettleMsg('');
-            setSettleError('');
-            runSettlement.mutate();
-          }}
-          disabled={runSettlement.isPending}
+          onClick={runSettlement}
+          disabled={settleLoading}
           className="flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50"
         >
           <Zap size={16} />
-          {runSettlement.isPending ? 'Running...' : 'Run settlement now'}
+          {settleLoading ? 'Running...' : 'Run settlement now'}
         </button>
       </div>
     </div>

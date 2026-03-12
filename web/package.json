@@ -27,7 +27,6 @@
     "@radix-ui/react-switch": "catalog:",
     "@radix-ui/react-tabs": "catalog:",
     "@radix-ui/react-toast": "catalog:",
-    "@tanstack/react-query": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "lucide-react": "catalog:",

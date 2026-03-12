@@ -54,7 +54,7 @@ export default function NotificationsPage() {
               </div>
               {!n.read && (
                 <button
-                  onClick={() => markRead.mutate(n._id)}
+                  onClick={() => void markRead.mutate(n._id)}
                   className="text-xs text-primary hover:underline flex-shrink-0"
                 >
                   Mark read

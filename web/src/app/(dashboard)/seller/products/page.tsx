@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,20 +19,28 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function SellerProductsPage() {
-  const queryClient = useQueryClient();
+  const [data, setData] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['seller-products'],
-    queryFn: async () => {
-      const res = await productApi.list();
-      return res as Product[];
-    },
-  });
-
   const form = useForm<FormData>({ resolver: zodResolver(schema) as never });
+
+  const loadProducts = useCallback(async () => {
+    try {
+      const res = (await productApi.list()) as Product[];
+      setData(res ?? []);
+    } catch {
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadProducts();
+  }, [loadProducts]);
 
   const openCreate = () => {
     form.reset({ name: '', description: '', price: 0, stock: 0, category: '' });
@@ -53,34 +60,28 @@ export default function SellerProductsPage() {
     setShowForm(true);
   };
 
-  const createMutation = useMutation({
-    mutationFn: (data: FormData) => productApi.create(data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['seller-products'] });
-      setShowForm(false);
-    },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Failed'),
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (data: FormData) => productApi.update(editing!._id, data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['seller-products'] });
-      setShowForm(false);
-    },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Failed'),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => productApi.delete(id),
-    onSuccess: () =>
-      void queryClient.invalidateQueries({ queryKey: ['seller-products'] }),
-  });
-
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (formData: FormData) => {
     setError('');
-    if (editing) updateMutation.mutate(data);
-    else createMutation.mutate(data);
+    try {
+      if (editing) {
+        await productApi.update(editing._id, formData);
+      } else {
+        await productApi.create(formData);
+      }
+      setShowForm(false);
+      await loadProducts();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed');
+    }
+  };
+
+  const deleteProduct = async (id: string) => {
+    try {
+      await productApi.delete(id);
+      await loadProducts();
+    } catch {
+      // Error
+    }
   };
 
   return (
@@ -95,7 +96,6 @@ export default function SellerProductsPage() {
         </button>
       </div>
 
-      {/* Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
@@ -154,7 +154,7 @@ export default function SellerProductsPage() {
         </div>
       )}
 
-      {isLoading ? (
+      {loading ? (
         <div className="text-center py-12 text-muted-foreground">
           Loading...
         </div>
@@ -171,7 +171,7 @@ export default function SellerProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {data?.map((p) => (
+              {data.map((p) => (
                 <tr
                   key={p._id}
                   className="border-b last:border-0 hover:bg-muted/30"
@@ -197,7 +197,7 @@ export default function SellerProductsPage() {
                         <Pencil size={14} />
                       </button>
                       <button
-                        onClick={() => deleteMutation.mutate(p._id)}
+                        onClick={() => deleteProduct(p._id)}
                         className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                       >
                         <Trash2 size={14} />
@@ -206,7 +206,7 @@ export default function SellerProductsPage() {
                   </td>
                 </tr>
               ))}
-              {!data?.length && (
+              {!data.length && (
                 <tr>
                   <td
                     colSpan={5}

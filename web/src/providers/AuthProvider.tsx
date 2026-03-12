@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr) as User;
+        document.cookie = `accessToken=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
         setState({ user, accessToken: token, isLoading: false });
         return;
       } catch {
@@ -49,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback((user: User, accessToken: string) => {
     setToken(accessToken);
     localStorage.setItem('user', JSON.stringify(user));
+    document.cookie = `accessToken=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
     setState({ user, accessToken, isLoading: false });
   }, []);
 
@@ -59,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
     clearAuth();
+    document.cookie = 'accessToken=; path=/; max-age=0';
     setState({ user: null, accessToken: null, isLoading: false });
   }, []);
 

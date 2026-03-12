@@ -1,46 +1,26 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
-import { analyticsApi } from '@/lib/api';
+import { apiServerFetch } from '@/lib/api-server';
 import { BarChart3 } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Order } from '@/types';
 
-export default function SystemAnalyticsPage() {
-  const { data: dashboard, isLoading } = useQuery({
-    queryKey: ['analytics-dashboard'],
-    queryFn: async () => {
-      const res = await analyticsApi.getDashboard();
-      return res as Record<string, unknown>;
-    },
-  });
+export default async function SystemAnalyticsPage() {
+  let dashboard: Record<string, unknown> = {};
+  let orders: Record<string, unknown> = {};
+  let products: Record<string, unknown> = {};
+  try {
+    const [d, o, p] = await Promise.all([
+      apiServerFetch<Record<string, unknown>>('/analytics/dashboard'),
+      apiServerFetch<Record<string, unknown>>('/analytics/orders'),
+      apiServerFetch<Record<string, unknown>>('/analytics/products'),
+    ]);
+    dashboard = d ?? {};
+    orders = o ?? {};
+    products = p ?? {};
+  } catch {
+    // Unauthorized or error
+  }
 
-  const { data: orders } = useQuery({
-    queryKey: ['analytics-orders'],
-    queryFn: async () => {
-      const res = await analyticsApi.getOrders();
-      return res as Record<string, unknown>;
-    },
-  });
-
-  const { data: products } = useQuery({
-    queryKey: ['analytics-products'],
-    queryFn: async () => {
-      const res = await analyticsApi.getProducts();
-      return res as Record<string, unknown>;
-    },
-  });
-
-  if (isLoading)
-    return (
-      <div className="text-center py-16 text-muted-foreground">Loading...</div>
-    );
-
-  const allStats = {
-    ...(dashboard ?? {}),
-    ...(orders ?? {}),
-    ...(products ?? {}),
-  };
+  const allStats = { ...dashboard, ...orders, ...products };
   const scalarStats = Object.entries(allStats).filter(
     ([, v]) => typeof v !== 'object',
   );

@@ -58,7 +58,7 @@ export function NotificationBell() {
                   key={n._id}
                   className={`p-3 border-b last:border-0 cursor-pointer hover:bg-accent/50 transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
                   onClick={() => {
-                    if (!n.read) markRead.mutate(n._id);
+                    if (!n.read) void markRead.mutate(n._id);
                   }}
                 >
                   <div className="flex items-start gap-2">

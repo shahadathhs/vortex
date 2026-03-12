@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { AuthProvider } from '@/providers/AuthProvider';
-import { QueryProvider } from '@/providers/QueryProvider';
 import { SocketProvider } from '@/providers/SocketProvider';
 import './globals.css';
 
@@ -20,11 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <QueryProvider>
-          <AuthProvider>
-            <SocketProvider>{children}</SocketProvider>
-          </AuthProvider>
-        </QueryProvider>
+        <AuthProvider>
+          <SocketProvider>{children}</SocketProvider>
+        </AuthProvider>
       </body>
     </html>
   );

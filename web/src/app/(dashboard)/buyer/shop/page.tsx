@@ -1,69 +1,38 @@
-'use client';
-
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productApi, cartApi } from '@/lib/api';
+import { apiServerFetch } from '@/lib/api-server';
 import { Product } from '@/types';
 import { formatPrice } from '@/lib/utils';
-import { ShoppingCart, Search } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
+import { ShopFilters } from './ShopFilters';
+import { AddToCartButton } from './AddToCartButton';
 
-export default function ShopPage() {
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
-  const [addedId, setAddedId] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; category?: string }>;
+}) {
+  const params = await searchParams;
+  const search = params.search ?? '';
+  const category = params.category ?? '';
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['products', search, category],
-    queryFn: async () => {
-      const res = await productApi.list({
-        search: search || undefined,
-        category: category || undefined,
-      });
-      return res as Product[];
-    },
-  });
-
-  const addToCart = useMutation({
-    mutationFn: (productId: string) => cartApi.add({ productId, quantity: 1 }),
-    onSuccess: (_, productId) => {
-      void queryClient.invalidateQueries({ queryKey: ['cart'] });
-      setAddedId(productId);
-      setTimeout(() => setAddedId(null), 1500);
-    },
-  });
+  let data: Product[] = [];
+  try {
+    const qs = new URLSearchParams();
+    if (search) qs.set('search', search);
+    if (category) qs.set('category', category);
+    const path = `/products${qs.toString() ? `?${qs}` : ''}`;
+    data = (await apiServerFetch<Product[]>(path)) ?? [];
+  } catch {
+    // Unauthorized or error
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Shop</h1>
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search
-              size={16}
-              className="absolute left-2.5 top-2.5 text-muted-foreground"
-            />
-            <input
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 pr-3 py-2 rounded-md border bg-transparent text-sm w-56 focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-          <input
-            placeholder="Category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="px-3 py-2 rounded-md border bg-transparent text-sm w-36 focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
+        <ShopFilters search={search} category={category} />
       </div>
 
-      {isLoading ? (
-        <div className="text-center py-16 text-muted-foreground">
-          Loading...
-        </div>
-      ) : !data?.length ? (
+      {!data?.length ? (
         <div className="text-center py-16 text-muted-foreground">
           No products found
         </div>
@@ -99,17 +68,7 @@ export default function ShopPage() {
                   {product.stock} in stock
                 </span>
               </div>
-              <button
-                onClick={() => addToCart.mutate(product._id)}
-                disabled={product.stock === 0 || addedId === product._id}
-                className="w-full rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
-              >
-                {addedId === product._id
-                  ? 'Added!'
-                  : product.stock === 0
-                    ? 'Out of stock'
-                    : 'Add to cart'}
-              </button>
+              <AddToCartButton productId={product._id} stock={product.stock} />
             </div>
           ))}
         </div>

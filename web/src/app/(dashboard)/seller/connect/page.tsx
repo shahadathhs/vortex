@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { paymentApi } from '@/lib/api';
 import { CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 
@@ -12,29 +12,47 @@ interface ConnectStatus {
 }
 
 export default function SellerConnectPage() {
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['connect-status'],
-    queryFn: async () => {
-      const res = await paymentApi.getConnectStatus();
-      return res as ConnectStatus;
-    },
-  });
+  const [data, setData] = useState<ConnectStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [onboardLoading, setOnboardLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
 
-  const onboard = useMutation({
-    mutationFn: () => paymentApi.startOnboarding(),
-    onSuccess: (res) => {
+  const loadStatus = useCallback(async () => {
+    try {
+      const res = (await paymentApi.getConnectStatus()) as ConnectStatus;
+      setData(res);
+    } catch {
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadStatus();
+  }, [loadStatus]);
+
+  const onboard = async () => {
+    setOnboardLoading(true);
+    try {
+      const res = await paymentApi.startOnboarding();
       window.location.href = res.url;
-    },
-  });
+    } finally {
+      setOnboardLoading(false);
+    }
+  };
 
-  const loginLink = useMutation({
-    mutationFn: () => paymentApi.getLoginLink(),
-    onSuccess: (res) => {
+  const loginLink = async () => {
+    setLoginLoading(true);
+    try {
+      const res = await paymentApi.getLoginLink();
       window.open(res.url, '_blank');
-    },
-  });
+    } finally {
+      setLoginLoading(false);
+    }
+  };
 
-  if (isLoading)
+  if (loading)
     return (
       <div className="text-center py-16 text-muted-foreground">Loading...</div>
     );
@@ -101,8 +119,8 @@ export default function SellerConnectPage() {
         <div className="flex gap-3 flex-wrap">
           {!isFullyOnboarded && (
             <button
-              onClick={() => onboard.mutate()}
-              disabled={onboard.isPending}
+              onClick={onboard}
+              disabled={onboardLoading}
               className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50"
             >
               {data?.connected ? 'Continue onboarding' : 'Connect with Stripe'}
@@ -110,15 +128,15 @@ export default function SellerConnectPage() {
           )}
           {isFullyOnboarded && (
             <button
-              onClick={() => loginLink.mutate()}
-              disabled={loginLink.isPending}
+              onClick={loginLink}
+              disabled={loginLoading}
               className="flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
             >
               <ExternalLink size={14} /> Stripe Dashboard
             </button>
           )}
           <button
-            onClick={() => refetch()}
+            onClick={() => loadStatus()}
             className="rounded-md border px-4 py-2 text-sm hover:bg-accent"
           >
             Refresh status

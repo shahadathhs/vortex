@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -23,52 +22,67 @@ type CreateData = z.infer<typeof createSchema>;
 type ResetData = z.infer<typeof resetSchema>;
 
 export default function SystemSellersPage() {
-  const queryClient = useQueryClient();
+  const [data, setData] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [resetTarget, setResetTarget] = useState<User | null>(null);
   const [error, setError] = useState('');
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['system-sellers'],
-    queryFn: async () => {
-      const res = await authApi.getSellers();
-      return res as User[];
-    },
-  });
 
   const createForm = useForm<CreateData>({
     resolver: zodResolver(createSchema),
   });
   const resetForm = useForm<ResetData>({ resolver: zodResolver(resetSchema) });
 
-  const createSeller = useMutation({
-    mutationFn: (data: CreateData) => authApi.createSeller(data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['system-sellers'] });
+  const loadSellers = useCallback(async () => {
+    try {
+      const res = (await authApi.getSellers()) as User[];
+      setData(res ?? []);
+    } catch {
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSellers();
+  }, [loadSellers]);
+
+  const createSeller = async (d: CreateData) => {
+    setError('');
+    try {
+      await authApi.createSeller(d);
       setShowCreate(false);
       createForm.reset();
-    },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Failed'),
-  });
+      await loadSellers();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed');
+    }
+  };
 
-  const deleteSeller = useMutation({
-    mutationFn: (id: string) => authApi.deleteSeller(id),
-    onSuccess: () =>
-      void queryClient.invalidateQueries({ queryKey: ['system-sellers'] }),
-  });
+  const deleteSeller = async (id: string) => {
+    try {
+      await authApi.deleteSeller(id);
+      await loadSellers();
+    } catch {
+      // Error
+    }
+  };
 
-  const resetPassword = useMutation({
-    mutationFn: (data: ResetData) =>
-      authApi.resetSellerPassword({
-        sellerId: resetTarget!._id,
-        newPassword: data.newPassword,
-      }),
-    onSuccess: () => {
+  const resetPassword = async (d: ResetData) => {
+    if (!resetTarget) return;
+    setError('');
+    try {
+      await authApi.resetSellerPassword({
+        sellerId: resetTarget._id,
+        newPassword: d.newPassword,
+      });
       setResetTarget(null);
       resetForm.reset();
-    },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Failed'),
-  });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -82,7 +96,6 @@ export default function SystemSellersPage() {
         </button>
       </div>
 
-      {/* Create modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-card border rounded-xl w-full max-w-md p-6 space-y-4">
@@ -93,10 +106,7 @@ export default function SystemSellersPage() {
               </button>
             </div>
             <form
-              onSubmit={createForm.handleSubmit((d) => {
-                setError('');
-                createSeller.mutate(d);
-              })}
+              onSubmit={createForm.handleSubmit(createSeller)}
               className="space-y-3"
             >
               <div className="grid grid-cols-2 gap-3">
@@ -139,7 +149,7 @@ export default function SystemSellersPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={createSeller.isPending}
+                  disabled={createForm.formState.isSubmitting}
                   className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
                   Create seller
@@ -150,7 +160,6 @@ export default function SystemSellersPage() {
         </div>
       )}
 
-      {/* Reset password modal */}
       {resetTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-card border rounded-xl w-full max-w-sm p-6 space-y-4">
@@ -163,10 +172,7 @@ export default function SystemSellersPage() {
               </button>
             </div>
             <form
-              onSubmit={resetForm.handleSubmit((d) => {
-                setError('');
-                resetPassword.mutate(d);
-              })}
+              onSubmit={resetForm.handleSubmit(resetPassword)}
               className="space-y-3"
             >
               <div>
@@ -188,7 +194,7 @@ export default function SystemSellersPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={resetPassword.isPending}
+                  disabled={resetForm.formState.isSubmitting}
                   className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
                   Reset
@@ -199,7 +205,7 @@ export default function SystemSellersPage() {
         </div>
       )}
 
-      {isLoading ? (
+      {loading ? (
         <div className="text-center py-12 text-muted-foreground">
           Loading...
         </div>
@@ -216,7 +222,7 @@ export default function SystemSellersPage() {
               </tr>
             </thead>
             <tbody>
-              {data?.map((seller) => (
+              {data.map((seller) => (
                 <tr
                   key={seller._id}
                   className="border-b last:border-0 hover:bg-muted/30"
@@ -250,7 +256,7 @@ export default function SystemSellersPage() {
                         <Key size={14} />
                       </button>
                       <button
-                        onClick={() => deleteSeller.mutate(seller._id)}
+                        onClick={() => deleteSeller(seller._id)}
                         className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                         title="Delete seller"
                       >
@@ -260,7 +266,7 @@ export default function SystemSellersPage() {
                   </td>
                 </tr>
               ))}
-              {!data?.length && (
+              {!data.length && (
                 <tr>
                   <td
                     colSpan={5}

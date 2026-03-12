@@ -1,51 +1,58 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { notificationApi } from '@/lib/api';
 import { Notification } from '@/types';
 import { useSocket } from '@/providers/SocketProvider';
 
 export function useNotifications() {
-  const queryClient = useQueryClient();
   const socket = useSocket();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const query = useQuery({
-    queryKey: ['notifications'],
-    queryFn: async () => {
-      const res = await notificationApi.list();
-      return res as Notification[];
-    },
-  });
+  const loadNotifications = useCallback(async () => {
+    try {
+      const res = (await notificationApi.list()) as Notification[];
+      setNotifications(res ?? []);
+    } catch {
+      setNotifications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadNotifications();
+  }, [loadNotifications]);
 
   useEffect(() => {
     if (!socket) return;
     const handler = (notification: Notification) => {
-      queryClient.setQueryData<Notification[]>(['notifications'], (prev) =>
-        prev ? [notification, ...prev] : [notification],
-      );
+      setNotifications((prev) => [notification, ...prev]);
     };
     socket.on('notification', handler);
     return () => {
       socket.off('notification', handler);
     };
-  }, [socket, queryClient]);
+  }, [socket]);
 
-  const markRead = useMutation({
-    mutationFn: (id: string) => notificationApi.markRead(id),
-    onSuccess: (_, id) => {
-      queryClient.setQueryData<Notification[]>(['notifications'], (prev) =>
+  const markRead = useCallback(async (id: string) => {
+    try {
+      await notificationApi.markRead(id);
+      setNotifications((prev) =>
         prev?.map((n) => (n._id === id ? { ...n, read: true } : n)),
       );
-    },
-  });
+    } catch {
+      // Error
+    }
+  }, []);
 
-  const unreadCount = query.data?.filter((n) => !n.read).length ?? 0;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return {
-    notifications: query.data ?? [],
+    notifications,
     unreadCount,
-    markRead,
-    isLoading: query.isLoading,
+    markRead: { mutate: markRead },
+    isLoading,
   };
 }

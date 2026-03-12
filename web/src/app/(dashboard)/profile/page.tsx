@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authApi, notificationApi } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { User, NotificationSettings } from '@/types';
@@ -32,7 +31,21 @@ export default function ProfilePage() {
   const [pwMsg, setPwMsg] = useState('');
   const [tfaStep, setTfaStep] = useState<'idle' | 'sent'>('idle');
   const [tfaMsg, setTfaMsg] = useState('');
-  const queryClient = useQueryClient();
+  const [notifSettings, setNotifSettings] =
+    useState<NotificationSettings | null>(null);
+
+  const loadNotifSettings = useCallback(async () => {
+    try {
+      const res = (await notificationApi.getSettings()) as NotificationSettings;
+      setNotifSettings(res);
+    } catch {
+      setNotifSettings(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadNotifSettings();
+  }, [loadNotifSettings]);
 
   // Profile form
   const profileForm = useForm<ProfileData>({
@@ -87,31 +100,21 @@ export default function ProfilePage() {
     disableForm.reset();
   };
 
-  // Notification settings
-  const { data: notifSettings } = useQuery({
-    queryKey: ['notification-settings'],
-    queryFn: async () => {
-      const res = await notificationApi.getSettings();
-      return res as NotificationSettings;
-    },
-  });
-
-  const updateNotifSettings = useMutation({
-    mutationFn: (data: { emailTypes?: string[]; socketTypes?: string[] }) =>
-      notificationApi.updateSettings(data),
-    onSuccess: () =>
-      void queryClient.invalidateQueries({
-        queryKey: ['notification-settings'],
-      }),
-  });
-
-  const toggleType = (channel: 'emailTypes' | 'socketTypes', type: string) => {
+  const toggleType = async (
+    channel: 'emailTypes' | 'socketTypes',
+    type: string,
+  ) => {
     if (!notifSettings) return;
     const current = notifSettings[channel] ?? [];
     const updated = current.includes(type)
       ? current.filter((t) => t !== type)
       : [...current, type];
-    updateNotifSettings.mutate({ [channel]: updated });
+    try {
+      await notificationApi.updateSettings({ [channel]: updated });
+      await loadNotifSettings();
+    } catch {
+      // Error
+    }
   };
 
   return (
