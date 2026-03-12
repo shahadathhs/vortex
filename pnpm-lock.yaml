@@ -61,11 +61,11 @@ catalogs:
       specifier: ^14.1.0
       version: 14.1.0
     '@systemix/eslint':
-      specifier: ^0.4.0
-      version: 0.4.0
+      specifier: ^0.5.0
+      version: 0.5.0
     '@systemix/typescript':
-      specifier: ^0.4.0
-      version: 0.4.0
+      specifier: ^0.5.0
+      version: 0.5.0
     '@tailwindcss/postcss':
       specifier: ^4.2.1
       version: 4.2.1
@@ -124,8 +124,8 @@ catalogs:
       specifier: ^17.3.1
       version: 17.3.1
     dotenv-cli:
-      specifier: ^8.0.0
-      version: 8.0.0
+      specifier: ^11.0.0
+      version: 11.0.0
     eslint:
       specifier: ^10.0.3
       version: 10.0.3
@@ -154,8 +154,8 @@ catalogs:
       specifier: ^16.3.3
       version: 16.3.3
     lucide-react:
-      specifier: ^0.511.0
-      version: 0.511.0
+      specifier: ^0.577.0
+      version: 0.577.0
     mongoose:
       specifier: ^9.3.0
       version: 9.3.0
@@ -201,9 +201,6 @@ catalogs:
     ts-node-dev:
       specifier: ^2.0.0
       version: 2.0.0
-    tsconfig-paths:
-      specifier: ^4.2.0
-      version: 4.2.0
     tsup:
       specifier: ^8.5.1
       version: 8.5.1
@@ -254,10 +251,10 @@ importers:
         version: 14.1.0(semantic-release@25.0.3(typescript@5.9.3))
       '@systemix/eslint':
         specifier: 'catalog:'
-        version: 0.4.0(eslint@10.0.3(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.16)(typescript@5.9.3)
+        version: 0.5.0(@typescript-eslint/parser@8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.3(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.16)(typescript@5.9.3)
       '@systemix/typescript':
         specifier: 'catalog:'
-        version: 0.4.0
+        version: 0.5.0
       commitizen:
         specifier: 'catalog:'
         version: 4.3.1(@types/node@25.4.0)(typescript@5.9.3)
@@ -266,7 +263,7 @@ importers:
         version: 1.12.0
       dotenv-cli:
         specifier: 'catalog:'
-        version: 8.0.0
+        version: 11.0.0
       eslint:
         specifier: 'catalog:'
         version: 10.0.3(jiti@2.6.1)
@@ -289,7 +286,7 @@ importers:
         specifier: 'catalog:'
         version: 10.9.2(@types/node@25.4.0)(typescript@5.9.3)
       tsconfig-paths:
-        specifier: 'catalog:'
+        specifier: 4.2.0
         version: 4.2.0
       turbo:
         specifier: 'catalog:'
@@ -761,7 +758,7 @@ importers:
         version: 2.1.1
       lucide-react:
         specifier: 'catalog:'
-        version: 0.511.0(react@19.2.4)
+        version: 0.577.0(react@19.2.4)
       next:
         specifier: 'catalog:'
         version: 16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -795,10 +792,10 @@ importers:
     devDependencies:
       '@systemix/eslint':
         specifier: 'catalog:'
-        version: 0.4.0(@typescript-eslint/parser@8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.3(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.16)(typescript@5.9.3)
+        version: 0.5.0(@typescript-eslint/parser@8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.3(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.16)(typescript@5.9.3)
       '@systemix/typescript':
         specifier: 'catalog:'
-        version: 0.4.0
+        version: 0.5.0
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.2.1
@@ -2148,12 +2145,12 @@ packages:
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
 
-  '@systemix/eslint@0.4.0':
-    resolution: {integrity: sha512-8Fpt/wgtCt+2GOidFrEv7y0mBWUwLNUHwiEIf9HNZg1v7t7MjIGvUOJwsP5v7aVKx3GImAwosqFLiDZnNilE/Q==}
+  '@systemix/eslint@0.5.0':
+    resolution: {integrity: sha512-DOG03ifmmQQA+MPLtGjiAhB9QtrtSDk3cUAsaMgXdrLuOcAA1wr+hzAVcOXrZI40GNJVFzy2WZ+yvAtjo8gcQQ==}
     engines: {node: '>=18.0.0'}
 
-  '@systemix/typescript@0.4.0':
-    resolution: {integrity: sha512-ORPG2l3gJniTMTGs9No/EQ12qe+YBgbn7nCZ53z8H07cHDlXlBx+wDm6I0GAv8l+jzaSseGngw7uJ2z+xtrtvw==}
+  '@systemix/typescript@0.5.0':
+    resolution: {integrity: sha512-/9kW2yXNNtwq3a0KyHd7CdYk4/um+iwf4sI02bKulLcMvM5qwT40Qnp8feXQou61q1k9XxScFYRSvv1W2KPfTQ==}
     engines: {node: '>=18.0.0'}
 
   '@tailwindcss/node@4.2.1':
@@ -3101,12 +3098,12 @@ packages:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
 
-  dotenv-cli@8.0.0:
-    resolution: {integrity: sha512-aLqYbK7xKOiTMIRf1lDPbI+Y+Ip/wo5k3eyp6ePysVaSqbyxjyK3dK35BTxG+rmd7djf5q2UPs4noPNH+cj0Qw==}
+  dotenv-cli@11.0.0:
+    resolution: {integrity: sha512-r5pA8idbk7GFWuHEU7trSTflWcdBpQEK+Aw17UrSHjS6CReuhrrPcyC3zcQBPQvhArRHnBo/h6eLH1fkCvNlww==}
     hasBin: true
 
-  dotenv-expand@10.0.0:
-    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+  dotenv-expand@12.0.3:
+    resolution: {integrity: sha512-uc47g4b+4k/M/SeaW1y4OApx+mtLWl92l5LMPP0GNXctZqELk+YGgOPIIC5elYmUH4OuoK3JLhuRUYegeySiFA==}
     engines: {node: '>=12'}
 
   dotenv@16.0.3:
@@ -4323,8 +4320,8 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide-react@0.511.0:
-    resolution: {integrity: sha512-VK5a2ydJ7xm8GvBeKLS9mu1pVK6ucef9780JVUjw6bAjJL/QXnd4Y0p7SPeOUMC27YhzNCZvm5d/QX0Tp3rc0w==}
+  lucide-react@0.577.0:
+    resolution: {integrity: sha512-4LjoFv2eEPwYDPg/CUdBJQSDfPyzXCRrVW1X7jrx/trgxnxkHFjnVZINbzvzxjN70dxychOfg+FTYwBiS3pQ5A==}
     peerDependencies:
       react: 19.2.4
 
@@ -7221,7 +7218,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@systemix/eslint@0.4.0(@typescript-eslint/parser@8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.3(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.16)(typescript@5.9.3)':
+  '@systemix/eslint@0.5.0(@typescript-eslint/parser@8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.3(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.16)(typescript@5.9.3)':
     dependencies:
       '@eslint/js': 10.0.1(eslint@10.0.3(jiti@2.6.1))
       '@next/eslint-plugin-next': 16.1.6
@@ -7245,31 +7242,7 @@ snapshots:
       - turbo
       - typescript
 
-  '@systemix/eslint@0.4.0(eslint@10.0.3(jiti@2.6.1))(prettier@3.8.1)(turbo@2.8.16)(typescript@5.9.3)':
-    dependencies:
-      '@eslint/js': 10.0.1(eslint@10.0.3(jiti@2.6.1))
-      '@next/eslint-plugin-next': 16.1.6
-      eslint-config-prettier: 10.1.8(eslint@10.0.3(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(eslint@10.0.3(jiti@2.6.1))
-      eslint-plugin-only-warn: 1.2.1
-      eslint-plugin-prettier: 5.5.5(eslint-config-prettier@10.1.8(eslint@10.0.3(jiti@2.6.1)))(eslint@10.0.3(jiti@2.6.1))(prettier@3.8.1)
-      eslint-plugin-react: 7.37.5(eslint@10.0.3(jiti@2.6.1))
-      eslint-plugin-react-hooks: 7.0.1(eslint@10.0.3(jiti@2.6.1))
-      eslint-plugin-turbo: 2.8.16(eslint@10.0.3(jiti@2.6.1))(turbo@2.8.16)
-      globals: 17.4.0
-      typescript-eslint: 8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3)
-    transitivePeerDependencies:
-      - '@types/eslint'
-      - '@typescript-eslint/parser'
-      - eslint
-      - eslint-import-resolver-typescript
-      - eslint-import-resolver-webpack
-      - prettier
-      - supports-color
-      - turbo
-      - typescript
-
-  '@systemix/typescript@0.4.0': {}
+  '@systemix/typescript@0.5.0': {}
 
   '@tailwindcss/node@4.2.1':
     dependencies:
@@ -8216,14 +8189,16 @@ snapshots:
     dependencies:
       is-obj: 2.0.0
 
-  dotenv-cli@8.0.0:
+  dotenv-cli@11.0.0:
     dependencies:
       cross-spawn: 7.0.6
-      dotenv: 16.6.1
-      dotenv-expand: 10.0.0
+      dotenv: 17.3.1
+      dotenv-expand: 12.0.3
       minimist: 1.2.8
 
-  dotenv-expand@10.0.0: {}
+  dotenv-expand@12.0.3:
+    dependencies:
+      dotenv: 16.6.1
 
   dotenv@16.0.3: {}
 
@@ -8537,33 +8512,6 @@ snapshots:
       tsconfig-paths: 3.15.0
     optionalDependencies:
       '@typescript-eslint/parser': 8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3)
-    transitivePeerDependencies:
-      - eslint-import-resolver-typescript
-      - eslint-import-resolver-webpack
-      - supports-color
-
-  eslint-plugin-import@2.32.0(eslint@10.0.3(jiti@2.6.1)):
-    dependencies:
-      '@rtsao/scc': 1.1.0
-      array-includes: 3.1.9
-      array.prototype.findlastindex: 1.2.6
-      array.prototype.flat: 1.3.3
-      array.prototype.flatmap: 1.3.3
-      debug: 3.2.7
-      doctrine: 2.1.0
-      eslint: 10.0.3(jiti@2.6.1)
-      eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.57.0(eslint@10.0.3(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.3(jiti@2.6.1)))(eslint@10.0.3(jiti@2.6.1)))(eslint@10.0.3(jiti@2.6.1))
-      hasown: 2.0.2
-      is-core-module: 2.16.1
-      is-glob: 4.0.3
-      minimatch: 3.1.5
-      object.fromentries: 2.0.8
-      object.groupby: 1.0.3
-      object.values: 1.2.1
-      semver: 6.3.1
-      string.prototype.trimend: 1.0.9
-      tsconfig-paths: 3.15.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
@@ -9678,7 +9626,7 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide-react@0.511.0(react@19.2.4):
+  lucide-react@0.577.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 
