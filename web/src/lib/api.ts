@@ -8,17 +8,75 @@ function getToken(): string | null {
   return localStorage.getItem('accessToken');
 }
 
+function getRefreshToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('refreshToken');
+}
+
+function isValidJwt(token: string | null): boolean {
+  return (
+    typeof token === 'string' &&
+    token.length > 0 &&
+    token !== 'undefined' &&
+    token !== 'null' &&
+    token.split('.').length === 3
+  );
+}
+
 function setToken(token: string): void {
-  localStorage.setItem('accessToken', token);
+  if (isValidJwt(token)) {
+    localStorage.setItem('accessToken', token);
+  }
+}
+
+function setRefreshToken(token: string): void {
+  if (typeof token === 'string' && token.length > 0) {
+    localStorage.setItem('refreshToken', token);
+  }
 }
 
 function clearAuth(): void {
   localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
   localStorage.removeItem('user');
 }
 
 interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
+}
+
+// Serialize refresh attempts so only one runs at a time (refresh tokens are single-use)
+let refreshPromise: Promise<string | null> | null = null;
+
+async function doRefresh(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return null;
+  try {
+    const refreshRes = await fetch(`${API_BASE}/auth/refresh-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!refreshRes.ok) return null;
+    const refreshJson = (await refreshRes.json()) as {
+      data?: { token?: string; accessToken?: string; refreshToken?: string };
+      token?: string;
+      accessToken?: string;
+      refreshToken?: string;
+    };
+    const data = refreshJson?.data ?? refreshJson;
+    const accessToken = data?.token ?? data?.accessToken ?? '';
+    const newRefreshToken = data?.refreshToken ?? refreshToken;
+    if (!accessToken) return null;
+    setToken(accessToken);
+    setRefreshToken(newRefreshToken);
+    if (typeof document !== 'undefined') {
+      document.cookie = `accessToken=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+    }
+    return accessToken;
+  } catch {
+    return null;
+  }
 }
 
 async function apiFetch<T>(
@@ -33,47 +91,40 @@ async function apiFetch<T>(
 
   if (!skipAuth) {
     const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
+    if (isValidJwt(token)) headers.Authorization = `Bearer ${token}`;
   }
 
   const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
 
   if (res.status === 401 && !skipAuth) {
-    // Attempt token refresh
-    try {
-      const refreshRes = await fetch(`${API_BASE}/auth/refresh-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (refreshRes.ok) {
-        const refreshJson = (await refreshRes.json()) as {
-          data?: { accessToken: string };
-          accessToken?: string;
-        };
-        const accessToken =
-          refreshJson?.data?.accessToken ?? refreshJson?.accessToken ?? '';
-        setToken(accessToken);
-        headers.Authorization = `Bearer ${accessToken}`;
-        const retryRes = await fetch(`${API_BASE}${path}`, {
-          ...init,
-          headers,
-        });
-        if (!retryRes.ok) {
-          const err = (await retryRes.json().catch(() => ({}))) as {
-            message?: string;
-          };
-          throw new Error(err?.message ?? retryRes.statusText);
-        }
-        return unwrapEnvelope<T>(await retryRes.json());
+    if (!getRefreshToken()) {
+      clearAuth();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
       }
-    } catch {
-      // refresh failed
+      throw new Error('Unauthorized');
     }
-    clearAuth();
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
+    // Serialize refresh: only one refresh at a time, others wait and retry with new token
+    refreshPromise ??= doRefresh().finally(() => {
+      refreshPromise = null;
+    });
+    const accessToken = await refreshPromise;
+    if (!accessToken) {
+      clearAuth();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Unauthorized');
     }
-    throw new Error('Unauthorized');
+    headers.Authorization = `Bearer ${accessToken}`;
+    const retryRes = await fetch(`${API_BASE}${path}`, { ...init, headers });
+    if (!retryRes.ok) {
+      const err = (await retryRes.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      throw new Error(err?.message ?? retryRes.statusText);
+    }
+    return unwrapEnvelope<T>(await retryRes.json());
   }
 
   if (!res.ok) {
@@ -342,4 +393,4 @@ export const activityApi = {
   },
 };
 
-export { setToken, clearAuth };
+export { setToken, setRefreshToken, clearAuth };

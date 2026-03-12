@@ -39,9 +39,13 @@ export default function TfaPage() {
     setIsLoading(true);
     try {
       const res = await authApi.verifyTfaLogin({ tfaToken, otp: data.otp });
-      const { user, accessToken } = res as { user: User; accessToken: string };
+      const { user, token, refreshToken } = res as {
+        user: User;
+        token: string;
+        refreshToken: string;
+      };
       sessionStorage.removeItem('tfaToken');
-      login(user, accessToken);
+      login(user, token, refreshToken);
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid OTP');

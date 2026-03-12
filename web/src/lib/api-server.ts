@@ -15,6 +15,16 @@ function unwrapEnvelope<T>(json: unknown): T {
   return json as T;
 }
 
+function isValidJwt(token: string | null | undefined): boolean {
+  return (
+    typeof token === 'string' &&
+    token.length > 0 &&
+    token !== 'undefined' &&
+    token !== 'null' &&
+    token.split('.').length === 3
+  );
+}
+
 export async function apiServerFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -26,7 +36,7 @@ export async function apiServerFetch<T>(
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
-  if (accessToken) {
+  if (isValidJwt(accessToken)) {
     headers.Authorization = `Bearer ${accessToken}`;
   }
 

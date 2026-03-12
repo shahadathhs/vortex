@@ -8,7 +8,7 @@ import {
   useCallback,
 } from 'react';
 import { User } from '@/types';
-import { authApi, clearAuth, setToken } from '@/lib/api';
+import { authApi, clearAuth, setToken, setRefreshToken } from '@/lib/api';
 
 interface AuthState {
   user: User | null;
@@ -17,7 +17,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (user: User, accessToken: string, refreshToken?: string) => void;
+  login: (user: User, accessToken: string, refreshToken: string) => void;
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
 }
@@ -34,7 +34,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     const userStr = localStorage.getItem('user');
-    if (token && userStr) {
+    const validToken =
+      typeof token === 'string' &&
+      token.length > 0 &&
+      token !== 'undefined' &&
+      token.split('.').length === 3;
+    if (validToken && userStr) {
       try {
         const user = JSON.parse(userStr) as User;
         document.cookie = `accessToken=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
@@ -47,12 +52,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, isLoading: false }));
   }, []);
 
-  const login = useCallback((user: User, accessToken: string) => {
-    setToken(accessToken);
-    localStorage.setItem('user', JSON.stringify(user));
-    document.cookie = `accessToken=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-    setState({ user, accessToken, isLoading: false });
-  }, []);
+  const login = useCallback(
+    (user: User, accessToken: string, refreshToken: string) => {
+      if (
+        typeof accessToken !== 'string' ||
+        accessToken.length === 0 ||
+        accessToken.split('.').length !== 3
+      ) {
+        throw new Error('Invalid token received from server');
+      }
+      setToken(accessToken);
+      setRefreshToken(refreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      document.cookie = `accessToken=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+      setState({ user, accessToken, isLoading: false });
+    },
+    [],
+  );
 
   const logout = useCallback(async () => {
     try {

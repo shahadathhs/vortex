@@ -39,12 +39,12 @@ export default function LoginPage() {
         router.push('/tfa');
         return;
       }
-      const { user, accessToken } = res as {
+      const { user, token, refreshToken } = res as {
         user: User;
-        accessToken: string;
+        token: string;
         refreshToken: string;
       };
-      login(user, accessToken);
+      login(user, token, refreshToken);
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
