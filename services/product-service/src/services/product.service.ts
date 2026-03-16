@@ -147,7 +147,7 @@ async function getProducts(
   const sortDir = sortOrder === 'asc' ? 1 : -1;
 
   const skipNum = Number(skip) || 0;
-  const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
+  const limitNum = Math.min(1000, Math.max(1, Number(limit) || 20));
 
   const [products, total] = await Promise.all([
     Product.find(dbQuery)

@@ -13,7 +13,7 @@ COMPOSE_INFRA_CMD := docker compose -f compose.infra.yaml $(COMPOSE_ENV_ARGS)
 # Services List
 SERVICES := gateway auth product order payment notification activity analytics web
 
-.PHONY: help infra dev prod tools up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-check ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
+.PHONY: help infra dev prod up-% down build-% push-% pull-% clean clean-all logs-% install build-js typecheck lint lint-fix format format-fix ci-check ci-fix clean-pkg dev-% pm2-start pm2-stop pm2-restart pm2-delete pm2-status pm2-logs pm2-logs-%
 
 help:
 	@echo "Vortex - Makefile Commands"
@@ -47,7 +47,6 @@ help:
 	@echo "  make infra            Start infrastructure (Mongo, RabbitMQ)"
 	@echo "  make up               Start all services"
 	@echo "  make up-<service>     Start specific service (gateway, auth, product, order, payment, notification, activity, web)"
-	@echo "  make tools           Start dev tools (Mongo Express)"
 	@echo "  make down            Stop all containers"
 	@echo ""
 	@echo "Docker Images (build/push/pull):"
@@ -209,15 +208,12 @@ up:
 prod:
 	$(COMPOSE_CMD) --profile prod up -d
 
-tools:
-	$(COMPOSE_INFRA_CMD) --profile tools up -d
-
 # Pattern: make up-auth, make up-gateway
 up-%:
 	$(COMPOSE_CMD) --profile $* up -d
 
 down:
-	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools --profile web down --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile web down --remove-orphans
 
 # --- Build / Push / Pull patterns ---
 
@@ -260,10 +256,10 @@ pull: $(addprefix pull-, $(SERVICES))
 # --- Maintenance ---
 
 clean:
-	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools --profile web down --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile web down --remove-orphans
 
 clean-all:
-	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile tools --profile web down -v --remove-orphans
+	$(COMPOSE_CMD) --profile infra --profile dev --profile prod --profile web down -v --remove-orphans
 	docker system prune -f
 	docker volume prune -f
 
