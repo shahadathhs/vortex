@@ -35,8 +35,9 @@ export default function SystemSellersPage() {
 
   const loadSellers = useCallback(async () => {
     try {
-      const res = (await authApi.getSellers()) as User[];
-      setData(res ?? []);
+      const res = (await authApi.getSellers()) as { sellers: User[] } | User[];
+      const sellers = Array.isArray(res) ? res : (res?.sellers ?? []);
+      setData(sellers);
     } catch {
       setData([]);
     } finally {

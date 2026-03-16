@@ -70,8 +70,3 @@ Format: `<type>(<scope>): <subject>`
 1. Create a new branch from `main`.
 2. Ensure your code passes all CI checks (`pnpm lint`, `pnpm typecheck`, `pnpm build`).
 3. Open a Pull Request using the provided PR template.
-4. Once approved and merged into `main`, the CI/CD pipeline will automatically handle the release.
-
-## Tools
-
-You can use `make tools` to start management interfaces like **Mongo Express**.
