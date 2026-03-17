@@ -15,14 +15,59 @@ export interface User {
   updatedAt: string;
 }
 
+export interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parentId?: string;
+  level: number;
+  path: string[];
+  image?: {
+    url: string;
+    alt: string;
+  };
+  isActive: boolean;
+  displayOrder: number;
+  productCount: number;
+}
+
+export interface Brand {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  logo?: string;
+  isActive: boolean;
+  displayOrder: number;
+  productCount: number;
+}
+
+export interface ProductImage {
+  url: string;
+  alt: string;
+  isPrimary?: boolean;
+}
+
 export interface Product {
   _id: string;
   name: string;
+  slug: string;
   description: string;
+  shortDescription?: string;
   price: number;
+  compareAtPrice?: number;
   stock: number;
   category: string;
+  categoryIds?: string[];
+  primaryCategoryId?: string;
   sellerId: string;
+  images: ProductImage[];
+  rating?: number;
+  reviewCount?: number;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
   createdAt: string;
   updatedAt: string;
 }
