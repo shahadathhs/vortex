@@ -15,7 +15,11 @@ app.use(apiInfoLogger);
 app.get('/', (req, res) => {
   res.json({
     service: 'product-service',
-    routes: { products: '/api/products', health: '/health' },
+    routes: {
+      products: '/api/products',
+      public: '/api/public',
+      health: '/health',
+    },
   });
 });
 

@@ -22,6 +22,7 @@
     "express": "catalog:",
     "helmet": "catalog:",
     "mongoose": "catalog:",
+    "slugify": "catalog:",
     "zod": "catalog:",
     "dotenv": "catalog:"
   },
